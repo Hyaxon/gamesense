@@ -1,4 +1,4 @@
-# Sports Prediction Platform
+# GameSense: Sports Prediction Platform
 
 ## Overview
 
