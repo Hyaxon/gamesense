@@ -38,9 +38,9 @@ jobs:
     runs-on: ubuntu-latest
 
     # Uncomment to run python validation on only a specific directory.
-    #defaults:
-    #  run:
-    #    working-directory: prediction
+    defaults:
+      run:
+        working-directory: prediction
 
     steps:
       - uses: actions/checkout@v7
