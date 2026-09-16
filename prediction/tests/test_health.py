@@ -1,4 +1,8 @@
-# Verifies that the prediction service health endpoint is available and returns the expected response.
+"""Tests for the prediction service health endpoint.
+
+Verifies that the service responds successfully and returns the expected
+health-check response.
+"""
 from fastapi.testclient import TestClient
 
 from gamesense_prediction.main import app
