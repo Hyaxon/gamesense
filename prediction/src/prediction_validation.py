@@ -1,6 +1,9 @@
-def is_valid_prediction(prediction: dict) -> bool:
-    """Returns True when a prediction contains all required fields and valid data."""
+"""Validation helpers for standardized prediction data.
 
+Provides reusable checks to ensure prediction results contain the required
+fields and valid values before they are used by other application components.
+"""
+def is_valid_prediction(prediction: dict) -> bool:
     # Use camelCase for dictionary keys because predictions are shared logical objects
     # exchanged across multiple languages and should follow a consistent data schema.
     method = prediction.get("method")

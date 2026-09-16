@@ -1,3 +1,8 @@
+"""Static tests for prediction validation behavior.
+
+Verifies that valid prediction data is accepted and malformed or invalid
+prediction data is rejected consistently.
+"""
 from src.prediction_validation import is_valid_prediction
 
 
