@@ -8,3 +8,10 @@ dependencies = [
     "fastapi",
     "uvicorn",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "httpx2",
+    "ruff",
+]
