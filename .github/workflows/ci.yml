@@ -37,7 +37,6 @@ jobs:
     name: Validate Python
     runs-on: ubuntu-latest
 
-    # Uncomment to run python validation on only a specific directory.
     defaults:
       run:
         working-directory: prediction
@@ -47,16 +46,52 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: "3.1"
 
-      - name: Install Python test and quality tools
-        run: python -m pip install pytest ruff
+      - name: Install prediction service and development dependencies
+        run: python -m pip install -e ".[dev]"
 
       - name: Run Python tests
         run: python -m pytest
 
       - name: Run Ruff linting
-        run: ruff check .
+        run: python -m ruff check .
 
       - name: Check Ruff formatting
-        run: ruff format --check .
+        run: python -m ruff format --check .
+
+  validate-java:
+    name: Validate Java
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x mvnw
+
+      - name: Run Java tests
+        run: ./mvnw test
+
+      - name: Run Checkstyle
+        run: ./mvnw checkstyle:check
+
+      - name: Check Spotless formatting
+        run: ./mvnw spotless:check
+
+      - name: Run Maven verification
+        run: ./mvnw verify -DskipTests
+
+
