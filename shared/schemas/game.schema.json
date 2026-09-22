@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/game.schema.json",
+  "title": "Game",
+  "description": "A single matchup between two teams, scheduled or played.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Canonical identifier."
+    },
+    "externalId": {
+      "type": "string",
+      "description": "Identifier from the source data feed, if different from id."
+    },
+    "season": {
+      "type": "integer",
+      "description": "Season year, e.g. 2025."
+    },
+    "week": {
+      "type": "integer",
+      "description": "Week number within the season, if applicable."
+    },
+    "homeTeamId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "awayTeamId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "venue": {
+      "$ref": "#/$defs/venue"
+    },
+    "isNeutralSite": {
+      "type": "boolean",
+      "description": "True if neither team is the home team at this game's location. Independent of venue, since a source may know a game was neutral-site without knowing the venue's name."
+    },
+    "scheduledAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "$ref": "#/$defs/gameStatus"
+    },
+    "homeScore": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "awayScore": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "winnerTeamId": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Populated once status is FINAL; null for a tied final score or an unplayed game."
+    }
+  },
+  "required": ["id", "season", "homeTeamId", "awayTeamId", "scheduledAt", "status"],
+  "additionalProperties": false,
+  "$defs": {
+    "gameStatus": {
+      "type": "string",
+      "enum": ["SCHEDULED", "IN_PROGRESS", "FINAL", "POSTPONED", "CANCELLED"]
+    },
+    "venue": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    }
+  }
+}
