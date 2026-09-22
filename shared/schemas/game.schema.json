@@ -33,6 +33,10 @@
     "venue": {
       "$ref": "#/$defs/venue"
     },
+    "isNeutralSite": {
+      "type": "boolean",
+      "description": "True if neither team is the home team at this game's location. Independent of venue, since a source may know a game was neutral-site without knowing the venue's name."
+    },
     "scheduledAt": {
       "type": "string",
       "format": "date-time"
@@ -66,8 +70,7 @@
       "properties": {
         "name": { "type": "string" },
         "city": { "type": "string" },
-        "state": { "type": "string" },
-        "isNeutralSite": { "type": "boolean" }
+        "state": { "type": "string" }
       },
       "required": ["name"],
       "additionalProperties": false

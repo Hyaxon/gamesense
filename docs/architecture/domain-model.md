@@ -85,6 +85,7 @@ A single matchup between two teams, scheduled or played.
 | `homeTeamId` | string (UUID) | yes | The home `Team`. |
 | `awayTeamId` | string (UUID) | yes | The away `Team`. |
 | `venue` | Venue object | no | See [Location / Venue](#location--venue). |
+| `isNeutralSite` | boolean | no | `true` if neither team is the home team at this game's location. Kept separate from `venue` so a source can mark a game neutral-site without knowing the venue's name. |
 | `scheduledAt` | timestamp | yes | Scheduled kickoff time. |
 | `status` | [GameStatus](#game-status) | yes | Current lifecycle state of the game. |
 | `homeScore` | integer | no | Present once the game has started; final once `status` is `FINAL`. |
@@ -102,9 +103,9 @@ A single matchup between two teams, scheduled or played.
   "venue": {
     "name": "Gaylord Family Oklahoma Memorial Stadium",
     "city": "Norman",
-    "state": "OK",
-    "isNeutralSite": false
+    "state": "OK"
   },
+  "isNeutralSite": false,
   "scheduledAt": "2025-08-30T19:00:00Z",
   "status": "SCHEDULED",
   "homeScore": null,
@@ -300,14 +301,13 @@ Not a separate entity — a `Game` whose `status` is `FINAL`. At that point `hom
 
 ## Location / Venue
 
-Used on `Game`. Modeled as an embedded object rather than a standalone entity with its own `id`, since venues aren't referenced independently elsewhere yet.
+Used on `Game`. Modeled as an embedded object rather than a standalone entity with its own `id`, since venues aren't referenced independently elsewhere yet. `isNeutralSite` lives on `Game` directly, not here, since a source can know a game was neutral-site without knowing the venue's name (see [Game](#game)).
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `name` | string | yes | Venue name. |
 | `city` | string | no | |
 | `state` | string | no | |
-| `isNeutralSite` | boolean | no | `true` if neither team is the designated home team at this venue. |
 
 ---
 
