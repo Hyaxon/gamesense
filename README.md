@@ -18,4 +18,12 @@ The plan is to use an AGILE work method, utilizing tickets created by the produc
 - Sprint 3: Finalizing UI and communication between it and the framework/application
 - Sprint 4: Additional fixes and features, followed by a final poster board
 
+## Project Documentation
+
+For more detail on how the project is structured and engineered, please take a glance at the following documentation directories:
+
+- **[Architecture (`docs/architecture/`)](docs/architecture/README.md):** System architecture, domain models, API contracts, database design, and technical specifications.
+- **[Standards (`docs/standards/`)](docs/standards/README.md):** Naming conventions, coding rules, formatting, testing, and development guidelines.
+- **[Decisions (`docs/decisions/`)](docs/decisions/README.md):** Architectural Decision Records (ADRs) documenting significant technical decisions and their rationale.
+
 [This project is a work in progress. More will be added as the project develops.]
