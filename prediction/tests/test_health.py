@@ -8,6 +8,7 @@ from gamesense_prediction.main import app
 
 client = TestClient(app)
 
+
 def test_health_check():
     response = client.get("/health")
 
