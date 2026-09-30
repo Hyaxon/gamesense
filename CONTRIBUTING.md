@@ -26,3 +26,13 @@
 - **Architecture (`docs/architecture/`):** Use when defining system components, data flows, or API contracts.
 - **Standards (`docs/standards/`):** Use when establishing formatting, naming conventions, or testing procedures.
 - **Decisions (`docs/decisions/`):** Use when making a significant technical decision (like selecting a library, database, or architectural pattern).
+
+## CI checks
+
+GitHub Actions runs on pull requests targeting `main`, new commits to those pull requests, and pushes to `main`. PR branch names must use `tickets/<number>-<description>` with lowercase words separated by hyphens.
+
+The workflow runs Python tests and Ruff checks, Java tests with Checkstyle and Spotless, and frontend ESLint, Prettier, and production build checks. Checks do not automatically fix source files.
+
+The frontend initialization and code-quality configuration tickets must land before all jobs can pass. The code-quality ticket supplies the tool dependencies and configurations, including the frontend `lint` and `format:check` scripts and the Spotless Maven plugin.
+
+Before merging, confirm the workflow passes on GitHub and request a teammate's review. Repository administrators should make the CI checks required in the `main` branch rules if failed checks must block merging.
