@@ -1,7 +1,7 @@
 # Contributing Guidelines
 
 ## Branching Strategy
-- Create feature branches from `main` using a standard ticket format: `ticket/{ticket-number}-{ticket-name}` (e.g., `ticket/12-setup-docs`).
+- Create feature branches from `main` using a standard ticket format: `tickets/{ticket-number}-{ticket-name}` (e.g., `tickets/12-setup-docs`).
 - Always keep pull requests focused on single tasks or tickets.
 
 ## Code Standards
