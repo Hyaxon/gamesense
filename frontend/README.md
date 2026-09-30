@@ -1,16 +1,56 @@
 # GameSense Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The React frontend for GameSense, built with Vite. The initial application displays a GameSense heading. Routing, application pages, and backend integration will be added in later work.
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 22.12 or newer, or Node.js 20.19+ within version 20
+- npm
 
-## React Compiler
+## Local development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+From the repository root:
 
-## Expanding the Oxlint configuration
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Open the local URL printed in the terminal (usually `http://localhost:5173`). Saving source files updates the page automatically. Press `Ctrl+C` to stop the server.
+
+Commit `package.json` and `package-lock.json` when dependencies change. Do not commit `node_modules/` or `dist/`.
+
+## Build and checks
+
+Run these commands from `frontend/`:
+
+| Command | Purpose |
+| --- | --- |
+| `npm ci` | Install the exact locked dependencies for a clean installation. |
+| `npm run build` | Create the production build in `dist/`. |
+| `npm run preview` | Serve the production build locally after building. |
+| `npm run lint` | Run the currently configured Oxlint checks. |
+
+Formatting and linting standards are being handled in a separate PR. No test runner is configured yet.
+
+## Project structure
+
+```text
+frontend/
+├── src/
+│   ├── components/  # Reusable UI components
+│   ├── pages/       # Application pages
+│   ├── services/    # Future API and service code
+│   ├── utils/       # Shared helper functions
+│   ├── App.jsx      # Root React component
+│   ├── index.css    # Global styles
+│   └── main.jsx     # React entry point
+├── tests/           # Future frontend tests
+├── index.html       # HTML entry point and browser title
+├── package.json     # Dependencies and scripts
+├── package-lock.json
+└── vite.config.js   # Vite configuration
+```
+
+Empty folders contain `.gitkeep` files so Git preserves them. Remove each placeholder when adding files to that folder.
