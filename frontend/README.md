@@ -4,7 +4,7 @@ The React frontend for GameSense, built with Vite. The initial application displ
 
 ## Requirements
 
-- Node.js 22.12 or newer, or Node.js 20.19+ within version 20
+- Node.js 22.12 or newer (Node.js 24 is used in CI)
 - npm
 
 ## Local development
