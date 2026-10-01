@@ -38,7 +38,7 @@ JUnit tests that mirror the `main/` package structure. New tests should be writt
 
 ## Requirements
 
-* JDK 17 or newer
+* JDK 17 (matching CI; set `JAVA_HOME` to your JDK 17 installation)
 * Maven (or use the included wrapper, no local install required)
 
 Check your Java version:
@@ -57,7 +57,7 @@ Run the following commands from the `backend/` directory.
 ./mvnw clean verify
 ```
 
-`verify` compiles the project, runs the test suite, and runs Checkstyle against the shared style rules in `config/checkstyle/checkstyle.xml`.
+`verify` compiles the project, runs the test suite, and runs Checkstyle and Spotless against both production and test sources. Shared lint rules live in `config/checkstyle/checkstyle.xml`; the pinned formatter is configured in `pom.xml`.
 
 ---
 
@@ -115,7 +115,14 @@ This project shares a Checkstyle configuration with the rest of the Java code in
 ./mvnw checkstyle:check
 ```
 
-This also runs automatically as part of `./mvnw verify`.
+Check or apply Google Java Format using Spotless:
+
+```bash
+./mvnw spotless:check
+./mvnw spotless:apply
+```
+
+Both Checkstyle and Spotless checks also run automatically as part of `./mvnw verify`. On Windows, use `mvnw.cmd`.
 
 ---
 
@@ -127,7 +134,7 @@ Before submitting changes, run:
 ./mvnw clean verify
 ```
 
-This should pass (tests + Checkstyle) before opening or updating a pull request.
+This should pass (tests + Checkstyle + Spotless) before opening or updating a pull request.
 
 ---
 

@@ -33,6 +33,16 @@ GitHub Actions runs on pull requests targeting `main`, new commits to those pull
 
 The workflow runs Python tests and Ruff checks, Java tests with Checkstyle and Spotless, and frontend ESLint, Prettier, and production build checks. Checks do not automatically fix source files.
 
-The frontend initialization and code-quality configuration tickets must land before all jobs can pass. The code-quality ticket supplies the tool dependencies and configurations, including the frontend `lint` and `format:check` scripts and the Spotless Maven plugin.
+## Local quality checks
+
+Install each service's dependencies using its README, then run the following from the indicated directory:
+
+| Directory | Validate | Apply formatting / safe lint fixes |
+| --- | --- | --- |
+| `prediction/` | `python -m pytest`, `python -m ruff check .`, `python -m ruff format --check .` | `python -m ruff check . --fix`, `python -m ruff format .` |
+| `backend/` | `./mvnw --batch-mode verify` | `./mvnw spotless:apply` |
+| `frontend/` | `npm run lint`, `npm run format:check`, `npm run build` | `npm run lint:fix`, `npm run format` |
+
+On Windows, use `mvnw.cmd` in place of `./mvnw`. Review automatic fixes before committing. See [coding and testing standards](docs/standards/README.md) for tool configuration and test locations.
 
 Before merging, confirm the workflow passes on GitHub and request a teammate's review. Repository administrators should make the CI checks required in the `main` branch rules if failed checks must block merging.

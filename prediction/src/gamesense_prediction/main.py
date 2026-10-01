@@ -3,6 +3,7 @@
 Creates the FastAPI application and exposes basic service endpoints used
 to verify that the prediction service is running correctly.
 """
+
 from fastapi import FastAPI
 
 app = FastAPI(title="GameSense Prediction Service")

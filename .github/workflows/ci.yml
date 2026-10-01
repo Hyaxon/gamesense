@@ -81,14 +81,8 @@ jobs:
       - name: Make Maven Wrapper executable
         run: chmod +x mvnw
 
-      - name: Run Java tests
-        run: ./mvnw --batch-mode test
-
-      - name: Run Checkstyle
-        run: ./mvnw --batch-mode checkstyle:check
-
-      - name: Check Spotless formatting
-        run: ./mvnw --batch-mode spotless:check
+      - name: Run Java tests, Checkstyle, and Spotless
+        run: ./mvnw --batch-mode verify
 
   validate-javascript:
     name: Validate JavaScript

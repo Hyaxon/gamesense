@@ -3,7 +3,8 @@
 Verifies that valid prediction data is accepted and malformed or invalid
 prediction data is rejected consistently.
 """
-from src.prediction_validation import is_valid_prediction
+
+from gamesense_prediction.prediction_validation import is_valid_prediction
 
 
 def test_valid_prediction():
