@@ -218,7 +218,6 @@ pyproject.toml
 - **httpx2** — HTTP client used by FastAPI testing tools to test API endpoints.
 - **Ruff** — Linter and formatter used to enforce consistent Python code quality and style.
 
-
 ### Adding Dependencies
 
 Runtime dependencies should be added to the main dependency section in `pyproject.toml`.

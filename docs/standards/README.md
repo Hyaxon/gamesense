@@ -16,6 +16,10 @@ Source files and tests follow the same checks. Generated output, dependencies, a
 
 See [Contributing](../../CONTRIBUTING.md#local-quality-checks) for validation and automatic-fix commands. Java `verify` runs tests, Checkstyle, and Spotless; CI uses the same configurations and never rewrites files.
 
+## Markdown standards
+
+Repository-wide Markdown checks use `.markdownlint-cli2.jsonc` and markdownlint-cli2. Keep one space after heading markers and blank lines around headings, lists, and fenced code blocks. Avoid tabs, extra trailing whitespace, and repeated blank lines; end files with a newline. Embedded HTML and long lines are allowed. See [Contributing](../../CONTRIBUTING.md#markdown-checks) for check and fix commands.
+
 ## Source and test layout
 
 Keep tests inside the service they exercise, separate from production source:
@@ -27,6 +31,7 @@ Keep tests inside the service they exercise, separate from production source:
 Tool references: [Ruff configuration](https://docs.astral.sh/ruff/configuration/), [ESLint configuration](https://eslint.org/docs/latest/use/configure/configuration-files), [Spotless Maven](https://github.com/diffplug/spotless/tree/main/plugin-maven).
 
 ## General Principles
+
 - **No generic names:** Avoid placeholder names like `data`, `info`, `temp`, `obj`, `thing`, `utils2.py`, `temp.js`, `stuff.ts`, or `data1` unless scoped locally.
 - **No unapproved abbreviations:** Use full words (e.g., `manager`, not `mgr`; `user`, not `usr`).
 - **Single Responsibility:** Strive for one file, one responsibility.
@@ -36,6 +41,7 @@ Tool references: [Ruff configuration](https://docs.astral.sh/ruff/configuration/
 ---
 
 ## Python Standards
+
 - **Files/Modules:** `snake_case.py` (all lowercase, no hyphens).
 - **File Headers:** Include a header at the top of Python files summarizing the contained classes.
 - **Packages/Folders:** Short, lowercase, no underscores if possible.
@@ -48,6 +54,7 @@ Tool references: [Ruff configuration](https://docs.astral.sh/ruff/configuration/
 ---
 
 ## JavaScript / TypeScript Standards
+
 - **Files:** React components use `PascalCase.jsx` (or `PascalCase.tsx` if TypeScript is introduced) (e.g., `UserProfile.tsx`). Utilities, hooks, and configs use `camelCase.js` or `kebab-case.js`.
 - **Folders:** Use `kebab-case` or `camelCase`, matching the chosen file convention (e.g., `user-profile/`).
 - **Hooks:** Must start with `use` (e.g., `useAuth.ts`, `useFetch.ts`).
@@ -57,9 +64,11 @@ Tool references: [Ruff configuration](https://docs.astral.sh/ruff/configuration/
 - **Event Handlers:** Use `handle` prefix internally (`handleClick`), and `on` prefix for props (`onClick`).
 - **Types & Interfaces:** `PascalCase` (e.g., `type OrderStatus`, `interface UserPayload`).
 - **Private Fields:** Prefer native private fields (`#truePrivate`) over older conventional styles.
+
 ---
 
 ## Java Standards
+
 - **Files:** `PascalCase.java`, must match the public class name exactly.
 - **Packages:** All lowercase, reverse domain style, no underscores (e.g., `com.company.userservice`).
 - **Variables, Fields & Methods:** `camelCase` (methods must be verb-first).
@@ -69,4 +78,4 @@ Tool references: [Ruff configuration](https://docs.astral.sh/ruff/configuration/
 - **Private Fields:** No underscore prefixes; rely strictly on the `private` keyword (e.g., `private String userName;`, never `_userName`).
 - **Getters & Setters:** Strict `get`, `set`, and `is` prefixes (use `isActive()` for booleans, never `getActive()`).
 - **Exceptions:** `PascalCase`, ending with `Exception`.
-- **Annotations:** `PascalCase` with no special prefix (e.g., `@Override`, `@LogExecutionTime`). 
+- **Annotations:** `PascalCase` with no special prefix (e.g., `@Override`, `@LogExecutionTime`).
