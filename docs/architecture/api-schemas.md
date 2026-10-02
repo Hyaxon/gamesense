@@ -24,6 +24,10 @@ Team conference names come from the feed. Conference divisions/groups are outsid
 - Every payload object rejects unknown properties, including nested objects. Array elements have explicit schemas. Future fields require reviewed contract changes.
 - An optional nonempty array is omitted when unused rather than sent as an empty array. Result order carries no ranking significance.
 
+## Prediction model execution
+
+The [prediction model interface](prediction-model-interface.md) defines adapter invocation separately from frontend API requests. Its model-descriptor, model-execution-request, model-execution-result, model-execution-error, and model-execution-response schemas add capabilities, model-specific configuration, snapshot context, and execution metadata while reusing Matchup, SinglePredictionResult, SimulationOutcome, and ErrorResponse.
+
 ## Payload inventory
 
 All files are under [shared/schemas](../../shared/schemas/). Matching complete JSON examples are under [shared/examples](../../shared/examples/), named after each schema.

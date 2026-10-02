@@ -1,0 +1,35 @@
+{
+  "status": "SUCCESS",
+  "executionId": "a1b2c3d4-e5f6-4789-8abc-1234567890ab",
+  "model": {
+    "modelId": "ml-stochastic-v1",
+    "displayName": "Stochastic ML",
+    "method": "MACHINE_LEARNING",
+    "version": "1.0.0",
+    "supportedExecutionKinds": [
+      "STOCHASTIC"
+    ]
+  },
+  "matchup": {
+    "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+    "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+    "season": 2025,
+    "isNeutralSite": true
+  },
+  "prediction": {
+    "id": "7f6e5d4c-3b2a-4190-8b7c-6a5f4e3d2c1b",
+    "method": "MACHINE_LEARNING",
+    "predictedWinnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+    "confidence": 0.64,
+    "generatedAt": "2025-08-29T12:00:00Z"
+  },
+  "configuration": {},
+  "metadata": {
+    "executionKind": "STOCHASTIC",
+    "dataSnapshotId": "season-2025-snapshot-2025-08-29",
+    "startedAt": "2025-08-29T12:00:00Z",
+    "completedAt": "2025-08-29T12:00:00Z",
+    "durationMilliseconds": 4.2,
+    "seed": 42
+  }
+}
