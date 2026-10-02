@@ -1,0 +1,9 @@
+{
+  "id": "5e6f7081-92a3-4bb4-8c5d-6e7f8091a2b3",
+  "method": "MONTE_CARLO",
+  "trials": 10000,
+  "homeWinProbability": 0.71,
+  "awayWinProbability": 0.29,
+  "simulatedAt": "2025-08-29T12:00:00Z",
+  "gameId": "9c1e2d3b-4a5f-4e6d-8b7c-1a2b3c4d5e6f"
+}

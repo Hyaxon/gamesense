@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/custom-prediction-request.schema.json",
+  "title": "CustomPredictionRequest",
+  "description": "An independent matchup using existing teams. Methods request single outputs; optional simulations request repeated trials. Enum membership does not imply implementation availability.",
+  "type": "object",
+  "properties": {
+    "matchup": {
+      "$ref": "matchup.schema.json"
+    },
+    "methods": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/predictionMethod"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "simulations": {
+      "type": "array",
+      "items": {
+        "$ref": "simulation-configuration-request.schema.json"
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "matchup",
+    "methods"
+  ],
+  "additionalProperties": false
+}

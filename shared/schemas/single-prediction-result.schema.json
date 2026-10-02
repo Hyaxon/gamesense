@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/single-prediction-result.schema.json",
+  "title": "SinglePredictionResult",
+  "description": "A method output within a containing matchup response. Confidence refers to predictedWinnerTeamId, not always the home team. Execution cost or method name does not establish determinism.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "prediction.schema.json#/properties/id"
+    },
+    "method": {
+      "$ref": "prediction.schema.json#/properties/method"
+    },
+    "predictedWinnerTeamId": {
+      "$ref": "prediction.schema.json#/properties/predictedWinnerTeamId"
+    },
+    "confidence": {
+      "$ref": "prediction.schema.json#/properties/confidence"
+    },
+    "predictedHomeScore": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "predictedAwayScore": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "generatedAt": {
+      "$ref": "common.schema.json#/$defs/utcTimestamp"
+    }
+  },
+  "required": [
+    "id",
+    "method",
+    "predictedWinnerTeamId",
+    "confidence",
+    "generatedAt"
+  ],
+  "additionalProperties": false
+}

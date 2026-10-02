@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/common.schema.json",
+  "title": "Common definitions",
+  "description": "Reusable wire types. Identifier generation follows the domain-model ADR; UUID format alone does not enforce version 4.",
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "utcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "nonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "predictionMethod": {
+      "type": "string",
+      "enum": [
+        "ELO",
+        "GLICKO2",
+        "TRUESKILL",
+        "MONTE_CARLO",
+        "MACHINE_LEARNING",
+        "BRADLEY_TERRY",
+        "HOME_GROWN",
+        "RANDOM"
+      ]
+    },
+    "aggregationStrategy": {
+      "type": "string",
+      "enum": [
+        "AVERAGE",
+        "WEIGHTED_AVERAGE",
+        "MAJORITY_VOTE"
+      ]
+    }
+  }
+}

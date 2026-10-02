@@ -1,0 +1,5 @@
+{
+  "method": "MONTE_CARLO",
+  "trials": 10000,
+  "seed": 42
+}
