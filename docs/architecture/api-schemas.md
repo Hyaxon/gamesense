@@ -346,8 +346,7 @@ Example: [single-prediction-result.json](../../shared/examples/single-prediction
 | `externalId` | `string` | no | See referenced definition / semantics above. |
 | `name` | `string` | yes | See referenced definition / semantics above. |
 | `shortName` | `string` | no | See referenced definition / semantics above. |
-| `conferenceId` | `string` | yes | format=uuid |
-| `division` | `string` | no | See referenced definition / semantics above. |
+| `conference` | `string` | yes | Full conference name. |
 | `logoUrl` | `string` | no | format=uri |
 
 Example: [team.json](../../shared/examples/team.json).

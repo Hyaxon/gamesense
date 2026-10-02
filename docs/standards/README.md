@@ -6,7 +6,7 @@ This directory holds our team's coding conventions, naming rules, formatting sta
 - **No generic names:** Avoid placeholder names like `data`, `info`, `temp`, `obj`, `thing`, `utils2.py`, `temp.js`, `stuff.ts`, or `data1` unless scoped locally.
 - **No unapproved abbreviations:** Use full words (e.g., `manager`, not `mgr`; `user`, not `usr`).
 - **Single Responsibility:** Strive for one file, one responsibility.
-- **Test File Mirroring:** Test files must mirror source file names (e.g., `userService.js` $\rightarrow$ `userService.test.js`).
+- **Test File Mirroring:** Test files must mirror source file names (e.g., `userService.js` -> `userService.test.js`).
 - **Booleans:** Universal prefix rule (`is`, `has`, `can`, `should`) across all languages.
 
 ---
