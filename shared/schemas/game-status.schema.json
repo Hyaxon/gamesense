@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/game-status.schema.json",
+  "title": "GameStatus",
+  "description": "Lifecycle state. BYE is not a game status.",
+  "type": "string",
+  "enum": [
+    "SCHEDULED",
+    "IN_PROGRESS",
+    "FINAL",
+    "POSTPONED",
+    "CANCELLED"
+  ]
+}

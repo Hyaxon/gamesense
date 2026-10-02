@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/simulation-result.schema.json",
+  "title": "SimulationResult",
+  "description": "Scheduled-game simulation result aligned with the domain model.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "method": {
+      "$ref": "common.schema.json#/$defs/predictionMethod"
+    },
+    "trials": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000
+    },
+    "homeWinProbability": {
+      "$ref": "common.schema.json#/$defs/probability"
+    },
+    "awayWinProbability": {
+      "$ref": "common.schema.json#/$defs/probability"
+    },
+    "simulatedAt": {
+      "$ref": "common.schema.json#/$defs/utcTimestamp"
+    },
+    "gameId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    }
+  },
+  "required": [
+    "id",
+    "method",
+    "trials",
+    "homeWinProbability",
+    "awayWinProbability",
+    "simulatedAt",
+    "gameId"
+  ],
+  "additionalProperties": false
+}
