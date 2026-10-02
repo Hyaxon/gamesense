@@ -40,6 +40,27 @@ GitHub Actions runs on pull requests targeting `main`, new commits to those pull
 
 The workflow runs Python tests and Ruff checks, Java tests with Checkstyle and Spotless, and frontend ESLint, Prettier, and production build checks. Checks do not automatically fix source files.
 
-The frontend initialization and code-quality configuration tickets must land before all jobs can pass. The code-quality ticket supplies the tool dependencies and configurations, including the frontend `lint` and `format:check` scripts and the Spotless Maven plugin.
+## Local quality checks
+
+Install each service's dependencies using its README, then run the following from the indicated directory:
+
+| Directory | Validate | Apply formatting / safe lint fixes |
+| --- | --- | --- |
+| `prediction/` | `python -m pytest`, `python -m ruff check .`, `python -m ruff format --check .` | `python -m ruff check . --fix`, `python -m ruff format .` |
+| `backend/` | `./mvnw --batch-mode verify` | `./mvnw spotless:apply` |
+| `frontend/` | `npm run lint`, `npm run format:check`, `npm run build` | `npm run lint:fix`, `npm run format` |
+
+On Windows, use `mvnw.cmd` in place of `./mvnw`. Review automatic fixes before committing. See [coding and testing standards](docs/standards/README.md) for tool configuration and test locations.
 
 Before merging, confirm the workflow passes on GitHub and request a teammate's review. Repository administrators should make the CI checks required in the `main` branch rules if failed checks must block merging.
+
+## Markdown checks
+
+From the repository root, install tooling with `npm ci --prefix frontend`, then run:
+
+```bash
+npm run lint:markdown --prefix frontend
+npm run lint:markdown:fix --prefix frontend
+```
+
+CI runs the check command for Markdown across the repository. The fix command applies supported spacing fixes locally. `.markdownlint-cli2.jsonc` checks spaces after heading markers, blank lines around headings, lists and fenced code blocks, trailing whitespace, tabs, repeated blank lines, and final newlines. Embedded HTML, long lines, and Markdown hard breaks using two trailing spaces are allowed. Generated files and dependency directories are excluded.

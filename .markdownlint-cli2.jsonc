@@ -1,0 +1,32 @@
+// Basic Markdown spacing checks. Embedded HTML and long lines are allowed.
+{
+  "config": {
+    "default": false,
+    "MD009": true,
+    "MD010": true,
+    "MD012": true,
+    "MD018": true,
+    "MD019": true,
+    "MD020": true,
+    "MD021": true,
+    "MD022": true,
+    "MD023": true,
+    "MD031": true,
+    "MD032": true,
+    "MD047": true,
+    "MD033": false // allow inline html
+  },
+  "globs": [
+    "**/*.md"
+  ],
+  "ignores": [
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**",
+    "**/target/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    ".git/**"
+  ]
+}
