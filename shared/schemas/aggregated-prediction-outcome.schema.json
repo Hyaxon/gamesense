@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/aggregated-prediction-outcome.schema.json",
+  "title": "AggregatedPredictionOutcome",
+  "description": "Aggregate within a matchup response. Contributor IDs refer to single prediction results in that response.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "aggregationStrategy": {
+      "$ref": "common.schema.json#/$defs/aggregationStrategy"
+    },
+    "contributingResultIds": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/identifier"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "predictedWinnerTeamId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "confidence": {
+      "$ref": "common.schema.json#/$defs/probability"
+    },
+    "generatedAt": {
+      "$ref": "common.schema.json#/$defs/utcTimestamp"
+    }
+  },
+  "required": [
+    "id",
+    "aggregationStrategy",
+    "contributingResultIds",
+    "predictedWinnerTeamId",
+    "confidence",
+    "generatedAt"
+  ],
+  "additionalProperties": false
+}

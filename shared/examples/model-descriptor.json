@@ -1,0 +1,10 @@
+{
+  "modelId": "elo-v1",
+  "displayName": "Elo",
+  "method": "ELO",
+  "version": "1.0.0",
+  "supportedExecutionKinds": [
+    "DETERMINISTIC"
+  ],
+  "configurationSchemaId": "elo-configuration-v1"
+}
