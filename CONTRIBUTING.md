@@ -1,6 +1,10 @@
 # Contributing Guidelines
 
 ## Branching Strategy
+- Create feature branches from `main` using a standard ticket format: `ticket/{ticket-number}-{ticket-name}` (e.g., `ticket/12-setup-docs`).
+- Always keep pull requests focused on single tasks or tickets.
+
+## Code Standards
 
 - Create feature branches from `main` using a standard ticket format: `tickets/{ticket-number}-{ticket-name}` (e.g., `tickets/12-setup-docs`).
 - Always keep pull requests focused on single tasks or tickets.
@@ -22,6 +26,9 @@
 - Architectural Decision Records (ADRs) must be prefixed with a date: `YYYY-MM-DD-short-title.md`.
 
 ## When to Document What
+- **Architecture (`docs/architecture/`):** Use when defining system components, data flows, or API contracts.
+- **Standards (`docs/standards/`):** Use when establishing formatting, naming conventions, or testing procedures.
+- **Decisions (`docs/decisions/`):** Use when making a significant technical decision (like selecting a library, database, or architectural pattern).
 
 - **Architecture (`docs/architecture/`):** Use when defining system components, data flows, or API contracts.
 - **Standards (`docs/standards/`):** Use when establishing formatting, naming conventions, or testing procedures.
