@@ -25,6 +25,7 @@ This directory holds our team's coding conventions, naming rules, formatting sta
 
 ## JavaScript / TypeScript Standards
 - **Files:** React/Vue components use `PascalCase.tsx` (e.g., `UserProfile.tsx`). Utilities, hooks, and configs use `camelCase.js` or `kebab-case.js`.
+- **File Headers:** Include a header at the top of JavaScript/TypeScript files summarizing the contained classes/components.
 - **Folders:** Use `kebab-case` or `camelCase`, matching the chosen file convention (e.g., `user-profile/`).
 - **Hooks:** Must start with `use` (e.g., `useAuth.ts`, `useFetch.ts`).
 - **Variables & Functions:** `camelCase` (e.g., `userCount`, `getUser()`).
@@ -37,6 +38,7 @@ This directory holds our team's coding conventions, naming rules, formatting sta
 
 ## Java Standards
 - **Files:** `PascalCase.java`, must match the public class name exactly.
+- **File Headers:** Include a header at the top of Java files summarizing the contained class.
 - **Packages:** All lowercase, reverse domain style, no underscores (e.g., `com.company.userservice`).
 - **Variables, Fields & Methods:** `camelCase` (methods must be verb-first).
 - **Constants:** `CAPITAL_SNAKE_CASE`, declared `static final`.

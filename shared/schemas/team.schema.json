@@ -22,20 +22,15 @@
       "type": "string",
       "description": "Abbreviated or common name, e.g. \"Oklahoma\"."
     },
-    "conferenceId": {
+    "conference": {
       "type": "string",
-      "format": "uuid",
-      "description": "Identifier of the Conference this team belongs to."
-    },
-    "division": {
-      "type": "string",
-      "description": "Conference division/group, if applicable."
+      "description": "Full name of the Conference this team belongs to, e.g. \"Southeastern Conference\". A plain name, not a conferenceId -- every team always has its conference given directly, so Conference has no id to reference."
     },
     "logoUrl": {
       "type": "string",
       "format": "uri"
     }
   },
-  "required": ["id", "name", "conferenceId"],
+  "required": ["id", "name", "conference"],
   "additionalProperties": false
 }
