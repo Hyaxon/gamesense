@@ -4,7 +4,7 @@ The React frontend for GameSense, built with Vite. The initial application displ
 
 ## Requirements
 
-- Node.js 22.12 or newer, or Node.js 20.19+ within version 20
+- Node.js 22.12 or newer (Node.js 24 is used in CI)
 - npm
 
 ## Local development
@@ -25,14 +25,17 @@ Commit `package.json` and `package-lock.json` when dependencies change. Do not c
 
 Run these commands from `frontend/`:
 
-| Command | Purpose |
-| --- | --- |
-| `npm ci` | Install the exact locked dependencies for a clean installation. |
-| `npm run build` | Create the production build in `dist/`. |
-| `npm run preview` | Serve the production build locally after building. |
-| `npm run lint` | Run the currently configured Oxlint checks. |
+| Command                | Purpose                                                         |
+| ---------------------- | --------------------------------------------------------------- |
+| `npm ci`               | Install the exact locked dependencies for a clean installation. |
+| `npm run build`        | Create the production build in `dist/`.                         |
+| `npm run preview`      | Serve the production build locally after building.              |
+| `npm run lint`         | Run ESLint on JavaScript and JSX, including tests.              |
+| `npm run lint:fix`     | Apply automatic ESLint fixes.                                   |
+| `npm run format:check` | Check frontend formatting with Prettier.                        |
+| `npm run format`       | Apply Prettier formatting.                                      |
 
-Formatting and linting standards are being handled in a separate PR. No test runner is configured yet.
+ESLint is configured in `eslint.config.js`; Prettier uses the repository's `.prettierrc.json`. See [standards](../docs/standards/README.md) for the shared conventions. No test runner is configured yet; future tests belong in `tests/`, mirroring `src/`.
 
 ## Project structure
 
