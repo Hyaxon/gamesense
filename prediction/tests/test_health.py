@@ -3,7 +3,9 @@
 Verifies that the service responds successfully and returns the expected
 health-check response.
 """
+
 from fastapi.testclient import TestClient
+
 from gamesense_prediction.main import app
 
 client = TestClient(app)

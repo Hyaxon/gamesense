@@ -101,14 +101,8 @@ jobs:
       - name: Make Maven Wrapper executable
         run: chmod +x mvnw
 
-      - name: Run Java tests
-        run: ./mvnw --batch-mode test
-
-      - name: Run Checkstyle
-        run: ./mvnw --batch-mode checkstyle:check
-
-      - name: Check Spotless formatting
-        run: ./mvnw --batch-mode spotless:check
+      - name: Run Java tests, Checkstyle, and Spotless
+        run: ./mvnw --batch-mode verify
 
   validate-javascript:
     name: Validate JavaScript
@@ -138,3 +132,22 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+  validate-markdown:
+    name: Validate Markdown
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Markdown tooling from the shared lockfile
+        run: npm ci --prefix frontend
+
+      - name: Check Markdown formatting across the repository
+        run: npm run lint:markdown --prefix frontend
