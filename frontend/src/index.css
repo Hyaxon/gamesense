@@ -11,7 +11,8 @@
   --color-border: #e9edf1;
   --color-muted: #68798d;
   --page-width: 1640px;
-  --page-gutter: clamp(1rem, 2.5vw, 2.75rem);
+  --page-gutter: clamp(1rem, 2vw, 2rem);
+  --layout-spacing: clamp(1rem, 1.5vw, 1.5rem);
 }
 
 * {
@@ -20,6 +21,19 @@
 
 body {
   margin: 0;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.section-subheading {
+  margin: 0.25rem 0 0;
+  color: var(--color-muted);
+  font-size: 1rem;
 }
 
 button,
@@ -75,8 +89,8 @@ button:focus-visible {
 .header-content {
   display: flex;
   align-items: center;
-  gap: clamp(2rem, 4vw, 4.5rem);
-  min-height: 110px;
+  gap: var(--layout-spacing);
+  min-height: 88px;
 }
 
 .app-brand {
@@ -123,8 +137,8 @@ button:focus-visible {
 .navigation-list {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: flex-start;
+  gap: clamp(0.5rem, 1vw, 1rem);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -151,6 +165,10 @@ button:focus-visible {
   border-bottom-color: currentColor;
 }
 
+.settings-item {
+  margin-inline-start: auto;
+}
+
 .settings-link svg {
   width: 28px;
   height: 28px;
@@ -167,7 +185,7 @@ button:focus-visible {
 
 .main-content {
   flex: 1;
-  padding-block: clamp(1.5rem, 2.2vw, 2.5rem);
+  padding-block: var(--layout-spacing);
 }
 
 @media (max-width: 68rem) {
@@ -175,8 +193,8 @@ button:focus-visible {
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 0;
-    min-height: 80px;
-    padding-block: 1rem;
+    min-height: 72px;
+    padding-block: 0.75rem;
   }
 
   .brand-icon {
@@ -215,7 +233,7 @@ button:focus-visible {
   .primary-navigation {
     display: none;
     flex-basis: 100%;
-    padding-top: 1rem;
+    padding-top: 0.75rem;
   }
 
   .primary-navigation.is-open {
@@ -240,6 +258,10 @@ button:focus-visible {
   .navigation-link.active {
     border-left-color: currentColor;
     background: #f5f7f8;
+  }
+
+  .settings-item {
+    margin-inline-start: 0;
   }
 
   .settings-link {
