@@ -28,6 +28,8 @@ Run these commands from `frontend/`:
 | Command                | Purpose                                                         |
 | ---------------------- | --------------------------------------------------------------- |
 | `npm ci`               | Install the exact locked dependencies for a clean installation. |
+| `npm test`             | Run the frontend JavaScript unit tests once with Vitest.        |
+| `npm run test:watch`   | Rerun unit tests as files change during development.            |
 | `npm run build`        | Create the production build in `dist/`.                         |
 | `npm run preview`      | Serve the production build locally after building.              |
 | `npm run lint`         | Run ESLint on JavaScript and JSX, including tests.              |
@@ -35,7 +37,13 @@ Run these commands from `frontend/`:
 | `npm run format:check` | Check frontend formatting with Prettier.                        |
 | `npm run format`       | Apply Prettier formatting.                                      |
 
-ESLint is configured in `eslint.config.js`; Prettier uses the repository's `.prettierrc.json`. See [standards](../docs/standards/README.md) for the shared conventions. No test runner is configured yet; future tests belong in `tests/`, mirroring `src/`.
+ESLint is configured in `eslint.config.js`; Prettier uses the repository's `.prettierrc.json`. See [standards](../docs/standards/README.md) for the shared conventions.
+
+## Unit tests
+
+Vitest shares the frontend's Vite configuration in `vite.config.js` and discovers `tests/**/*.test.js` and `tests/**/*.test.jsx`. Tests run in Node.js and explicitly import test APIs from `vitest`. Keep tests in `tests/`, mirroring the subdirectories in `src/`. Run `npm test` for a single pass or `npm run test:watch` while developing. CI runs the suite alongside linting, formatting, and the production build.
+
+The prototype prediction validator lives in `src/utils/predictionValidation.js`, with its tests in `tests/utils/predictionValidation.test.js`. It checks the earlier `method`, `predictedWinner`, and `confidenceScore` fields; it does not validate the canonical [prediction model interface](../docs/architecture/prediction-model-interface.md). JavaScript dependencies and tests are managed entirely by the frontend npm package.
 
 ## Shared layout and routes
 
@@ -80,12 +88,12 @@ frontend/
 │   ├── components/  # MainLayout and TopNavigation
 │   ├── pages/       # GamesPage and its page-level styles
 │   ├── services/    # Future API and service code
-│   ├── utils/       # Shared helper functions
+│   ├── utils/       # Prediction validation and shared helper functions
 │   ├── App.jsx      # Root React component
 │   ├── index.css    # Global styles
 │   ├── main.jsx     # React entry point
 │   └── routes.js    # Main navigation paths and labels
-├── tests/           # Future frontend tests
+├── tests/           # Vitest tests mirroring src/ subdirectories
 ├── index.html       # HTML entry point and browser title
 ├── package.json     # Dependencies and scripts
 ├── package-lock.json

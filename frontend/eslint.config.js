@@ -22,11 +22,11 @@ export default [
     },
   },
   {
-    files: ['src/**/*.{js,jsx}', 'tests/**/*.{js,jsx}'],
+    files: ['src/**/*.{js,jsx}'],
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ['*.config.js'],
+    files: ['*.config.js', 'tests/**/*.{js,jsx}'],
     languageOptions: { globals: globals.node },
   },
   {

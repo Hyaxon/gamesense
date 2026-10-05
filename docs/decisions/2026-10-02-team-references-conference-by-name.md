@@ -1,6 +1,7 @@
 # ADR 2: Team References Conference by Name, Not ID
 
 ## Status
+
 Accepted
 
 ## Context

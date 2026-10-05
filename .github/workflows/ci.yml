@@ -127,6 +127,9 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
+      - name: Run JavaScript tests
+        run: npm test
+
       - name: Check Prettier formatting
         run: npm run format:check
 

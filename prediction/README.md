@@ -28,6 +28,8 @@ Main source code directory, will contain the POC algorithms and other prediction
 
 `pytest` tests that ensure features are acting in accordance with their expected behavior. New tests should be written for every feature added to the `src/` code.
 
+The JavaScript prediction validator and its Vitest tests belong to the [frontend package](../frontend/README.md#unit-tests). This directory manages Python code and dependencies through `pyproject.toml`; run JavaScript tests from `frontend/` with `npm test`.
+
 ---
 
 ## Requirements
