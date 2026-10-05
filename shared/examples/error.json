@@ -1,0 +1,11 @@
+{
+  "code": "VALIDATION_ERROR",
+  "message": "The request contains invalid input.",
+  "requestId": "request-123",
+  "details": [
+    {
+      "path": "/matchup/season",
+      "message": "Season must be a positive integer."
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/deterministic-prediction-result.schema.json",
+  "title": "DeterministicPredictionResult",
+  "description": "Same wire shape as a single result; deterministic describes execution with fixed inputs, not a separate set of JSON fields.",
+  "$ref": "single-prediction-result.schema.json"
+}

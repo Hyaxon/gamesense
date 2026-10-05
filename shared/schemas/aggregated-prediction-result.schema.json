@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/aggregated-prediction-result.schema.json",
+  "title": "AggregatedPredictionResult",
+  "description": "Scheduled-game aggregate aligned with the domain model.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "aggregationStrategy": {
+      "$ref": "common.schema.json#/$defs/aggregationStrategy"
+    },
+    "contributingResultIds": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/identifier"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "predictedWinnerTeamId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "confidence": {
+      "$ref": "common.schema.json#/$defs/probability"
+    },
+    "generatedAt": {
+      "$ref": "common.schema.json#/$defs/utcTimestamp"
+    },
+    "gameId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    }
+  },
+  "required": [
+    "id",
+    "aggregationStrategy",
+    "contributingResultIds",
+    "predictedWinnerTeamId",
+    "confidence",
+    "generatedAt",
+    "gameId"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/simulation-configuration-request.schema.json",
+  "title": "SimulationConfigurationRequest",
+  "description": "Explicit configuration. The trial cap is a proposed MVP resource guard, not an algorithm limitation. A seed does not promise reproducibility across implementations.",
+  "type": "object",
+  "properties": {
+    "method": {
+      "$ref": "common.schema.json#/$defs/predictionMethod"
+    },
+    "trials": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    }
+  },
+  "required": [
+    "method",
+    "trials"
+  ],
+  "additionalProperties": false
+}
