@@ -1,6 +1,6 @@
 # GameSense Frontend
 
-The React frontend for GameSense, built with Vite. The initial application displays a GameSense heading. Routing, application pages, and backend integration will be added in later work.
+The React frontend for GameSense, built with Vite. The shared application shell provides branding, responsive navigation, and a consistent content container. Application routes currently render a blank canvas; page content and backend integration will be added in later work.
 
 ## Requirements
 
@@ -37,18 +37,46 @@ Run these commands from `frontend/`:
 
 ESLint is configured in `eslint.config.js`; Prettier uses the repository's `.prettierrc.json`. See [standards](../docs/standards/README.md) for the shared conventions. No test runner is configured yet; future tests belong in `tests/`, mirroring `src/`.
 
+## Shared layout and routes
+
+`App.jsx` defines nested React Router routes beneath `MainLayout`. The layout renders `TopNavigation` and a main content container with an `Outlet` for the current page. The root URL redirects to `/games`. All routes currently leave the main content area blank, including unknown URLs.
+
+| URL             | Navigation label                |
+| --------------- | ------------------------------- |
+| `/games`        | Games                           |
+| `/teams`        | Teams                           |
+| `/predictions`  | Custom Predictor                |
+| `/game-history` | Game History                    |
+| `/standings`    | Standings                       |
+| `/settings`     | Settings (gear icon on desktop) |
+
+The main navigation labels and paths are defined in `src/routes.js`. To implement a page, add its route beneath `MainLayout` in `App.jsx` with the page component as its element, replacing the corresponding blank route. The shared container supplies the outer spacing: responsive side gutters from 16px to 44px, top and bottom padding from 24px to 40px, and a maximum width of 1640px. It fills the available height below the header. Future pages control their own content and surfaces within these boundaries.
+
+At widths of 1088px and below, the navigation collapses behind a Menu button. Selecting a link closes the menu. Escape closes it and returns focus to the button. Active links have a visible indicator and `aria-current="page"`. Keyboard users can also use the skip-to-content link.
+
+For a manual layout check:
+
+1. Run `npm run dev` and visit the local URL.
+2. Navigate to every available route and confirm the header and active indicator while the main content remains blank.
+3. Reload a route directly and use browser Back/Forward to verify navigation.
+4. Resize to desktop, tablet, and phone widths, including 320px. Confirm the Menu button reveals all links and the page has no horizontal overflow.
+5. Use Tab to reach the skip link and navigation. Verify visible focus and Escape behavior in the open mobile menu.
+
+Production hosting must serve `index.html` for application routes so direct visits and reloads work with `BrowserRouter`.
+
 ## Project structure
 
 ```text
 frontend/
 ├── src/
-│   ├── components/  # Reusable UI components
-│   ├── pages/       # Application pages
+│   ├── components/  # MainLayout and TopNavigation
+│   ├── pages/       # Future application pages
 │   ├── services/    # Future API and service code
 │   ├── utils/       # Shared helper functions
 │   ├── App.jsx      # Root React component
 │   ├── index.css    # Global styles
-│   └── main.jsx     # React entry point
+│   ├── main.jsx     # React entry point
+│   └── routes.js    # Main navigation paths and labels
 ├── tests/           # Future frontend tests
 ├── index.html       # HTML entry point and browser title
 ├── package.json     # Dependencies and scripts

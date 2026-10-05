@@ -1,4 +1,257 @@
 :root {
-  font-family: system-ui, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   line-height: 1.5;
+  color: #08091f;
+  background: #f5f7f8;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+
+  --color-surface: #fff;
+  --color-border: #e9edf1;
+  --color-muted: #68798d;
+  --page-width: 1640px;
+  --page-gutter: clamp(1rem, 2.5vw, 2.75rem);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #285bb5;
+  outline-offset: 4px;
+}
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.page-container {
+  width: min(100% - var(--page-gutter) * 2, var(--page-width));
+  margin-inline: auto;
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: var(--page-gutter);
+  z-index: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--color-surface);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.app-header {
+  border-bottom: 2px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: clamp(2rem, 4vw, 4.5rem);
+  min-height: 110px;
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  font-size: 44px;
+  line-height: 1;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+}
+
+.brand-subtitle {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.primary-navigation {
+  flex: 1;
+  min-width: 0;
+}
+
+.navigation-list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navigation-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 4px solid transparent;
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navigation-link:hover {
+  background: #f5f7f8;
+}
+
+.navigation-link.active {
+  border-bottom-color: currentColor;
+}
+
+.settings-link svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.settings-label,
+.menu-toggle {
+  display: none;
+}
+
+.main-content {
+  flex: 1;
+  padding-block: clamp(1.5rem, 2.2vw, 2.5rem);
+}
+
+@media (max-width: 68rem) {
+  .header-content {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0;
+    min-height: 80px;
+    padding-block: 1rem;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 34px;
+  }
+
+  .brand-title {
+    font-size: 1.5rem;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: inherit;
+    background: var(--color-surface);
+    cursor: pointer;
+  }
+
+  .menu-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2;
+  }
+
+  .primary-navigation {
+    display: none;
+    flex-basis: 100%;
+    padding-top: 1rem;
+  }
+
+  .primary-navigation.is-open {
+    display: block;
+  }
+
+  .navigation-list {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .navigation-link {
+    justify-content: flex-start;
+    width: 100%;
+    border-bottom: 0;
+    border-left: 4px solid transparent;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+  }
+
+  .navigation-link.active {
+    border-left-color: currentColor;
+    background: #f5f7f8;
+  }
+
+  .settings-link {
+    gap: 0.75rem;
+  }
+
+  .settings-link svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .settings-label {
+    display: inline;
+  }
 }
