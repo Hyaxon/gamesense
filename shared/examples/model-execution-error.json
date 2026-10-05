@@ -1,0 +1,15 @@
+{
+  "status": "ERROR",
+  "executionId": "a1b2c3d4-e5f6-4789-8abc-1234567890ab",
+  "modelId": "elo-v1",
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "The selected model does not accept this configuration.",
+    "details": [
+      {
+        "path": "/configuration/homeAdvantage",
+        "message": "Expected a finite number."
+      }
+    ]
+  }
+}

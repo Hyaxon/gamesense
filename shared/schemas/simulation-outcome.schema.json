@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/simulation-outcome.schema.json",
+  "title": "SimulationOutcome",
+  "description": "Repeated-trial output within a matchup response. The two probabilities must sum to one within 0.000001, checked semantically. MVP models two outcomes.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "method": {
+      "$ref": "common.schema.json#/$defs/predictionMethod"
+    },
+    "trials": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000
+    },
+    "homeWinProbability": {
+      "$ref": "common.schema.json#/$defs/probability"
+    },
+    "awayWinProbability": {
+      "$ref": "common.schema.json#/$defs/probability"
+    },
+    "simulatedAt": {
+      "$ref": "common.schema.json#/$defs/utcTimestamp"
+    }
+  },
+  "required": [
+    "id",
+    "method",
+    "trials",
+    "homeWinProbability",
+    "awayWinProbability",
+    "simulatedAt"
+  ],
+  "additionalProperties": false
+}

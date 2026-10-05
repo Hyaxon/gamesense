@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/team.schema.json",
+  "title": "Team",
+  "description": "A college football program that plays games and belongs to a conference.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Canonical identifier."
+    },
+    "externalId": {
+      "type": "string",
+      "description": "Identifier from the source data feed, if different from id."
+    },
+    "name": {
+      "type": "string",
+      "description": "Full team name, e.g. \"Oklahoma Sooners\"."
+    },
+    "shortName": {
+      "type": "string",
+      "description": "Abbreviated or common name, e.g. \"Oklahoma\"."
+    },
+    "conference": {
+      "type": "string",
+      "description": "Full name of the Conference this team belongs to, e.g. \"Southeastern Conference\". A plain name, not a conferenceId -- every team always has its conference given directly, so Conference has no id to reference."
+    },
+    "logoUrl": {
+      "type": "string",
+      "format": "uri"
+    }
+  },
+  "required": ["id", "name", "conference"],
+  "additionalProperties": false
+}

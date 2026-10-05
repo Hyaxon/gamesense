@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/prediction.schema.json",
+  "title": "PredictionResult",
+  "description": "A single method's prediction for the outcome of one game.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Canonical identifier."
+    },
+    "gameId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The Game this prediction is for."
+    },
+    "method": {
+      "$ref": "#/$defs/predictionMethod"
+    },
+    "predictedWinnerTeamId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Probability the predicted winner wins, in [0,1]."
+    },
+    "predictedHomeScore": {
+      "type": "integer"
+    },
+    "predictedAwayScore": {
+      "type": "integer"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["id", "gameId", "method", "predictedWinnerTeamId", "confidence", "generatedAt"],
+  "additionalProperties": false,
+  "$defs": {
+    "predictionMethod": {
+      "type": "string",
+      "enum": [
+        "ELO",
+        "GLICKO2",
+        "TRUESKILL",
+        "MONTE_CARLO",
+        "MACHINE_LEARNING",
+        "BRADLEY_TERRY",
+        "HOME_GROWN",
+        "RANDOM"
+      ]
+    }
+  }
+}

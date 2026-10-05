@@ -1,0 +1,11 @@
+{
+  "id": "2b3c4d5e-6f70-4819-9a0b-1c2d3e4f5061",
+  "aggregationStrategy": "AVERAGE",
+  "contributingResultIds": [
+    "7f6e5d4c-3b2a-4190-8b7c-6a5f4e3d2c1b"
+  ],
+  "predictedWinnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+  "confidence": 0.72,
+  "generatedAt": "2025-08-29T12:00:00Z",
+  "gameId": "9c1e2d3b-4a5f-4e6d-8b7c-1a2b3c4d5e6f"
+}

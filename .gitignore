@@ -1,0 +1,190 @@
+# ============================================================
+# Python
+# ============================================================
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Testing / linting / type-checking caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+pytest.xml
+
+# Python packaging / build artifacts
+*.egg-info/
+.eggs/
+build/
+dist/
+pip-wheel-metadata/
+
+# Jupyter
+.ipynb_checkpoints/
+
+
+# ============================================================
+# Java / Maven
+# ============================================================
+
+# Maven build output
+target/
+
+# Compiled Java
+*.class
+
+# Maven temporary / release files
+dependency-reduced-pom.xml
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
+
+
+# ============================================================
+# JavaScript / Node / React
+# ============================================================
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+out/
+
+# Tool caches
+.eslintcache
+.parcel-cache/
+.vite/
+.cache/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# npm / yarn / pnpm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local package-manager state
+.pnpm-store/
+
+
+# ============================================================
+# Environment Variables / Secrets
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+# Private keys / certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local secret/config overrides
+*.local
+
+
+# ============================================================
+# IDEs / Editors
+# ============================================================
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
+# In the future we may uncomment this so we can share formatter settings.
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.factorypath
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+\#*\#
+.\#*
+
+
+# ============================================================
+# Operating System Files
+# ============================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+
+
+# ============================================================
+# Logs / Runtime / Temporary Files
+# ============================================================
+
+*.log
+logs/
+*.tmp
+*.temp
+tmp/
+temp/
+
+*.pid
+*.pid.lock
+
+
+# ============================================================
+# Miscellaneous Generated Files
+# ============================================================
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Compressed/generated archives
+*.zip
+*.tar
+*.tar.gz

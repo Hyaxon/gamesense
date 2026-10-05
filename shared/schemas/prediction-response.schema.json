@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/prediction-response.schema.json",
+  "title": "PredictionResponse",
+  "description": "Structured results, not an LLM summary. gameId is present only for an existing scheduled/historical game; custom matchups omit it. MVP returns complete success or an error.",
+  "type": "object",
+  "properties": {
+    "matchup": {
+      "$ref": "matchup.schema.json"
+    },
+    "gameId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "predictions": {
+      "type": "array",
+      "items": {
+        "$ref": "single-prediction-result.schema.json"
+      },
+      "minItems": 1
+    },
+    "simulations": {
+      "type": "array",
+      "items": {
+        "$ref": "simulation-outcome.schema.json"
+      },
+      "minItems": 1
+    },
+    "aggregate": {
+      "$ref": "aggregated-prediction-outcome.schema.json"
+    }
+  },
+  "required": [
+    "matchup",
+    "predictions"
+  ],
+  "additionalProperties": false
+}

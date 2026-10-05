@@ -1,0 +1,9 @@
+{
+  "id": "9c1e2d3b-4a5f-4e6d-8b7c-1a2b3c4d5e6f",
+  "season": 2025,
+  "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+  "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+  "scheduledAt": "2025-08-30T19:00:00Z",
+  "status": "SCHEDULED",
+  "isNeutralSite": false
+}

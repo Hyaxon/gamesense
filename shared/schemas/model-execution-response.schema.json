@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/model-execution-response.schema.json",
+  "title": "ModelExecutionResponse",
+  "description": "Return contract of the common execution method. Consumers distinguish SUCCESS and ERROR, independent of model family.",
+  "oneOf": [
+    {
+      "$ref": "model-execution-result.schema.json"
+    },
+    {
+      "$ref": "model-execution-error.schema.json"
+    }
+  ]
+}

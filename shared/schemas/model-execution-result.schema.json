@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/model-execution-result.schema.json",
+  "title": "ModelExecutionResult",
+  "description": "Uniform successful result for every adapter. prediction is always present; simulation is present exactly for SIMULATION. configuration records effective validated settings. Supporting scores are diagnostic named values, never alternate probabilities.",
+  "type": "object",
+  "properties": {
+    "status": {
+      "const": "SUCCESS"
+    },
+    "executionId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "model": {
+      "$ref": "model-descriptor.schema.json"
+    },
+    "matchup": {
+      "$ref": "matchup.schema.json"
+    },
+    "prediction": {
+      "$ref": "single-prediction-result.schema.json"
+    },
+    "simulation": {
+      "$ref": "simulation-outcome.schema.json"
+    },
+    "supportingScores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "$ref": "common.schema.json#/$defs/identifier"
+          },
+          "name": {
+            "$ref": "common.schema.json#/$defs/nonBlankString"
+          },
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "$ref": "common.schema.json#/$defs/nonBlankString"
+          }
+        },
+        "required": [
+          "teamId",
+          "name",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "executionKind": {
+          "type": "string",
+          "enum": [
+            "DETERMINISTIC",
+            "STOCHASTIC",
+            "SIMULATION"
+          ]
+        },
+        "dataSnapshotId": {
+          "$ref": "common.schema.json#/$defs/nonBlankString"
+        },
+        "startedAt": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        },
+        "completedAt": {
+          "$ref": "common.schema.json#/$defs/utcTimestamp"
+        },
+        "durationMilliseconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "executionKind",
+        "dataSnapshotId",
+        "startedAt",
+        "completedAt",
+        "durationMilliseconds"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "executionKind": {
+                "const": "DETERMINISTIC"
+              }
+            },
+            "required": [
+              "executionKind"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "seed"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "required": [
+    "status",
+    "executionId",
+    "model",
+    "matchup",
+    "prediction",
+    "metadata"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "metadata": {
+            "properties": {
+              "executionKind": {
+                "const": "SIMULATION"
+              }
+            },
+            "required": [
+              "executionKind"
+            ]
+          }
+        },
+        "required": [
+          "metadata"
+        ]
+      },
+      "then": {
+        "required": [
+          "simulation"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "simulation"
+          ]
+        }
+      }
+    }
+  ]
+}
