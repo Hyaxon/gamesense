@@ -8,7 +8,7 @@ GameSense/
 │
 ├── frontend/          # React (TypeScript/JavaScript) User Interface
 ├── backend/           # Java Core API & Data Handling Services
-└── engine/            # Python Data Processing & Prediction Models
+└── prediction/        # Python Data Processing & Prediction Models
 
 ## Core Layers
 
@@ -22,3 +22,5 @@ GameSense/
 - [Ingestion Notes](ingestion-notes.md): how Adam's data feed maps to the domain model, for whoever builds ingestion.
 - [Core API JSON Schemas](api-schemas.md): proposed payload contracts, examples, validation rules, and deferred additions.
 - [Prediction Model Interface](prediction-model-interface.md): common model invocation, capabilities, configuration, results, and errors.
+- [Prediction Model Development](prediction-model-development.md): implemented Python framework, model package structure, data access, registration, and testing.
+- [Prediction Model Walkthrough](prediction-model-walkthrough.md): step-by-step implementation instructions using the working coin-flip model and an Elo adapter example.

@@ -4,7 +4,7 @@
 
 This contract defines how the prediction service invokes a model adapter and how every adapter returns a standardized result. It covers deterministic, stochastic single-run, and repeated-trial simulation execution. It builds on the [shared domain models](domain-model.md) and [API JSON contracts](api-schemas.md). The [interface ADR](../decisions/2026-10-01-prediction-model-interface.md) records the design decisions.
 
-Models, training, backtesting, performance comparisons, aggregation, REST endpoints, Java-to-Python integration, and database persistence are outside this contract. The MVP uses in-memory or file-backed data snapshots. No algorithm or registry implementation is supplied here.
+Models, training, backtesting, performance comparisons, aggregation, REST endpoints, Java-to-Python integration, and database persistence are outside this contract. The MVP uses in-memory or file-backed data snapshots. The [Python framework and author guide](prediction-model-development.md) implement the common registry, runner, types, context, and validation separately; no prediction algorithm is supplied here.
 
 ## Common invocation
 
@@ -21,7 +21,7 @@ class PredictionModel(Protocol):
     ) -> ModelExecutionResponse: ...
 ```
 
-This is an interface specification, not an implemented Python class. `Protocol` denotes structural typing: an adapter conforms by providing these methods. The named request, descriptor, and response types are objects described by the linked JSON schemas below, mapped to language-specific DTOs. Python implementations use snake_case attributes internally and camelCase at serialization boundaries.
+This code block specifies the interface; its Python Protocol is implemented in `prediction/src/gamesense_prediction/models/interface.py`. `Protocol` denotes structural typing: an adapter conforms by providing these methods. The named request, descriptor, and response types are objects described by the linked JSON schemas below, mapped to language-specific DTOs. Python implementations use snake_case attributes internally and camelCase at serialization boundaries.
 
 `ModelExecutionResponse` is exactly one `ModelExecutionResult` or `ModelExecutionError`. One invocation executes one registered model for one matchup. The generic runner selects adapters by modelId; it does not branch on Elo, ML, or other algorithm names. Execution kind controls common validation and simulation fields. No batch, asynchronous, or partial-success behavior is defined.
 
@@ -165,6 +165,6 @@ This review establishes representational fit, not proof that unimplemented model
 
 ## Validation and review
 
-Run the [shared validation workflow](../../shared/README.md#validate-schemas-and-examples). It validates all schemas/examples, execution-kind constraints, success/error exclusivity, and representative semantic relationships in the model examples. Service runtime validation remains an implementation responsibility.
+Run the [shared validation workflow](../../shared/README.md#validate-schemas-and-examples). It validates all schemas/examples, execution-kind constraints, success/error exclusivity, and representative semantic relationships in the model examples. The Python runner implements common runtime schema and semantic validation; model-specific input sufficiency, configuration default resolution, and algorithm correctness remain adapter responsibilities.
 
 Team review should confirm snapshot selection and season meaning, model identity/version policy, trial budget, seed policies, configuration schemas, and equal-probability winner policy before acceptance. No deployment, model algorithms, or integration are included. LLM explanations, asynchronous execution, tie outcomes, performance metadata, and aggregation remain separate future contracts.
