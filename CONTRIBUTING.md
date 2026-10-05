@@ -31,7 +31,7 @@
 
 GitHub Actions runs on pull requests targeting `main`, new commits to those pull requests, and pushes to `main`. PR branch names must use `tickets/<number>-<description>` with lowercase words separated by hyphens.
 
-The workflow runs Python tests and Ruff checks, Java tests with Checkstyle and Spotless, and frontend ESLint, Prettier, and production build checks. Checks do not automatically fix source files.
+The workflow runs Python tests and Ruff checks, Java tests with Checkstyle and Spotless, and frontend Vitest tests, ESLint, Prettier, and production build checks. Checks do not automatically fix source files.
 
 ## Local quality checks
 
@@ -41,7 +41,7 @@ Install each service's dependencies using its README, then run the following fro
 | --- | --- | --- |
 | `prediction/` | `python -m pytest`, `python -m ruff check .`, `python -m ruff format --check .` | `python -m ruff check . --fix`, `python -m ruff format .` |
 | `backend/` | `./mvnw --batch-mode verify` | `./mvnw spotless:apply` |
-| `frontend/` | `npm run lint`, `npm run format:check`, `npm run build` | `npm run lint:fix`, `npm run format` |
+| `frontend/` | `npm test`, `npm run lint`, `npm run format:check`, `npm run build` | `npm run lint:fix`, `npm run format` |
 
 On Windows, use `mvnw.cmd` in place of `./mvnw`. Review automatic fixes before committing. See [coding and testing standards](docs/standards/README.md) for tool configuration and test locations.
 
