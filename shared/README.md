@@ -34,6 +34,8 @@ python3 -m venv /tmp/gamesense-schema-validation
 
 The script validates schema definitions, resolves references through a local registry, checks every example with format validation enabled, checks enum consistency, and tests representative invalid payloads and probability boundaries. Schema IDs are identifiers; validation does not fetch them from the internet.
 
+CI runs this validator on pull requests targeting `main` and pushes to `main`, with both normal and optimized (`-O`) Python execution.
+
 Additional deterministic, stochastic, and simulation execution examples live in [examples/model-execution/](examples/model-execution/). The validator checks their schemas and representative request/result relationships; these checks do not implement service runtime validation.
 
 Schema validation does not establish whether referenced teams exist, a winner belongs to the matchup, or simulation probabilities sum to one. These semantic rules are documented in the API schema documentation and require service-level validation when the services are implemented.

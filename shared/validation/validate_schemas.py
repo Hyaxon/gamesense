@@ -6,7 +6,7 @@ import math
 from datetime import datetime
 from pathlib import Path
 
-from jsonschema import Draft202012Validator, FormatChecker
+from jsonschema import Draft202012Validator, FormatChecker, ValidationError
 from referencing import Registry, Resource
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,41 +16,62 @@ EXAMPLES = ROOT / 'shared' / 'examples'
 
 def validate_model_relationships(request, result):
     """Check semantic relationships in synthetic success examples, not a service."""
-    assert request['executionId'] == result['executionId']
-    assert request['modelId'] == result['model']['modelId']
-    assert request['matchup'] == result['matchup']
-    assert request['matchup']['homeTeamId'] != request['matchup']['awayTeamId']
+    if request['executionId'] != result['executionId']:
+        raise ValidationError('Request and result execution IDs must match')
+    if request['modelId'] != result['model']['modelId']:
+        raise ValidationError('Request and result model IDs must match')
+    if request['matchup'] != result['matchup']:
+        raise ValidationError('Request and result matchups must match')
+    if request['matchup']['homeTeamId'] == request['matchup']['awayTeamId']:
+        raise ValidationError('Home and away teams must differ')
     kind = request['executionKind']
-    assert kind in result['model']['supportedExecutionKinds']
+    if kind not in result['model']['supportedExecutionKinds']:
+        raise ValidationError('Model must support the requested execution kind')
     metadata = result['metadata']
-    assert metadata['executionKind'] == kind
-    assert metadata['dataSnapshotId'] == request['dataSnapshotId']
-    assert datetime.fromisoformat(metadata['completedAt'].replace('Z', '+00:00')) >= (
+    if metadata['executionKind'] != kind:
+        raise ValidationError('Metadata execution kind must match the request')
+    if metadata['dataSnapshotId'] != request['dataSnapshotId']:
+        raise ValidationError('Metadata data snapshot ID must match the request')
+    if datetime.fromisoformat(metadata['completedAt'].replace('Z', '+00:00')) < (
         datetime.fromisoformat(metadata['startedAt'].replace('Z', '+00:00'))
-    )
-    if 'seed' in request:
-        assert metadata.get('seed') == request['seed']
+    ):
+        raise ValidationError('Completion time must not precede start time')
+    if 'seed' in request and metadata.get('seed') != request['seed']:
+        raise ValidationError('Metadata seed must match the request')
     prediction = result['prediction']
     sides = {request['matchup']['homeTeamId'], request['matchup']['awayTeamId']}
-    assert prediction['predictedWinnerTeamId'] in sides
-    assert prediction['method'] == result['model']['method']
-    assert math.isfinite(prediction['confidence'])
-    assert prediction['confidence'] >= 0.5
+    if prediction['predictedWinnerTeamId'] not in sides:
+        raise ValidationError('Predicted winner must belong to the matchup')
+    if prediction['method'] != result['model']['method']:
+        raise ValidationError('Prediction method must match the model method')
+    if not math.isfinite(prediction['confidence']):
+        raise ValidationError('Prediction confidence must be finite')
+    if prediction['confidence'] < 0.5:
+        raise ValidationError('Predicted winner confidence must be at least 0.5')
     scores = result.get('supportingScores', [])
-    assert all(score['teamId'] in sides for score in scores)
-    assert all(math.isfinite(score['value']) for score in scores)
-    assert len({(score['teamId'], score['name']) for score in scores}) == len(scores)
+    if not all(score['teamId'] in sides for score in scores):
+        raise ValidationError('Supporting score teams must belong to the matchup')
+    if not all(math.isfinite(score['value']) for score in scores):
+        raise ValidationError('Supporting score values must be finite')
+    if len({(score['teamId'], score['name']) for score in scores}) != len(scores):
+        raise ValidationError('Supporting scores must have unique team and name pairs')
     if kind == 'SIMULATION':
         simulation = result['simulation']
-        assert simulation['method'] == prediction['method']
-        assert simulation['trials'] == request['trials']
+        if simulation['method'] != prediction['method']:
+            raise ValidationError('Simulation method must match the prediction method')
+        if simulation['trials'] != request['trials']:
+            raise ValidationError('Simulation trials must match the request')
         home = simulation['homeWinProbability']
         away = simulation['awayWinProbability']
-        assert math.isfinite(home) and math.isfinite(away)
-        assert abs(home + away - 1) <= 0.000001
+        if not (math.isfinite(home) and math.isfinite(away)):
+            raise ValidationError('Simulation win probabilities must be finite')
+        if abs(home + away - 1) > 0.000001:
+            raise ValidationError('Simulation win probabilities must sum to one')
         side = 'homeTeamId' if home >= away else 'awayTeamId'
-        assert prediction['predictedWinnerTeamId'] == request['matchup'][side]
-        assert abs(prediction['confidence'] - max(home, away)) <= 0.000001
+        if prediction['predictedWinnerTeamId'] != request['matchup'][side]:
+            raise ValidationError('Predicted winner must follow simulation win probabilities')
+        if abs(prediction['confidence'] - max(home, away)) > 0.000001:
+            raise ValidationError('Prediction confidence must match the winning probability')
 
 
 def main():
@@ -62,12 +83,14 @@ def main():
         (schema['$id'], Resource.from_contents(schema)) for schema in schemas.values()
     )
     validators = {}
-    assert schemas['common']['$defs']['predictionMethod']['enum'] == (
+    if schemas['common']['$defs']['predictionMethod']['enum'] != (
         schemas['prediction']['$defs']['predictionMethod']['enum']
-    ), 'Prediction method enums have drifted from the domain baseline'
-    assert schemas['game-status']['enum'] == (
+    ):
+        raise ValidationError('Prediction method enums have drifted from the domain baseline')
+    if schemas['game-status']['enum'] != (
         schemas['game']['$defs']['gameStatus']['enum']
-    ), 'Game status enums have drifted from the domain baseline'
+    ):
+        raise ValidationError('Game status enums have drifted from the domain baseline')
     for name, schema in schemas.items():
         Draft202012Validator.check_schema(schema)
         validators[name] = Draft202012Validator(
@@ -78,14 +101,16 @@ def main():
         examples[path.stem] = json.loads(path.read_text())
         validators[path.stem].validate(examples[path.stem])
     missing = set(schemas) - set(examples) - {'common'}
-    assert not missing, f'Schemas without examples: {missing}'
+    if missing:
+        raise ValidationError(f'Schemas without examples: {missing}')
 
     checks = []
 
     def reject(name, mutate):
         payload = copy.deepcopy(examples[name])
         mutate(payload)
-        assert list(validators[name].iter_errors(payload)), f'Accepted invalid {name}: {payload}'
+        if not list(validators[name].iter_errors(payload)):
+            raise ValidationError(f'Accepted invalid {name}: {payload}')
         checks.append(name)
 
     reject('custom-prediction-request', lambda p: p.pop('matchup'))
@@ -111,8 +136,9 @@ def main():
     reject('error', lambda p: p.update(code='UNKNOWN'))
     reject('error', lambda p: p.update(message='  '))
     reject('error', lambda p: p['details'][0].update(path='matchup.season'))
-    assert validators['game-status'].is_valid('FINAL')
-    assert not validators['game-status'].is_valid('BYE')
+    validators['game-status'].validate('FINAL')
+    if validators['game-status'].is_valid('BYE'):
+        raise ValidationError('Accepted invalid game-status: BYE')
     for name in ['prediction', 'single-prediction-result']:
         for confidence in [0, 1]:
             validators[name].validate({**examples[name], 'confidence': confidence})
@@ -161,10 +187,10 @@ def main():
         mutate(result)
         try:
             validate_model_relationships(request, result)
-        except AssertionError:
+        except ValidationError:
             semantic_checks.append(kind)
         else:
-            raise AssertionError(f'Accepted inconsistent {kind} model example')
+            raise ValidationError(f'Accepted inconsistent {kind} model example')
 
     reject_relationship('deterministic', lambda p: p['prediction'].update(predictedWinnerTeamId=p['executionId']))
     reject_relationship('deterministic', lambda p: p['prediction'].update(method='GLICKO2'))
