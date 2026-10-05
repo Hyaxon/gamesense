@@ -13,6 +13,7 @@ This directory contains JSON contracts used by the Java backend, Python predicti
 ## Start here
 
 - [API schema documentation](../docs/architecture/api-schemas.md): payload inventory, field tables, examples, validation rules, and deferred features.
+- [Prediction model interface](../docs/architecture/prediction-model-interface.md): standard invocation, registration, configuration, execution metadata, and model examples.
 - [Shared domain models](../docs/architecture/domain-model.md): application concepts and relationships.
 - [Shared domain conventions ADR](../docs/decisions/2026-09-22-shared-domain-model-conventions.md): naming, identifiers, timestamps, and enums.
 - [Proposed API contracts ADR](../docs/decisions/2026-10-01-core-api-contracts.md): custom matchups, result context, nullability, and other contract decisions.
@@ -32,6 +33,10 @@ python3 -m venv /tmp/gamesense-schema-validation
 ```
 
 The script validates schema definitions, resolves references through a local registry, checks every example with format validation enabled, checks enum consistency, and tests representative invalid payloads and probability boundaries. Schema IDs are identifiers; validation does not fetch them from the internet.
+
+CI runs this validator on pull requests targeting `main` and pushes to `main`, with both normal and optimized (`-O`) Python execution.
+
+Additional deterministic, stochastic, and simulation execution examples live in [examples/model-execution/](examples/model-execution/). The validator checks their schemas and representative request/result relationships; these checks do not implement service runtime validation.
 
 Schema validation does not establish whether referenced teams exist, a winner belongs to the matchup, or simulation probabilities sum to one. These semantic rules are documented in the API schema documentation and require service-level validation when the services are implemented.
 

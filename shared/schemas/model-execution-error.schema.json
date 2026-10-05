@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/model-execution-error.schema.json",
+  "title": "ModelExecutionError",
+  "description": "Failure for one identified execution; contains the existing safe error structure and no successful prediction.",
+  "type": "object",
+  "properties": {
+    "status": {
+      "const": "ERROR"
+    },
+    "executionId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "modelId": {
+      "$ref": "common.schema.json#/$defs/nonBlankString"
+    },
+    "error": {
+      "$ref": "error.schema.json"
+    }
+  },
+  "required": [
+    "status",
+    "executionId",
+    "modelId",
+    "error"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/model-descriptor.schema.json",
+  "title": "ModelDescriptor",
+  "description": "Registration metadata for one versioned model adapter. modelId selects an implementation; method identifies its shared algorithm family. configurationSchemaId names a trusted local registry schema, never a caller-selected URL.",
+  "type": "object",
+  "properties": {
+    "modelId": {
+      "$ref": "common.schema.json#/$defs/nonBlankString"
+    },
+    "displayName": {
+      "$ref": "common.schema.json#/$defs/nonBlankString"
+    },
+    "method": {
+      "$ref": "common.schema.json#/$defs/predictionMethod"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/nonBlankString"
+    },
+    "supportedExecutionKinds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "DETERMINISTIC",
+          "STOCHASTIC",
+          "SIMULATION"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "configurationSchemaId": {
+      "$ref": "common.schema.json#/$defs/nonBlankString"
+    }
+  },
+  "required": [
+    "modelId",
+    "displayName",
+    "method",
+    "version",
+    "supportedExecutionKinds"
+  ],
+  "additionalProperties": false
+}
