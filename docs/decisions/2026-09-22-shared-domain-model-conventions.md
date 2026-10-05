@@ -1,6 +1,7 @@
 # ADR 1: Shared Domain Model Conventions
 
 ## Status
+
 Accepted
 
 ## Context
