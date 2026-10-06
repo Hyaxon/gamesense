@@ -286,6 +286,15 @@ python examples/run_coin_flip.py --trials 1000 --seed 42
 python -m pytest tests/models/test_coin_flip.py
 ```
 
+The [Monte Carlo package](src/gamesense_prediction/models/monte_carlo/README.md)
+predicts a matchup by simulating it many times from each team's own scoring
+history. Run it from `prediction/`:
+
+```sh
+python examples/run_monte_carlo.py --trials 10000 --seed 42
+python -m pytest tests/models/test_monte_carlo.py
+```
+
 Other algorithms are implemented in their own tickets.
 
 Run the fixture-backed framework demonstration from `prediction/`:
