@@ -286,6 +286,15 @@ python examples/run_coin_flip.py --trials 1000 --seed 42
 python -m pytest tests/models/test_coin_flip.py
 ```
 
+The [XGBoost POC](src/gamesense_prediction/models/xgboost/README.md) trains a binary
+classifier offline using pregame scoring history, then returns deterministic
+winner predictions through the same runner. Run the synthetic demonstration:
+
+```sh
+python src/examples/run_xgboost.py
+python -m pytest tests/models/test_xgboost.py
+```
+
 Other algorithms are implemented in their own tickets.
 
 Run the fixture-backed framework demonstration from `prediction/`:
