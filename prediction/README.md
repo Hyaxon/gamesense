@@ -296,6 +296,15 @@ python examples/run_bradley_terry.py
 python -m pytest tests/models/test_bradley_terry.py
 ```
 
+The [XGBoost POC](src/gamesense_prediction/models/xgboost/README.md) trains a binary
+classifier offline using pregame scoring history, then returns deterministic
+winner predictions through the same runner. Run the synthetic demonstration:
+
+```sh
+python src/examples/run_xgboost.py
+python -m pytest tests/models/test_xgboost.py
+```
+
 The [Elo package](src/gamesense_prediction/models/elo/README.md) is a deterministic
 rating model. It replays completed games in date order to build team ratings, then
 converts the rating gap into a win probability. Run it from `prediction/`:
