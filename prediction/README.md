@@ -284,6 +284,16 @@ fair-coin simulation baseline. Run it from `prediction/`:
 ```sh
 python examples/run_coin_flip.py --trials 1000 --seed 42
 python -m pytest tests/models/test_coin_flip.py
+
+```
+
+The [Bradley-Terry package](src/gamesense_prediction/models/bradley_terry/README.md)
+rates each team from the win/loss record in the snapshot and predicts a matchup
+from the ratings. Run it from `prediction/`:
+
+```sh
+python examples/run_bradley_terry.py
+python -m pytest tests/models/test_bradley_terry.py
 ```
 
 The [Elo package](src/gamesense_prediction/models/elo/README.md) is a deterministic
