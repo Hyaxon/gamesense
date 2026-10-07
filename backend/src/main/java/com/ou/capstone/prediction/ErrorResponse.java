@@ -5,8 +5,5 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorResponse(
-        ErrorCode code,
-        String message,
-        String requestId,
-        List<ErrorDetail> details) {
-}
+    ErrorCode code, String message, String requestId, List<ErrorDetail> details)
+    implements PredictionServiceResponse {}
