@@ -5,11 +5,10 @@ import java.time.Instant;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record SinglePredictionResult(
-        String id,
-        PredictionMethod method,
-        String predictedWinnerTeamId,
-        double confidence,
-        Instant generatedAt,
-        Integer predictedHomeScore,
-        Integer predictedAwayScore) {
-}
+    String id,
+    PredictionMethod method,
+    String predictedWinnerTeamId,
+    double confidence,
+    Instant generatedAt,
+    Integer predictedHomeScore,
+    Integer predictedAwayScore) {}

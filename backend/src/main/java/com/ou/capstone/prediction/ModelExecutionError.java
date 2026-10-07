@@ -1,8 +1,5 @@
 package com.ou.capstone.prediction;
 
 public record ModelExecutionError(
-        String status,
-        String executionId,
-        String modelId,
-        ErrorResponse error) {
-}
+    String status, String executionId, String modelId, ErrorResponse error)
+    implements PredictionServiceResponse {}
