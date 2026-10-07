@@ -286,6 +286,16 @@ python examples/run_coin_flip.py --trials 1000 --seed 42
 python -m pytest tests/models/test_coin_flip.py
 ```
 
+The [Elo package](src/gamesense_prediction/models/elo/README.md) is a deterministic
+rating model. It replays completed games in date order to build team ratings, then
+converts the rating gap into a win probability. Run it from `prediction/`:
+
+```sh
+python examples/run_elo.py
+python -m pytest tests/models/test_elo.py
+```
+
+
 Other algorithms are implemented in their own tickets.
 
 Run the fixture-backed framework demonstration from `prediction/`:
