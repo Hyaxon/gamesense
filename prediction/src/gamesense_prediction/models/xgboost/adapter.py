@@ -1,4 +1,7 @@
-"""Translate a trained XGBoost classifier into the shared prediction contract."""
+"""Own XGBoost model setup and translate predictions into the shared contract."""
+
+from pathlib import Path
+from typing import Self
 
 from xgboost import XGBClassifier
 
@@ -13,14 +16,38 @@ from ...contracts import (
     SupportingScore,
 )
 from ...execution_helpers import ExecutionTimer, execution_error
-from .algorithm import predict_matchup
+from .algorithm import predict_matchup, train_model
 
 
 class XGBoostModel:
-    """Deterministic inference; trusted startup supplies the trained classifier."""
+    """Explicit training/loading during setup; execute performs inference only."""
 
     def __init__(self, model: XGBClassifier):
         self.model = model
+
+    @classmethod
+    def train(cls, context: PredictionContext) -> Self:
+        """Create a trained adapter without writing an artifact."""
+        return cls(train_model(context))
+
+    @classmethod
+    def train_and_save(
+        cls, context: PredictionContext, output_path: str | Path
+    ) -> Self:
+        """Train offline, save a JSON/UBJ artifact, and return the trained adapter."""
+        path = Path(output_path)
+        if path.suffix not in (".json", ".ubj"):
+            raise ValueError("Model output path must end in .json or .ubj")
+        adapter = cls.train(context)
+        adapter.model.save_model(path)
+        return adapter
+
+    @classmethod
+    def from_file(cls, model_path: str | Path) -> Self:
+        """Load an artifact once from a trusted setup path, without training."""
+        model = XGBClassifier(n_jobs=1)
+        model.load_model(model_path)
+        return cls(model)
 
     def get_descriptor(self) -> ModelDescriptor:
         return ModelDescriptor(

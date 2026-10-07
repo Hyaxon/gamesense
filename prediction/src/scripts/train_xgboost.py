@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 
-from gamesense_prediction.models.xgboost.algorithm import train_model
+from gamesense_prediction.models.xgboost import XGBoostModel
 from gamesense_prediction.snapshots import FileSnapshotProvider
 
 
@@ -19,15 +19,11 @@ def main() -> int:
     parser.add_argument("--season", type=int, default=2025)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if args.output.suffix not in (".json", ".ubj"):
-        parser.error("--output must end in .json or .ubj")
-
     context = FileSnapshotProvider([args.snapshot]).get(args.snapshot_id, args.season)
     try:
-        model = train_model(context)
+        XGBoostModel.train_and_save(context, args.output)
     except ValueError as error:
         parser.error(str(error))
-    model.save_model(args.output)
     print(f"Saved XGBoost model to {args.output}")
     return 0
 

@@ -4,8 +4,6 @@ import argparse
 import json
 from pathlib import Path
 
-from xgboost import XGBClassifier
-
 from gamesense_prediction.contracts import (
     ExecutionKind,
     Matchup,
@@ -15,7 +13,6 @@ from gamesense_prediction.contracts import (
 )
 from gamesense_prediction.execution_helpers import new_identifier
 from gamesense_prediction.models.xgboost import XGBoostModel
-from gamesense_prediction.models.xgboost.algorithm import train_model
 from gamesense_prediction.registry import ModelRegistration, ModelRegistry
 from gamesense_prediction.runner import PredictionRunner
 from gamesense_prediction.snapshots import FileSnapshotProvider
@@ -37,12 +34,11 @@ def main() -> int:
     context = snapshots.get("xgboost-poc-2025", 2025)
     # This local demo trains during setup. The adapter only performs inference.
     if args.model is None:
-        classifier = train_model(context)
+        adapter = XGBoostModel.train(context)
     else:
-        classifier = XGBClassifier(n_jobs=1)
-        classifier.load_model(args.model)
+        adapter = XGBoostModel.from_file(args.model)
     registry = ModelRegistry(
-        [ModelRegistration(adapter=XGBoostModel(classifier))],
+        [ModelRegistration(adapter=adapter)],
         {PredictionMethod.MACHINE_LEARNING: "xgboost-v1"},
     )
     home_team_id, away_team_id = tuple(context.teams)[:2]

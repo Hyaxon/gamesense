@@ -114,22 +114,68 @@ def test_reject_insufficient_training_data(snapshots, empty):
         train_model(context)
 
 
-def test_library_training_prediction_and_save_load(
-    classifier, training_context, tmp_path
+@pytest.mark.parametrize("extension", ["json", "ubj"])
+def test_package_training_prediction_and_save_load(
+    classifier, training_context, tmp_path, extension
 ):
     assert isinstance(classifier, XGBClassifier)
     home_probability = predict_matchup(classifier, HOME, AWAY, training_context, True)
     away_probability = predict_matchup(classifier, AWAY, HOME, training_context, True)
     assert 0.5 < home_probability < 1
     assert 0 < away_probability < 0.5
-    artifact = tmp_path / "model.json"
-    classifier.save_model(artifact)
-    restored = XGBClassifier(n_jobs=1)
-    restored.load_model(artifact)
+    artifact = tmp_path / f"model.{extension}"
+    trained = XGBoostModel.train_and_save(training_context, artifact)
+    assert artifact.is_file()
     assert (
-        predict_matchup(restored, HOME, AWAY, training_context, True)
+        predict_matchup(trained.model, HOME, AWAY, training_context, True)
         == home_probability
     )
+    with patch.object(
+        XGBClassifier, "fit", side_effect=AssertionError("Loading trained")
+    ):
+        restored = XGBoostModel.from_file(str(artifact))
+    assert (
+        predict_matchup(restored.model, HOME, AWAY, training_context, True)
+        == home_probability
+    )
+
+
+def test_reject_unsupported_artifact_format(training_context, tmp_path):
+    artifact = tmp_path / "model.pkl"
+    with patch.object(
+        XGBClassifier, "fit", side_effect=AssertionError("Invalid path trained")
+    ):
+        with pytest.raises(ValueError, match="must end in .json or .ubj"):
+            XGBoostModel.train_and_save(training_context, artifact)
+    assert not artifact.exists()
+
+
+def test_loaded_adapter_reuses_classifier(
+    training_context, tmp_path, snapshots, execution_request
+):
+    artifact = tmp_path / "model.json"
+    XGBoostModel.train_and_save(training_context, str(artifact))
+    adapter = XGBoostModel.from_file(artifact)
+    runner = PredictionRunner(
+        ModelRegistry(
+            [ModelRegistration(adapter=adapter)],
+            {PredictionMethod.MACHINE_LEARNING: "xgboost-v1"},
+        ),
+        snapshots,
+    )
+    request = replace(execution_request, model_id="xgboost-v1")
+    with (
+        patch.object(
+            XGBClassifier, "fit", side_effect=AssertionError("Inference trained")
+        ),
+        patch.object(
+            XGBClassifier,
+            "load_model",
+            side_effect=AssertionError("Inference reloaded"),
+        ),
+    ):
+        check_adapter_contract(runner, request)
+        check_deterministic_repeatability(runner, request)
 
 
 def test_framework_contract_and_inference_only(xgboost_runner, execution_request):

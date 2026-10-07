@@ -2,11 +2,35 @@
 
 `xgboost-v1` uses the XGBoost library's `XGBClassifier` to predict a winner.
 Its method is `MACHINE_LEARNING`, version is `1.0.0`, and execution kind is
-`DETERMINISTIC`. The adapter takes a previously trained classifier and performs
-inference only. It accepts no request configuration, seed, or trials.
+`DETERMINISTIC`. The adapter owns explicit training, saving, and loading methods;
+its `execute()` method performs inference only. It accepts no request
+configuration, seed, or trials.
 
 `algorithm.py` owns features, offline training, and matchup probabilities;
-`adapter.py` translates probabilities into the shared result contract.
+`adapter.py` owns model setup and translates probabilities into the shared result
+contract. Scripts use the package API without handling XGBoost classifiers directly.
+
+## Model setup
+
+```python
+from gamesense_prediction.models.xgboost import XGBoostModel
+
+# Separate offline training operation; returns an adapter and writes the model.
+adapter = XGBoostModel.train_and_save(historical_context, "model.json")
+
+# Load once during setup, then register the adapter with the shared runner.
+adapter = XGBoostModel.from_file("model.json")
+```
+
+`train_and_save()` accepts `.json` and `.ubj` output paths. `from_file()` loads the
+classifier without training; subsequent executions reuse it without reading the
+file again. `XGBoostModel.train(context)` creates a trained adapter in memory for
+the local demo, and `XGBoostModel(classifier)` still accepts an existing classifier.
+Training uses the supplied snapshot; the model package does not fetch sports data.
+
+Paths must come from trusted setup configuration. Callers choose the artifact
+location and provide an existing parent directory. Automatic storage management,
+artifact metadata/version selection, and FastAPI startup wiring remain future work.
 
 ## Inputs and training
 
