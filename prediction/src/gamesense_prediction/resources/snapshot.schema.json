@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/internal/snapshot.schema.json",
+  "title": "Internal development snapshot",
+  "description": "Trusted local snapshot format; not a frontend API contract.",
+  "type": "object",
+  "properties": {
+    "dataSnapshotId": { "$ref": "https://gamesense.dev/schemas/common.schema.json#/$defs/nonBlankString" },
+    "season": { "type": "integer", "minimum": 1 },
+    "provenance": { "type": "object", "minProperties": 1 },
+    "teams": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "https://gamesense.dev/schemas/team.schema.json" }
+    },
+    "games": {
+      "type": "array",
+      "items": { "$ref": "https://gamesense.dev/schemas/game.schema.json" }
+    },
+    "ratings": {
+      "type": "object",
+      "propertyNames": { "type": "string", "format": "uuid" },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": { "$ref": "https://gamesense.dev/schemas/common.schema.json#/$defs/nonBlankString" },
+        "additionalProperties": { "type": "number" }
+      }
+    }
+  },
+  "required": ["dataSnapshotId", "season", "provenance", "teams", "games"],
+  "additionalProperties": false
+}

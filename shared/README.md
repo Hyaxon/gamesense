@@ -14,6 +14,7 @@ This directory contains JSON contracts used by the Java backend, Python predicti
 
 - [API schema documentation](../docs/architecture/api-schemas.md): payload inventory, field tables, examples, validation rules, and deferred features.
 - [Prediction model interface](../docs/architecture/prediction-model-interface.md): standard invocation, registration, configuration, execution metadata, and model examples.
+- [Prediction model development](../docs/architecture/prediction-model-development.md): Python framework implementation and model author guide.
 - [Shared domain models](../docs/architecture/domain-model.md): application concepts and relationships.
 - [Shared domain conventions ADR](../docs/decisions/2026-09-22-shared-domain-model-conventions.md): naming, identifiers, timestamps, and enums.
 - [Proposed API contracts ADR](../docs/decisions/2026-10-01-core-api-contracts.md): custom matchups, result context, nullability, and other contract decisions.
@@ -38,7 +39,7 @@ CI runs this validator on pull requests targeting `main` and pushes to `main`, w
 
 Additional deterministic, stochastic, and simulation execution examples live in [examples/model-execution/](examples/model-execution/). The validator checks their schemas and representative request/result relationships; these checks do not implement service runtime validation.
 
-Schema validation does not establish whether referenced teams exist, a winner belongs to the matchup, or simulation probabilities sum to one. These semantic rules are documented in the API schema documentation and require service-level validation when the services are implemented.
+Schema validation does not establish whether referenced teams exist, a winner belongs to the matchup, or simulation probabilities sum to one. The Python prediction runner implements common service-level checks; model authors remain responsible for their required inputs and algorithm correctness.
 
 ## Updating a contract
 

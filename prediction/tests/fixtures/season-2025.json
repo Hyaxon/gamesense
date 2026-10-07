@@ -1,0 +1,42 @@
+{
+  "dataSnapshotId": "development-2025",
+  "season": 2025,
+  "provenance": {
+    "source": "Synthetic development fixture; not actual college football results",
+    "createdAt": "2025-09-01T00:00:00Z",
+    "notes": ["Date-only source games use a documented ordering time, not a known kickoff"]
+  },
+  "teams": [
+    { "id": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a", "name": "Fixture Home", "conference": "Fixture Conference" },
+    { "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d", "name": "Fixture Away", "conference": "Fixture Conference" },
+    { "id": "c3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a", "name": "Fixture New Team", "conference": "Fixture Conference" }
+  ],
+  "games": [
+    {
+      "id": "d3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a", "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-31T00:00:00Z", "status": "FINAL", "isNeutralSite": true,
+      "homeScore": 14, "awayScore": 14, "winnerTeamId": null
+    },
+    {
+      "id": "e3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a", "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-29T00:00:00Z", "status": "FINAL", "isNeutralSite": false,
+      "homeScore": 28, "awayScore": 21,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "f3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a", "season": 2025,
+      "homeTeamId": "c3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-09-05T00:00:00Z", "status": "SCHEDULED",
+      "isNeutralSite": false, "homeScore": null, "awayScore": null, "winnerTeamId": null
+    }
+  ],
+  "ratings": {
+    "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a": { "fixture_rating": 1520 },
+    "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d": { "fixture_rating": 1480 }
+  }
+}

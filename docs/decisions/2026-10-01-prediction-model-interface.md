@@ -27,4 +27,4 @@ Model authors can normalize native outputs behind one interface. The backend con
 
 Structural JSON Schema validation cannot check snapshot availability, registry capability membership, winner membership, configuration semantics, or numerical consistency between nested outputs. The runner must perform these checks before returning results. The validation tooling checks representative examples, not an implemented service.
 
-An immutable data-context provider, registry, execution helpers, DTOs, model implementations, and integration remain future implementation work. Team review is required before accepting the interface. Training, aggregation, performance comparison, and persistence are outside this decision.
+The [Python framework](../architecture/prediction-model-development.md) implements immutable data contexts and snapshot providers, a registry, execution helpers, DTOs, and common validation. Model algorithms, production ingestion, and Java integration remain future work. Team review is required before accepting the interface. Training, aggregation, performance comparison, and persistence are outside this decision.

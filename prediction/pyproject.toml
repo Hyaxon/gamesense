@@ -11,6 +11,8 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi",
     "uvicorn",
+    "jsonschema[format]==4.26.0",
+    "referencing>=0.37.0,<0.38",
 ]
 
 [project.optional-dependencies]
@@ -23,6 +25,12 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["gamesense_prediction*"]
+
+[tool.setuptools.package-data]
+gamesense_prediction = ["resources/*.json", "models/*/README.md", "models/*/*.schema.json"]
+
+[tool.setuptools.data-files]
+"share/gamesense/schemas" = ["../shared/schemas/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
