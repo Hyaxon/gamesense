@@ -6,13 +6,13 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ModelExecutionResult(
-        String status,
-        String executionId,
-        ModelDescriptor model,
-        Matchup matchup,
-        SinglePredictionResult prediction,
-        ExecutionMetadata metadata,
-        SimulationOutcome simulation,
-        List<SupportingScore> supportingScores,
-        Map<String, Object> configuration) {
-}
+    String status,
+    String executionId,
+    ModelDescriptor model,
+    Matchup matchup,
+    SinglePredictionResult prediction,
+    ExecutionMetadata metadata,
+    SimulationOutcome simulation,
+    List<SupportingScore> supportingScores,
+    Map<String, Object> configuration)
+    implements PredictionServiceResponse {}

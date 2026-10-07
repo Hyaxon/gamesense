@@ -5,12 +5,11 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ModelExecutionRequest(
-                String executionId,
-                String modelId,
-                Matchup matchup,
-                String dataSnapshotId,
-                ExecutionKind executionKind,
-                Map<String, Object> configuration,
-                Integer seed,
-                Integer trials) {
-}
+    String executionId,
+    String modelId,
+    Matchup matchup,
+    String dataSnapshotId,
+    ExecutionKind executionKind,
+    Map<String, Object> configuration,
+    Integer seed,
+    Integer trials) {}
