@@ -305,6 +305,15 @@ python src/examples/run_xgboost.py
 python -m pytest tests/models/test_xgboost.py
 ```
 
+The [Monte Carlo package](src/gamesense_prediction/models/monte_carlo/README.md)
+predicts a matchup by simulating it many times from each team's own scoring
+history. Run it from `prediction/`:
+
+```sh
+python examples/run_monte_carlo.py --trials 10000 --seed 42
+python -m pytest tests/models/test_monte_carlo.py
+```
+
 The [Elo package](src/gamesense_prediction/models/elo/README.md) is a deterministic
 rating model. It replays completed games in date order to build team ratings, then
 converts the rating gap into a win probability. Run it from `prediction/`:
