@@ -284,7 +284,6 @@ fair-coin simulation baseline. Run it from `prediction/`:
 ```sh
 python examples/run_coin_flip.py --trials 1000 --seed 42
 python -m pytest tests/models/test_coin_flip.py
-
 ```
 
 The [Bradley-Terry package](src/gamesense_prediction/models/bradley_terry/README.md)
@@ -322,7 +321,6 @@ converts the rating gap into a win probability. Run it from `prediction/`:
 python examples/run_elo.py
 python -m pytest tests/models/test_elo.py
 ```
-
 
 Other algorithms are implemented in their own tickets.
 
