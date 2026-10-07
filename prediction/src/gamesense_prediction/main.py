@@ -6,15 +6,15 @@ to verify that the prediction service is running correctly.
 
 import os
 from pathlib import Path
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 
-from .runner import PredictionRunner
-from .contracts import PredictionMethod
-from .contracts import ErrorCode, ErrorResponse, ModelExecutionError
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
+from .contracts import ErrorCode, ErrorResponse, ModelExecutionError, PredictionMethod
 from .models.coin_flip import CoinFlipModel
 from .registry import ModelRegistration, ModelRegistry
+from .runner import PredictionRunner
 from .snapshots import FileSnapshotProvider
 
 ERROR_HTTP_STATUS = {
