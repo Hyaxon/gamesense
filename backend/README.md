@@ -28,7 +28,7 @@ backend/
 
 ### `src/main/java/com/ou/capstone/`
 
-Main source code directory. `controller/` holds the HTTP endpoints; future application logic (services, models, data access, etc.) should be added under their own sub-packages here as it's implemented.
+Main source code directory. `controller/` holds HTTP endpoints. `prediction/` contains the Python HTTP client, execution-contract records, strict response decoder, and Spring configuration.
 
 ### `src/test/java/com/ou/capstone/`
 
@@ -165,7 +165,30 @@ Used to verify that the backend service is available.
 
 ## Architecture
 
-> Add a short explanation here describing how this Java backend communicates with the frontend and the Python prediction service as those integrations are implemented.
+Spring creates one reusable `PythonPredictionClient`. Backend services inject it
+and call `execute(ModelExecutionRequest)` to send a single execution to Python's
+`POST /model-executions` endpoint. The client returns a validated
+`PredictionServiceResponse` or throws a transport/invalid-response exception.
+Starting the backend alone does not send a prediction request.
+
+| Environment variable | Default |
+| --- | --- |
+| `PREDICTION_SERVICE_BASE_URL` | `http://127.0.0.1:8000` |
+| `PREDICTION_SERVICE_CONNECT_TIMEOUT` | `2s` |
+| `PREDICTION_SERVICE_REQUEST_TIMEOUT` | `30s` |
+
+Set overrides in the backend process environment. Spring binds them through
+`prediction.service.*` in `application.properties`. The URL must be an HTTP(S)
+root address; timeouts must be positive.
+
+The existing root-package `Prediction` and `PredictionValidator` are prototype
+types, not the Java/Python wire contract. Model selection, game-data retrieval,
+aggregation, and a frontend prediction controller are not part of this client.
+
+See the [connectivity guide](../docs/architecture/prediction-service-connectivity.md)
+for constructor injection, response/error handling, automated coverage, and a
+reproducible local Java-to-Python smoke check. Client tests run a local test server
+and do not require Python.
 
 ---
 

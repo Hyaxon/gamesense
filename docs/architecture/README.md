@@ -24,3 +24,5 @@ GameSense/
 - [Prediction Model Interface](prediction-model-interface.md): common model invocation, capabilities, configuration, results, and errors.
 - [Prediction Model Development](prediction-model-development.md): implemented Python framework, model package structure, data access, registration, and testing.
 - [Prediction Model Walkthrough](prediction-model-walkthrough.md): step-by-step implementation instructions using the working coin-flip model and an Elo adapter example.
+
+- [Prediction Service Connectivity](prediction-service-connectivity.md): Java client, Python HTTP boundary, configuration, errors, and local testing.

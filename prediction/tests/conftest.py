@@ -1,10 +1,16 @@
-"""Fixtures for exercising the framework independently of any real model."""
+"""Shared fixtures for prediction framework and HTTP endpoint tests.
+
+Provides synthetic snapshots, an example adapter, and prepared execution requests.
+The HTTP client fixture sets the snapshot environment variable before importing
+the application so endpoint tests do not require production data.
+"""
 
 import importlib.util
 import json
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 
 from gamesense_prediction.contracts import (
     ExecutionKind,
@@ -21,6 +27,19 @@ HOME = "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
 AWAY = "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"
 NEW_TEAM = "c3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
 UNKNOWN = "a3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+
+
+@pytest.fixture
+def http_client(monkeypatch):
+    # Startup reads configuration at import time; configure before importing app.
+    monkeypatch.setenv(
+        "PREDICTION_SNAPSHOT_PATH",
+        str(Path(__file__).parent / "fixtures/season-2025.json"),
+    )
+    from gamesense_prediction.main import app
+
+    with TestClient(app) as client:
+        yield client
 
 
 @pytest.fixture

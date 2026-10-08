@@ -109,11 +109,34 @@ Editable mode allows changes under `src/` to be used without reinstalling the pa
 
 ## Running the Prediction Service
 
-Start the development server:
+From `prediction/`, with the virtual environment activated, set the required
+`PREDICTION_SNAPSHOT_PATH` environment variable and start the development server.
+For local testing, use the synthetic snapshot included with the tests:
+
+### macOS / Linux
 
 ```bash
+export PREDICTION_SNAPSHOT_PATH=tests/fixtures/season-2025.json
 uvicorn gamesense_prediction.main:app --reload
 ```
+
+### Windows PowerShell
+
+```powershell
+$env:PREDICTION_SNAPSHOT_PATH = "tests/fixtures/season-2025.json"
+uvicorn gamesense_prediction.main:app --reload
+```
+
+`PREDICTION_SNAPSHOT_PATH` points to one snapshot JSON file. Relative paths resolve
+from the process's working directory; an absolute path can also be used. There is
+no default: an unset variable, unreadable file, or invalid snapshot prevents startup.
+The application reads the environment directly; it does not automatically load a
+`.env` file.
+
+The file is loaded and validated once when the application initializes. Restart
+the service after changing the snapshot file or environment setting. The fixture
+contains synthetic season-2025 data with snapshot ID `development-2025`.
+Prediction requests reference that ID in `dataSnapshotId`, not the file path.
 
 By default, the service will run at:
 
@@ -306,8 +329,18 @@ immutable season snapshot. Adapters own calculations and convert their outputs
 into the common success/error contract. The registry resolves model IDs and
 configured defaults per method; consumers do not parse algorithm-specific outputs.
 
-The FastAPI application currently exposes only the health endpoint. Prediction
-endpoints, Java transport, and production data ingestion remain separate work.
+The FastAPI application exposes `GET /health` and `POST /model-executions`. At
+initialization it registers the coin-flip adapter and loads the snapshot specified
+by `PREDICTION_SNAPSHOT_PATH`. The execution endpoint delegates to the shared runner.
+The Java backend now provides a configurable client for this endpoint. Production
+data ingestion and request orchestration remain separate work.
+
+See the [connectivity guide](../docs/architecture/prediction-service-connectivity.md)
+for the HTTP status/error policy, Java client usage, and a local end-to-end check.
+The endpoint returns 200 for success, 400 for validation errors, 404 for unavailable
+models/data, 422 for unsupported execution controls, and 500 for execution/internal
+failures. Model errors retain execution/model IDs; malformed request bodies receive
+a plain shared error object.
 
 ---
 
