@@ -4,6 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Complete successful execution envelope returned by Python.
+ *
+ * <p>Preserves model identity, prediction, provenance, and optional diagnostics and configuration.
+ * Simulation outcomes are present only for simulation executions.
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ModelExecutionResult(
     String status,

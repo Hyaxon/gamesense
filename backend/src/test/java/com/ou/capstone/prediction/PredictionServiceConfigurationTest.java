@@ -13,6 +13,10 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.ResourcePropertySource;
 
+/**
+ * Verifies Spring property binding, environment-style overrides, reusable client creation, and
+ * startup rejection of invalid or missing connection settings.
+ */
 class PredictionServiceConfigurationTest {
   private final ApplicationContextRunner runner =
       new ApplicationContextRunner()

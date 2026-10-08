@@ -14,6 +14,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+/**
+ * Exercises response decoding with shared fixtures and deliberately invalid payloads.
+ *
+ * <p>Covers response shape, strict field types, request correlation, and cross-field invariants.
+ */
 class PredictionResponseDecoderTest {
   private final ObjectMapper mapper = new ObjectMapper();
   private final PredictionResponseDecoder decoder = new PredictionResponseDecoder();

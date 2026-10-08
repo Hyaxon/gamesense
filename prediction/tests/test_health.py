@@ -1,7 +1,7 @@
-"""Tests for the prediction service health endpoint.
+"""Verify the health endpoint using the configured synthetic-snapshot HTTP fixture.
 
-Verifies that the service responds successfully and returns the expected
-health-check response.
+Checks that the application still reports its expected health response alongside
+the model execution endpoint.
 """
 
 

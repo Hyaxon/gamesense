@@ -1,7 +1,8 @@
-"""Application entry point for the GameSense prediction service.
+"""HTTP entry point for the GameSense prediction service.
 
-Creates the FastAPI application and exposes basic service endpoints used
-to verify that the prediction service is running correctly.
+Registers the coin-flip model and loads the environment-configured snapshot at
+initialization. Exposes health and single-model execution endpoints, delegates
+predictions to the shared runner, and maps errors to shared JSON and HTTP statuses.
 """
 
 import os

@@ -332,7 +332,15 @@ configured defaults per method; consumers do not parse algorithm-specific output
 The FastAPI application exposes `GET /health` and `POST /model-executions`. At
 initialization it registers the coin-flip adapter and loads the snapshot specified
 by `PREDICTION_SNAPSHOT_PATH`. The execution endpoint delegates to the shared runner.
-Java transport and production data ingestion remain separate work.
+The Java backend now provides a configurable client for this endpoint. Production
+data ingestion and request orchestration remain separate work.
+
+See the [connectivity guide](../docs/architecture/prediction-service-connectivity.md)
+for the HTTP status/error policy, Java client usage, and a local end-to-end check.
+The endpoint returns 200 for success, 400 for validation errors, 404 for unavailable
+models/data, 422 for unsupported execution controls, and 500 for execution/internal
+failures. Model errors retain execution/model IDs; malformed request bodies receive
+a plain shared error object.
 
 ---
 
