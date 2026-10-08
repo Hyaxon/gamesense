@@ -10,6 +10,13 @@ import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
+/**
+ * Synchronous HTTP client for one prepared model execution request.
+ *
+ * <p>Serializes requests, posts to Python's /model-executions endpoint, validates HTTP metadata,
+ * and delegates body validation to the decoder. Model selection and orchestration belong to
+ * callers.
+ */
 public class PythonPredictionClient {
   private final PredictionResponseDecoder decoder = new PredictionResponseDecoder();
 

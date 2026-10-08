@@ -11,6 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+/**
+ * Verifies request serialization against shared deterministic, stochastic, and simulation fixtures,
+ * including omission of absent optional fields.
+ */
 class ModelExecutionRequestTest {
 
   private final ObjectMapper objectMapper = new ObjectMapper();

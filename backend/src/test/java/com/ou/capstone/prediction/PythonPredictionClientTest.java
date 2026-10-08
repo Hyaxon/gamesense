@@ -22,6 +22,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+/**
+ * Tests the real Java HTTP client against an isolated loopback server without requiring Python.
+ *
+ * <p>Covers request serialization, response handling, transport failures, and thread interruption.
+ */
 class PythonPredictionClientTest {
   private final ObjectMapper mapper = new ObjectMapper();
   private final AtomicReference<CapturedRequest> captured = new AtomicReference<>();

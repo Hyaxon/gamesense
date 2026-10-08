@@ -1,6 +1,9 @@
 package com.ou.capstone.prediction;
 
-/** A response that must not be exposed downstream as a trustworthy prediction. */
+/**
+ * Signals an untrustworthy service response, including invalid JSON, contract violations,
+ * correlation mismatches, or inconsistent HTTP metadata.
+ */
 public final class InvalidPredictionResponseException extends RuntimeException {
   public InvalidPredictionResponseException(String message) {
     super(message);

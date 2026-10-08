@@ -8,6 +8,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Binds and validates prediction.service settings and creates the reusable Spring client bean.
+ *
+ * <p>Service location and positive connection/request timeouts are supplied through configuration.
+ */
 @Configuration
 @EnableConfigurationProperties(PredictionServiceConfiguration.Properties.class)
 public class PredictionServiceConfiguration {
