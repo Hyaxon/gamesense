@@ -1,5 +1,11 @@
 package com.ou.capstone.prediction;
 
+/**
+ * Algorithm families supported by the shared contract, rather than installed model identifiers.
+ *
+ * <p>Multiple registered models can share a family; availability is controlled by Python's
+ * registry.
+ */
 public enum PredictionMethod {
   ELO,
   GLICKO2,

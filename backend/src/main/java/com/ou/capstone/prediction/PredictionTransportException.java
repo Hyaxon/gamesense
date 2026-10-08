@@ -1,5 +1,10 @@
 package com.ou.capstone.prediction;
 
+/**
+ * Distinguishes request timeout, communication failure, and interruption from Python model errors.
+ *
+ * <p>Retains the underlying cause for diagnostics and exposes a reason for caller failure handling.
+ */
 public final class PredictionTransportException extends RuntimeException {
   public enum Reason {
     TIMEOUT,

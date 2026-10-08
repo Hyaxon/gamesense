@@ -1,4 +1,8 @@
-"""Exercise the HTTP boundary with real runner execution and synthetic data."""
+"""HTTP contract tests using the real runner and a synthetic snapshot.
+
+Covers seeded coin-flip success, invalid bodies and configuration, unavailable
+models/data, unsupported execution modes, and safe execution failure responses.
+"""
 
 import pytest
 

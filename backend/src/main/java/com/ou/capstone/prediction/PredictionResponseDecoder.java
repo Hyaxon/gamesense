@@ -13,7 +13,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-/** Strict wire validation followed by typed decoding; no model-specific logic. */
+/**
+ * Strictly validates Python response JSON before constructing typed backend records.
+ *
+ * <p>Distinguishes success, correlated model errors, and plain boundary errors; checks shared
+ * structural and semantic rules against the original request. Model-specific validation remains
+ * owned by Python.
+ */
 public final class PredictionResponseDecoder {
   private static final double TOLERANCE = 0.000001;
   private final JsonMapper mapper =

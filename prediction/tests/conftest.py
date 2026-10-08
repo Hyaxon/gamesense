@@ -1,4 +1,9 @@
-"""Fixtures for exercising the framework independently of any real model."""
+"""Shared fixtures for prediction framework and HTTP endpoint tests.
+
+Provides synthetic snapshots, an example adapter, and prepared execution requests.
+The HTTP client fixture sets the snapshot environment variable before importing
+the application so endpoint tests do not require production data.
+"""
 
 import importlib.util
 import json
