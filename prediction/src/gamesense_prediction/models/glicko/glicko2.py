@@ -74,41 +74,9 @@ def inactive_rd_update(phi, v):
     # Update the rating deviation (phi) after inactivity
     return (phi ** 2 + v) ** 0.5
 
-<<<<<<< Updated upstream
 def probability_prediction(team_a, team_b):
     # Use all the data from two teams to predict the outcome of a game. Return percentage of Team A winning over Team B.
     mu_a = rating_to_mu(team_a.rating)
     mu_b = rating_to_mu(team_b.rating)
     phi_b = rd_to_phi(team_b.rd)
     return expected_score(mu_a, mu_b, phi_b)
-=======
-def prediction(team_a, team_b):
-
-    # Convert ratings
-    mu_a = rating_to_mu(team_a.rating)
-    mu_b = rating_to_mu(team_b.rating)
-
-    phi_b = rd_to_phi(team_b.rd)
-
-    # Win probability
-    probability_a = expected_score(
-        mu_a,
-        mu_b,
-        phi_b
-    )
-
-    probability_b = 1 - probability_a
-
-    # Rating uncertainty
-    rd_confidence = 1 - (
-        (team_a.rd + team_b.rd) / (2 * 350)
-    )
-
-    # How decisive is the prediction?
-    decisiveness = abs(probability_a - 0.5) * 2
-
-    # Combine the two
-    confidence = rd_confidence * decisiveness
-
-    return probability_a, probability_b, confidence
->>>>>>> Stashed changes

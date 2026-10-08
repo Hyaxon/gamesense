@@ -247,17 +247,5 @@ if(team_b_name not in teams):
 team_a = teams[team_a_name]
 team_b = teams[team_b_name]
 
-<<<<<<< Updated upstream
 prediction = probability_prediction(team_a, team_b)
 print(f"Probability of {team_a.name} winning over {team_b.name}: {prediction:.2%}")
-=======
-prob_a, prob_b, confidence = prediction(team_a, team_b)
-print("==============================")
-print(f"{team_a.name} vs {team_b.name}")
-print(f"Probability {team_a.name} wins: {prob_a:.2%}")
-print(f"Probability {team_b.name} wins: {prob_b:.2%}")
-print(f"Predicted winner: {team_a.name if prob_a > prob_b else team_b.name}")
-print(f"Confidence in this prediction: {confidence:.2%}")
-
-# Output: GLICKO-2, predicted winner, confidence
->>>>>>> Stashed changes
