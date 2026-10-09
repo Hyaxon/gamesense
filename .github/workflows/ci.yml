@@ -41,7 +41,7 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install schema validation dependencies
         run: python -m pip install -r shared/validation/requirements.txt
@@ -65,7 +65,7 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install prediction service and development dependencies
         run: python -m pip install -e ".[dev]"
@@ -95,7 +95,7 @@ jobs:
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
           cache: maven
 
       - name: Make Maven Wrapper executable
@@ -117,7 +117,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version: "24"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
@@ -145,7 +145,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version: "24"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
