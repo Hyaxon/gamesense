@@ -64,16 +64,12 @@ def build_ratings(games) -> dict:
 def predict_matchup(
     home_team_id: str,
     away_team_id: str,
-    home_games,  # plain list of the home team's games
-    away_games,  # plain list of the away team's games
+    games,  # every completed game in snapshot
     is_neutral_site: bool,
 ) -> EloResult:
 
-    # make sue that games are only counted once
-    all_games = {g.id: g for g in [*home_games, *away_games]}.values()
-
     # replay everything to get current ratings, then pull out our two teams
-    team_elo = build_ratings(all_games)
+    team_elo = build_ratings(games)
     home_elo = team_elo[home_team_id]
     away_elo = team_elo[away_team_id]
 

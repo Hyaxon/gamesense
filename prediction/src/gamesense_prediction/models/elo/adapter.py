@@ -14,7 +14,7 @@ from ...execution_helpers import ExecutionTimer, execution_error
 from .algorithm import predict_matchup
 
 
-# adeterministic model that rates teams by replaying their games
+# a deterministic model that rates teams by replaying their games
 class EloModel:
     # model_id is used to find model, display_name just for UI
     def get_descriptor(self) -> ModelDescriptor:
@@ -44,16 +44,15 @@ class EloModel:
         matchup = request.matchup
 
         # each call gives back the games that team played this season
-        home_games = context.require_history(matchup.home_team_id)
-        away_games = context.require_history(matchup.away_team_id)
+        context.require_history(matchup.home_team_id)
+        context.require_history(matchup.away_team_id)
 
         # algorthm.py does the calculations
         result = predict_matchup(
             matchup.home_team_id,
             matchup.away_team_id,
-            home_games,
-            away_games,
-            matchup.is_neutral_site,  # TODO: confirm field name
+            context.completed_games,
+            matchup.is_neutral_site,
         )
 
         # pick the more likely winner, with a tie going to home

@@ -54,16 +54,32 @@ def test_games_are_replayed_in_date_order():
     assert build_ratings([late, early]) == build_ratings([early, late])
 
 
-# check that games are only counted once
-def test_duplicate_game_is_counted_once():
-    g = game("g1", 1, "OU", "TEXAS", 30, 20)
-    result = predict_matchup("OU", "TEXAS", [g], [g], True)
-    single = build_ratings([g])
-    assert result.home_elo == pytest.approx(single["OU"])
+# check that a team's rating uses games between other teams too
+def test_ratings_use_the_whole_schedule():
+    games = [
+        game("g1", 1, "A", "B", 30, 20),
+        game("g2", 2, "B", "C", 30, 20),
+    ]
+    result = predict_matchup("A", "C", games, True)
+
+    # C lost to B, so C should be rated below 1500
+    assert result.away_elo < 1500
+
+
+# check that a team's rating doesn't change depending on who it plays
+def test_team_rating_does_not_change_with_the_matchup():
+    games = [
+        game("g1", 1, "A", "B", 30, 20),
+        game("g2", 2, "B", "C", 30, 20),
+    ]
+    vs_b = predict_matchup("A", "B", games, True)
+    vs_c = predict_matchup("A", "C", games, True)
+
+    assert vs_b.home_elo == vs_c.home_elo
 
 
 # make sure probability doesn't exceed 1
 def test_probabilities_add_to_one():
     g = game("g1", 1, "OU", "TEXAS", 30, 20)
-    result = predict_matchup("OU", "TEXAS", [g], [g], False)
+    result = predict_matchup("OU", "TEXAS", [g], False)
     assert result.home_win_probability + result.away_probability == pytest.approx(1)

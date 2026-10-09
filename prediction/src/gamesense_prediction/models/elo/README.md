@@ -1,7 +1,7 @@
 # Elo Model
 
 Predicts a matchup from team ratings. Every team starts at 1500, and the model
-replays each team's completed games in date order, moving ratings up or down
+replays completed games in the snapshot, moving ratings up or down
 based on how surprising each result was. The final rating gap becomes the home
 team's win probability.
 
@@ -51,7 +51,5 @@ diagnostic use.
 
 ## Known simplifications
 
-- Ratings come only from the two teams' own game histories, so each opponent
-  starts at 1500 and the opponents' strength is not reflected.
 - No offseason regression toward the mean; each season snapshot starts fresh.
 - Constants are fixed in code and not configurable per request.
