@@ -9,7 +9,7 @@ from ...contracts import (
     SupportingScore,
 )
 from ...execution_helpers import ExecutionTimer, execution_error
-from .algorithm import predict_matchup
+from . import algorithm
 
 
 class Glicko2Model:
@@ -19,7 +19,7 @@ class Glicko2Model:
         return ModelDescriptor(
             model_id="glicko2",
             display_name="Glicko-2",
-            method=PredictionMethod.GLICKO,
+            method=PredictionMethod.GLICKO2,
             version="1.0.0",
             supported_execution_kinds=(ExecutionKind.DETERMINISTIC,),
         )
@@ -41,7 +41,7 @@ class Glicko2Model:
         home_games = context.require_history(matchup.home_team_id)
         away_games = context.require_history(matchup.away_team_id)
 
-        result = predict_matchup(
+        result = algorithm.predict_matchup(
             matchup.home_team_id,
             matchup.away_team_id,
             home_games,
