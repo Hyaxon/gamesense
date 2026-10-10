@@ -235,7 +235,7 @@ def main(schedule_path: Path | None = None) -> None:
             f"Vol: {team.volatility:.5f}"
         )
     """
-    #print("==============================")
+    # print("==============================")
 
     # And then get a prediction.
     # Read two teams and get a prediction.
@@ -253,7 +253,7 @@ def main(schedule_path: Path | None = None) -> None:
     team_b = teams[team_b_name]
 
     probability_prediction(team_a, team_b)
-    #print(f"Probability of {team_a.name} winning over {team_b.name}: {prediction:.2%}")
+    # print(f"Probability of {team_a.name} winning over {team_b.name}: {prediction:.2%}")
 
 
 if __name__ == "__main__":
