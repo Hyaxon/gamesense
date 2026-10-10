@@ -252,7 +252,7 @@ def main(schedule_path: Path | None = None) -> None:
     team_a = teams[team_a_name]
     team_b = teams[team_b_name]
 
-    prediction = probability_prediction(team_a, team_b)
+    probability_prediction(team_a, team_b)
     #print(f"Probability of {team_a.name} winning over {team_b.name}: {prediction:.2%}")
 
 
