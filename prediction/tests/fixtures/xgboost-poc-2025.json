@@ -1,0 +1,316 @@
+{
+  "dataSnapshotId": "xgboost-poc-2025",
+  "season": 2025,
+  "provenance": {
+    "source": "Synthetic XGBoost smoke-test fixture; not actual results or an accuracy benchmark",
+    "createdAt": "2025-09-01T00:00:00Z"
+  },
+  "teams": [
+    {
+      "id": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "name": "Fixture Home",
+      "conference": "Fixture Conference"
+    },
+    {
+      "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "name": "Fixture Away",
+      "conference": "Fixture Conference"
+    },
+    {
+      "id": "c3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "name": "Fixture New Team",
+      "conference": "Fixture Conference"
+    }
+  ],
+  "games": [
+    {
+      "id": "743a13de-52a7-4917-98bd-1397d4f69865",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-01T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": true,
+      "homeScore": 28,
+      "awayScore": 14,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "3f46636e-836a-4764-85a3-ef23822f5266",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-02T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 15,
+      "awayScore": 29,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "9af64cce-60bc-4757-b49a-c40de5a2ea39",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-03T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 30,
+      "awayScore": 16,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "20a2a09e-f007-4764-87fe-5570c439637a",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-04T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": true,
+      "homeScore": 17,
+      "awayScore": 31,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "92956cc6-c115-49c9-8a1c-321c48baaf91",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-05T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 32,
+      "awayScore": 18,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "6186457e-c0eb-4723-beab-fcedc98a362d",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-06T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 21,
+      "awayScore": 21,
+      "winnerTeamId": null
+    },
+    {
+      "id": "34cc2457-9e90-4a63-9744-7347de0b5639",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-07T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": true,
+      "homeScore": 34,
+      "awayScore": 15,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "0843216d-999e-4424-a55e-4416f0e632d1",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-08T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 16,
+      "awayScore": 28,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "2049b324-cf2c-46a1-a085-dcb519dd5e06",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-09T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 29,
+      "awayScore": 17,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "d99ba982-efbc-4015-92fd-b22f409966c3",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-10T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": true,
+      "homeScore": 30,
+      "awayScore": 18,
+      "winnerTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"
+    },
+    {
+      "id": "b6606dba-753d-49a3-9a50-513ccf885ad2",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-11T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 31,
+      "awayScore": 14,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "cec16e0d-2dc5-4787-a59e-c74ecdb9b8be",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-12T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 15,
+      "awayScore": 32,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "f36457ce-6466-4597-8a6a-539e699e0d05",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-13T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": true,
+      "homeScore": 33,
+      "awayScore": 16,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "d09629de-3724-4c67-bcf2-79bcb7e91139",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-14T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 17,
+      "awayScore": 34,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "4ea285df-54f2-4068-8a9e-51f94a635e78",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-15T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 28,
+      "awayScore": 18,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "d89ab6e2-095b-42ff-9e4b-fe7565c11794",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-16T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": true,
+      "homeScore": 14,
+      "awayScore": 29,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "fcd887a3-0787-4be1-adf4-24588907218f",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-17T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 30,
+      "awayScore": 15,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "d8a6f198-b14b-42dc-b147-1a9de9fe9e3b",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-18T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 16,
+      "awayScore": 31,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "09ce1ae5-ad97-48eb-95b8-620d89fd439f",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-19T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": true,
+      "homeScore": 17,
+      "awayScore": 32,
+      "winnerTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"
+    },
+    {
+      "id": "a85691d4-097b-4b7d-813a-afd336024a63",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-20T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 18,
+      "awayScore": 33,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "a57a5973-5a53-4d5f-9965-d1cb4fe84b13",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-21T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 34,
+      "awayScore": 14,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "a0e10d29-1cc7-4124-b0fd-e2a42eea35c2",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-22T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": true,
+      "homeScore": 15,
+      "awayScore": 28,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "260ceb6d-9a8c-4fe7-8a33-725094436956",
+      "season": 2025,
+      "homeTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "awayTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "scheduledAt": "2025-08-23T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 29,
+      "awayScore": 16,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    },
+    {
+      "id": "c1ec9548-e33c-4634-bcd3-2ed0f7a948c3",
+      "season": 2025,
+      "homeTeamId": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "awayTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+      "scheduledAt": "2025-08-24T00:00:00Z",
+      "status": "FINAL",
+      "isNeutralSite": false,
+      "homeScore": 17,
+      "awayScore": 30,
+      "winnerTeamId": "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a"
+    }
+  ],
+  "ratings": {}
+}
