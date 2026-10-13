@@ -1,7 +1,7 @@
 package com.ou.capstone.prediction.orchestration;
 
-import com.ou.capstone.prediction.ErrorResponse;
-import com.ou.capstone.prediction.ModelExecutionResult;
+import com.ou.capstone.prediction.contract.ErrorResponse;
+import com.ou.capstone.prediction.contract.ModelExecutionResult;
 import java.util.Objects;
 
 /**

@@ -1,9 +1,10 @@
 package com.ou.capstone.prediction.orchestration;
 
 import com.ou.capstone.data.PredictionSnapshot;
+import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.Team;
-import com.ou.capstone.prediction.ExecutionKind;
-import com.ou.capstone.prediction.Matchup;
+import com.ou.capstone.prediction.contract.ExecutionKind;
+import com.ou.capstone.prediction.contract.Matchup;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +16,23 @@ import java.util.UUID;
  * configuration, and required history. This validator does not normalize source data.
  */
 public final class PredictionInputValidator {
+
+  /** Checks a scheduled-game identifier before lookup. */
+  public void validateGameId(String gameId) {
+    validateIdentifier(gameId, "/gameId");
+  }
+
+  /** Checks supplied game identity and location without deriving or changing its status. */
+  public void validateGame(String gameId, Game game) {
+    validateGameId(gameId);
+    require(game != null, "/gameId", "Required game is unavailable.");
+    require(
+        gameId.equals(game.id()), "/gameId", "Resolved game does not match the requested game.");
+    require(
+        game.isNeutralSite() != null, "/matchup/isNeutralSite", "Game location must be explicit.");
+    validateMatchup(
+        new Matchup(game.homeTeamId(), game.awayTeamId(), game.season(), game.isNeutralSite()));
+  }
 
   /** Checks matchup identity and season before data retrieval. */
   public void validateMatchup(Matchup matchup) {
@@ -31,6 +49,13 @@ public final class PredictionInputValidator {
   /** Checks that resolved canonical records match the requested matchup and season. */
   public void validateData(
       Matchup matchup, PredictionSnapshot snapshot, Team homeTeam, Team awayTeam) {
+    validateSnapshot(matchup, snapshot);
+    validateTeam(homeTeam, matchup.homeTeamId(), "/matchup/homeTeamId");
+    validateTeam(awayTeam, matchup.awayTeamId(), "/matchup/awayTeamId");
+  }
+
+  /** Checks the selected snapshot before using it for team lookups. */
+  public void validateSnapshot(Matchup matchup, PredictionSnapshot snapshot) {
     validateMatchup(matchup);
     require(snapshot != null, "/dataSnapshotId", "Prediction snapshot is unavailable.");
     require(
@@ -41,8 +66,6 @@ public final class PredictionInputValidator {
         snapshot.season() == matchup.season(),
         "/dataSnapshotId",
         "Snapshot season must match the matchup season.");
-    validateTeam(homeTeam, matchup.homeTeamId(), "/matchup/homeTeamId");
-    validateTeam(awayTeam, matchup.awayTeamId(), "/matchup/awayTeamId");
   }
 
   /** Checks every configured execution, including common seed and trial restrictions. */

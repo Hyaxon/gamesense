@@ -1,6 +1,6 @@
 package com.ou.capstone.prediction.orchestration;
 
-import com.ou.capstone.prediction.ExecutionKind;
+import com.ou.capstone.prediction.contract.ExecutionKind;
 import java.util.Map;
 
 /**

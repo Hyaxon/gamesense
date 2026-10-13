@@ -1,7 +1,7 @@
 package com.ou.capstone.prediction.orchestration;
 
 import com.ou.capstone.data.PredictionSnapshot;
-import com.ou.capstone.prediction.Matchup;
+import com.ou.capstone.prediction.contract.Matchup;
 import java.util.List;
 import java.util.Objects;
 
