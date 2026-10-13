@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ou.capstone.prediction.ErrorCode;
-import com.ou.capstone.prediction.ErrorDetail;
-import com.ou.capstone.prediction.ErrorResponse;
-import com.ou.capstone.prediction.ModelExecutionRequest;
-import com.ou.capstone.prediction.ModelExecutionResult;
-import com.ou.capstone.prediction.PredictionResponseDecoder;
+import com.ou.capstone.prediction.client.PredictionResponseDecoder;
+import com.ou.capstone.prediction.contract.ErrorCode;
+import com.ou.capstone.prediction.contract.ErrorDetail;
+import com.ou.capstone.prediction.contract.ErrorResponse;
+import com.ou.capstone.prediction.contract.ModelExecutionRequest;
+import com.ou.capstone.prediction.contract.ModelExecutionResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;

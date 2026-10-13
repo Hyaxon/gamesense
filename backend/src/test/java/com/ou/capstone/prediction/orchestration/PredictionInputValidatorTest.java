@@ -6,8 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.ou.capstone.data.PredictionSnapshot;
 import com.ou.capstone.domain.Team;
-import com.ou.capstone.prediction.ExecutionKind;
-import com.ou.capstone.prediction.Matchup;
+import com.ou.capstone.prediction.contract.ExecutionKind;
+import com.ou.capstone.prediction.contract.Matchup;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;

@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ou.capstone.data.PredictionSnapshot;
-import com.ou.capstone.prediction.Matchup;
-import com.ou.capstone.prediction.ModelExecutionRequest;
-import com.ou.capstone.prediction.ModelExecutionResult;
-import com.ou.capstone.prediction.PredictionResponseDecoder;
+import com.ou.capstone.prediction.client.PredictionResponseDecoder;
+import com.ou.capstone.prediction.contract.Matchup;
+import com.ou.capstone.prediction.contract.ModelExecutionRequest;
+import com.ou.capstone.prediction.contract.ModelExecutionResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
