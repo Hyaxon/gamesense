@@ -24,43 +24,12 @@ def main(schedule_path: Path | None = None) -> None:
     with schedule_path.open("r", encoding="utf-8") as file:
         data = json.load(file)
 
-    """
-    # Test: Print names of all teams
-    for team in data["teams"]:
-        print(team["name"])
-    """
-
-    """
-    # Test: Print all games for each team
-    for game in team["schedule"]:
-        if game["outcome"] != "":
-            print(
-                game["timestamp"],
-                game["opponent"],
-                game["outcome"]
-            )
-    """
-
-    """
-    # Test: Create a team and print its initial Glicko-2 ratings
-    team = Team("Michigan State Spartans")
-    print(team.name)
-    print(team.rating)
-    print(team.rd)
-    print(team.volatility)
-    """
-
     teams = {}
 
     # Make a team object for each team in the JSON data
     for team in data["teams"]:
         name = team["name"]
         teams[name] = Team(name)
-        """
-        # Used in test below
-        team_obj = Team(team["name"])
-        team_objects.append(team_obj)
-        """
     print("Loaded", len(teams), "teams")
 
     # Some schedule sources use short opponent codes instead of the canonical
@@ -97,16 +66,6 @@ def main(schedule_path: Path | None = None) -> None:
                 f"Unknown team '{name}'. Add it to team_aliases with its "
                 "canonical schedule name."
             ) from error
-
-    """
-    # Test: Print all created team objects and their initial Glicko-2 ratings
-    for team_obj in team_objects:
-        print(team_obj.name)
-        print(team_obj.rating)
-        print(team_obj.rd)
-        print(team_obj.volatility)
-        print()  # Add a blank line between teams for readability
-    """
 
     games = []
     set_games = set()
@@ -220,21 +179,6 @@ def main(schedule_path: Path | None = None) -> None:
             team.rating = mu_to_rating(updated_mu)
             team.rd = phi_to_rd(updated_phi)
 
-    """
-    print("\n==============================")
-    print("FINAL RANKINGS")
-    print("==============================")
-
-    for rank, team in enumerate(rankings, start=1):
-
-        print(
-            f"{rank:3}. "
-            f"{team.name:40} "
-            f"Rating: {team.rating:8.2f} "
-            f"RD: {team.rd:7.2f} "
-            f"Vol: {team.volatility:.5f}"
-        )
-    """
     # print("==============================")
 
     # And then get a prediction.
