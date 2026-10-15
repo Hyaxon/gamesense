@@ -38,14 +38,10 @@ class Glicko2Model:
 
         matchup = request.matchup
 
-        home_games = context.require_history(matchup.home_team_id)
-        away_games = context.require_history(matchup.away_team_id)
-
         result = algorithm.predict_matchup(
             matchup.home_team_id,
             matchup.away_team_id,
-            home_games,
-            away_games,
+            context,
             matchup.is_neutral_site,
         )
 

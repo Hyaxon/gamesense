@@ -1,204 +1,111 @@
 # Xander Meadows
-"""Standalone schedule demonstration; imports do not load data or prompt."""
+"""Glicko-2 matchup calculations over a validated prediction context."""
 
-import json
-from collections import defaultdict
-from pathlib import Path
+from dataclasses import dataclass
 
+from ...context import PredictionContext
 from .glicko2 import (
     Team,
-    inactive_rd_update,
+    expected_score,
     mu_to_rating,
-    phi_to_rd,
-    probability_prediction,
     rating_to_mu,
     rd_to_phi,
     update_rating,
 )
 
+HOME_ADVANTAGE_RATING_POINTS = 50.0
+RATING_SCALE = 173.7178
 
-def main(schedule_path: Path | None = None) -> None:
-    """Run the interactive demo explicitly, outside model execution."""
-    if schedule_path is None:
-        schedule_path = Path(__file__).resolve().parents[4] / "Schedule.json"
-    with schedule_path.open("r", encoding="utf-8") as file:
-        data = json.load(file)
 
-    teams = {}
+@dataclass(frozen=True)
+class MatchupPrediction:
+    home_win_probability: float
+    away_probability: float
+    home_elo: float
+    away_elo: float
 
-    # Make a team object for each team in the JSON data
-    for team in data["teams"]:
-        name = team["name"]
-        teams[name] = Team(name)
-    print("Loaded", len(teams), "teams")
 
-    # Some schedule sources use short opponent codes instead of the canonical
-    # names used in the teams list.
-    team_aliases = {
-        "WEBB": "Gardner-Webb Runnin' Bulldogs",
-    }
-
-    missing_opponents = sorted(
-        {
-            game["opponent"]
-            for team in data["teams"]
-            for game in team["schedule"]
-            if game["outcome"] != ""
-            and game["opponent"]
-            and team_aliases.get(game["opponent"], game["opponent"]) not in teams
-        }
+def _update_team(
+    team: Team,
+    opponent: Team,
+    result: float,
+    *,
+    team_home_advantage: float = 0.0,
+    opponent_home_advantage: float = 0.0,
+) -> None:
+    """Update one team using both teams' ratings from before the game."""
+    team_mu = rating_to_mu(team.rating) + team_home_advantage / RATING_SCALE
+    opponent_mu = rating_to_mu(opponent.rating) + opponent_home_advantage / RATING_SCALE
+    updated_mu, updated_phi = update_rating(
+        team_mu,
+        rd_to_phi(team.rd),
+        [opponent_mu],
+        [rd_to_phi(opponent.rd)],
+        [result],
     )
-    for opponent_name in missing_opponents:
-        teams[opponent_name] = Team(opponent_name)
+    team.rating = mu_to_rating(updated_mu - team_home_advantage / RATING_SCALE)
+    team.rd = updated_phi * RATING_SCALE
 
-    if missing_opponents:
-        print(
-            "Warning: initialized opponents without team records:",
-            ", ".join(missing_opponents),
+
+def predict_matchup(
+    home_team_id: str,
+    away_team_id: str,
+    context: PredictionContext,
+    is_neutral_site: bool,
+) -> MatchupPrediction:
+    """Rate all completed context games, then predict the requested matchup.
+
+    The context is immutable, so ratings are kept in private ``Team`` objects.
+    Historical games use their own neutral-site flag; the requested matchup
+    uses ``is_neutral_site``.
+    """
+    context.require_team(home_team_id)
+    context.require_team(away_team_id)
+    teams = {team_id: Team() for team_id in context.teams}
+
+    for game in context.completed_games:
+        home = teams[game.home_team_id]
+        away = teams[game.away_team_id]
+        home_rating, home_rd = home.rating, home.rd
+        away_rating, away_rd = away.rating, away.rd
+
+        if game.winner_team_id == game.home_team_id:
+            home_result = 1.0
+        elif game.winner_team_id == game.away_team_id:
+            home_result = 0.0
+        else:
+            home_result = 0.5
+
+        advantage = (
+            0.0 if game.is_neutral_site else HOME_ADVANTAGE_RATING_POINTS
+        )
+        home_snapshot = Team()
+        home_snapshot.rating, home_snapshot.rd = home_rating, home_rd
+        away_snapshot = Team()
+        away_snapshot.rating, away_snapshot.rd = away_rating, away_rd
+        _update_team(
+            home,
+            away_snapshot,
+            home_result,
+            team_home_advantage=advantage,
+        )
+        _update_team(
+            away,
+            home_snapshot,
+            1.0 - home_result,
+            opponent_home_advantage=advantage,
         )
 
-    def get_team(name):
-        canonical_name = team_aliases.get(name, name)
-        try:
-            return teams[canonical_name]
-        except KeyError as error:
-            raise KeyError(
-                f"Unknown team '{name}'. Add it to team_aliases with its "
-                "canonical schedule name."
-            ) from error
+    home = teams[home_team_id]
+    away = teams[away_team_id]
+    advantage = 0.0 if is_neutral_site else HOME_ADVANTAGE_RATING_POINTS
+    home_mu = rating_to_mu(home.rating) + advantage / RATING_SCALE
+    away_mu = rating_to_mu(away.rating)
+    home_probability = expected_score(home_mu, away_mu, rd_to_phi(away.rd))
 
-    games = []
-    set_games = set()
-
-    # Collecting a list of all unique games
-    for team in data["teams"]:
-        team_name = team["name"]
-        for game in team["schedule"]:
-            # Skip days without games ("")
-            if game["outcome"] != "":
-                opponent_name = game["opponent"]
-                timestamp = game["timestamp"]
-                game_tuple = (timestamp, tuple(sorted([team_name, opponent_name])))
-                if game_tuple not in set_games:
-                    set_games.add(game_tuple)
-                    if game["outcome"] == "W":
-                        result = 1
-                    elif game["outcome"] == "L":
-                        result = 0
-                    else:
-                        result = 0.5
-                    games.append(
-                        {
-                            "timestamp": timestamp,
-                            "team_a": team_name,
-                            "team_b": opponent_name,
-                            "result": result,
-                        }
-                    )
-
-    print("Loaded", len(games), "unique games")
-
-    games_by_month = defaultdict(list)
-
-    for game in games:
-        month, day, year = game["timestamp"].split("/")
-        month_key = f"{year}-{month}"
-        games_by_month[month_key].append(game)
-
-    months = sorted(games_by_month.keys())
-
-    print("\nRating periods:")
-
-    for month in months:
-        print(month, ":", len(games_by_month[month]), "games")
-
-    print("==============================")
-
-    # Now to process each month
-    for month in months:
-        monthly_games = games_by_month[month]
-
-        print("PROCESSING", month)
-
-        # Store each team's games for this rating period.
-        team_games = defaultdict(list)
-
-        for game in monthly_games:
-            team_a = get_team(game["team_a"])
-            team_b = get_team(game["team_b"])
-
-            result_a = game["result"]
-            result_b = 1.0 - result_a
-
-            # Team A's perspective
-            team_games[team_a.name].append({"opponent": team_b, "result": result_a})
-
-            # Team B's perspective
-            team_games[team_b.name].append({"opponent": team_a, "result": result_b})
-
-        # Snapshot ratings so all updates in a rating period use the same
-        # pre-period opponent values.
-        period_ratings = {
-            team_name: (team.rating, team.rd) for team_name, team in teams.items()
-        }
-
-        # --------------------------------------------------
-        # UPDATE EVERY TEAM
-        # --------------------------------------------------
-
-        for team_name, team in teams.items():
-            games_this_month = team_games[team_name]
-
-            if len(games_this_month) == 0:
-                # No games this month = increase RD due to inactivity.
-                team.rd = phi_to_rd(inactive_rd_update(rd_to_phi(team.rd), 0))
-                continue
-
-            results = []
-            for game in games_this_month:
-                opponent = game["opponent"]
-                opponent_rating, opponent_rd = period_ratings[opponent.name]
-
-                results.append(
-                    {
-                        "opponent_mu": rating_to_mu(opponent_rating),
-                        "opponent_phi": rd_to_phi(opponent_rd),
-                        "result": game["result"],
-                    }
-                )
-
-            # Glicko-2 update. Assign the returned values; update_rating does
-            # not mutate the Team object itself.
-            updated_mu, updated_phi = update_rating(
-                rating_to_mu(team.rating),
-                rd_to_phi(team.rd),
-                [r["opponent_mu"] for r in results],
-                [r["opponent_phi"] for r in results],
-                [r["result"] for r in results],
-            )
-            team.rating = mu_to_rating(updated_mu)
-            team.rd = phi_to_rd(updated_phi)
-
-    # print("==============================")
-
-    # And then get a prediction.
-    # Read two teams and get a prediction.
-    team_a_name = input("Enter the name of Team A: ")
-    if team_a_name not in teams:
-        print("Team A name is invalid.")
-        exit()
-
-    team_b_name = input("Enter the name of Team B: ")
-    if team_b_name not in teams:
-        print("Team B name is invalid.")
-        exit()
-
-    team_a = teams[team_a_name]
-    team_b = teams[team_b_name]
-
-    probability_prediction(team_a, team_b)
-    # print(f"Probability of {team_a.name} winning over {team_b.name}: {prediction:.2%}")
-
-
-if __name__ == "__main__":
-    main()
+    return MatchupPrediction(
+        home_win_probability=home_probability,
+        away_probability=1.0 - home_probability,
+        home_elo=home.rating,
+        away_elo=away.rating,
+    )

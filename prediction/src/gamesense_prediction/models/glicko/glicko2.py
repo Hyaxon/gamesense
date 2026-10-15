@@ -6,9 +6,7 @@ import math
 
 # Team object
 class Team:
-    def __init__(self, name):
-        self.name = name  # Team name
-
+    def __init__(self):
         self.rating = 1500  # Initial Glicko-2 rating
         self.rd = 350  # Initial rating deviation
         self.volatility = 0.06  # Initial volatility
