@@ -3,6 +3,7 @@ package com.ou.capstone.datasource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
@@ -55,7 +56,7 @@ public class CurrentSeasonClient {
     } catch (IOException e) {
       throw new DataSourceException("Data source returned invalid JSON", e);
     }
-    if (feed == null || feed.teams() == null || feed.teams().isEmpty()) {
+    if (feed == null || CollectionUtils.isEmpty(feed.teams())) {
       throw new DataSourceException("Data source response contained no teams");
     }
     return feed;
