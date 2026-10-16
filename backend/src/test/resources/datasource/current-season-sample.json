@@ -1,0 +1,20 @@
+{
+  "teams": [
+    {
+      "name": "Abilene Christian Wildcats",
+      "league": "United Athletic Conference",
+      "schedule": [
+        {"index": "0", "timestamp": "08/28/2026", "dayOfWeek": "Fri", "location": "BYE", "opponent": "", "outcome": "", "pointsScored": "", "pointsAllowed": ""},
+        {"index": "0", "timestamp": "08/29/2026", "dayOfWeek": "Sat", "location": "@", "opponent": "Lamar Cardinals", "outcome": "L", "pointsScored": "14", "pointsAllowed": "21"},
+        {"index": "0", "timestamp": "10/17/2026", "dayOfWeek": "Sat", "location": "@", "opponent": "North Alabama Lions", "outcome": "-", "pointsScored": "0", "pointsAllowed": "0"}
+      ]
+    },
+    {
+      "name": "Alabama A&M Bulldogs",
+      "league": "Southwestern Athletic Conference",
+      "schedule": [
+        {"index": "0", "timestamp": "08/29/2026", "dayOfWeek": "Sat", "location": "N", "opponent": "Howard Bison", "outcome": "L", "pointsScored": "24", "pointsAllowed": "31"}
+      ]
+    }
+  ]
+}
