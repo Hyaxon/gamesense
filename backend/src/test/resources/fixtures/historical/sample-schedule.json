@@ -1,0 +1,14 @@
+{"teams":[
+ {"name":"Michigan State Spartans","league":"Big Ten Conference","schedule":[
+  {"index":"0","timestamp":"08/28/2025","dayOfWeek":"Thu","location":"BYE","opponent":"","outcome":"","pointsScored":"","pointsAllowed":""},
+  {"index":"0","timestamp":"08/29/2025","dayOfWeek":"Fri","location":"vs.","opponent":"Western Michigan Broncos","outcome":"W","pointsScored":"23","pointsAllowed":"6"},
+  {"index":"0","timestamp":"10/25/2025","dayOfWeek":"Sat","location":"vs.","opponent":"Michigan Wolverines","outcome":"L","pointsScored":"20","pointsAllowed":"31"}
+ ]},
+ {"name":"Michigan Wolverines","league":"Big Ten Conference","schedule":[
+  {"index":"0","timestamp":"10/25/2025","dayOfWeek":"Sat","location":"@","opponent":"Michigan State Spartans","outcome":"W","pointsScored":"31","pointsAllowed":"20"}
+ ]},
+ {"name":"Washington State Cougars","league":"Pacific 12 Conference","schedule":[
+  {"index":"0","timestamp":"08/29/2025","dayOfWeek":"Fri","location":"BYE","opponent":"","outcome":"","pointsScored":"","pointsAllowed":""},
+  {"index":"0","timestamp":"12/22/2025","dayOfWeek":"Mon","location":"N","opponent":"Utah State Aggies","outcome":"W","pointsScored":"34","pointsAllowed":"21"}
+ ]}
+]}
