@@ -2,6 +2,121 @@
 
 Java/Spring Boot service that sits between the frontend and the prediction service, handling application requests and coordinating application logic.
 
+## Schedule ingestion and HTTP prediction demo
+
+This demo reads the root `Schedule.json`, runs the existing historical ingestion
+pipeline, and serves all six implemented models through the Java backend. Use `curl` to list
+games and submit a model/game request. It requires JDK 17, the Python environment
+described in [prediction/README.md](../prediction/README.md), and `jq` for the CLI
+examples below.
+
+The flow is:
+
+```text
+Schedule.json -> HistoricalIngestionService -> canonical teams and games
+  -> dataset.json (Java provider and candidate games)
+  -> snapshot.json (Python's completed-game history)
+
+curl -> POST /demo/predictions -> PredictionOrchestrator
+     -> PythonPredictionClient -> Python POST /model-executions -> selected model -> JSON
+```
+
+The source contains completed 2025-season games, including January 2026. For a
+historical replay, choose a cutoff: only games strictly before that UTC date go
+into model history. Games on or after the cutoff can be requested. Their actual
+scores stay out of the Python snapshot and prediction request. All predictions
+use this fixed cutoff; history does not advance when requesting a later game.
+
+**1. Ingest once.** From `backend/`, with JDK 17 selected (on macOS:
+`export JAVA_HOME=$(/usr/libexec/java_home -v 17)`):
+
+```sh
+./mvnw --batch-mode compile dependency:build-classpath -Dmdep.outputFile=target/smoke-classpath.txt
+"$JAVA_HOME/bin/java" --class-path "target/classes:$(cat target/smoke-classpath.txt)" \
+  examples/IngestSchedule.java ../Schedule.json target/schedule-demo 2025 2025-11-15
+```
+
+The command prints counts and writes `target/schedule-demo/dataset.json` and
+`target/schedule-demo/snapshot.json`. Skipped-row reasons are in `dataset.json`.
+The existing ingester ignores BYE rows, deduplicates opposing schedule entries,
+maps locations/scores, and skips opponents absent from the feed. There is no
+database. The generated files retain the canonical IDs between processes.
+
+The output directory must be new. To re-ingest, choose a new directory and point
+both services to it, then restart them. Re-ingestion generates new team, game,
+and snapshot IDs. Do not run `mvn clean` during the demo: artifacts are in `target/`.
+
+**2. Start the Python demo service.** In a second terminal, from `prediction/`:
+
+```sh
+PREDICTION_SNAPSHOT_PATH=../backend/target/schedule-demo/snapshot.json \
+  .venv/bin/python -m uvicorn schedule_demo_app:app --app-dir examples \
+  --host 127.0.0.1 --port 8000
+```
+
+This example registers `elo-v1`, `glicko2`, `bradley-terry-v1`, and `xgboost-v1`
+for deterministic execution, plus `monte-carlo-v1` and `coin-flip-v1` for simulation.
+Simulations use 10,000 trials and seed 42. XGBoost trains once during startup on
+the exported pre-cutoff snapshot, then reuses that model for requests. The snapshot
+must contain enough prior history to train on both home wins and away wins.
+The usual
+`gamesense_prediction.main:app` still registers only coin flip; use the demo
+entry point above. Coin flip is a random baseline; the other models use history.
+See [demo.md](../demo.md) for direct commands for every model.
+
+**3. Start the Java backend.** In the first terminal, from `backend/`:
+
+```sh
+./mvnw spring-boot:run -Dspring-boot.run.profiles=schedule-demo \
+  -Dspring-boot.run.arguments="--server.address=127.0.0.1 --demo.data-directory=target/schedule-demo"
+```
+
+The demo controller creates an orchestrator for the requested model using the
+Spring-managed HTTP client and file-backed demo provider. Leave the global
+`prediction.orchestration.enabled` setting at its default `false`; the demo
+supplies its own model selection per request. These endpoints exist only when
+the `schedule-demo` profile is active.
+
+**4. Request a prediction from the CLI.** In another terminal:
+
+```sh
+curl -fsS http://127.0.0.1:8080/demo/models | jq
+curl -fsS 'http://127.0.0.1:8080/demo/games?team=Oklahoma%20Sooners' | jq
+
+GAME_ID=$(curl -fsS 'http://127.0.0.1:8080/demo/games?team=Oklahoma%20Sooners' | jq -er '.[0].gameId')
+
+jq -n --arg gameId "$GAME_ID" '{modelId: "elo-v1", gameId: $gameId}' \
+  | curl -sS --fail-with-body http://127.0.0.1:8080/demo/predictions \
+      -H 'Content-Type: application/json' --data-binary @- \
+  | jq
+```
+
+The request body is `{"modelId":"elo-v1","gameId":"<ID from /demo/games>"}`.
+Omit the `team` query to list all candidate games; filtering uses an exact team
+name, ignoring case. The response includes readable team/winner names, the
+history cutoff, and the complete orchestration result. Winner confidence is at
+`execution.outcomes[0].result.prediction.confidence`; model-specific diagnostics are in
+`execution.outcomes[0].result.supportingScores` when provided. For a compact terminal display,
+pipe the prediction response through:
+
+```sh
+jq '{homeTeam, awayTeam, predictedWinner, historyBefore,
+     confidence: .execution.outcomes[0].result.prediction.confidence}'
+```
+
+Use any `modelId` from `GET /demo/models` with the same game; no re-ingestion is
+needed to switch models. The model list also shows execution kind, seed, and trials.
+Invalid input returns HTTP 400,
+an unavailable/earlier game returns 404, and a Python/model failure returns 502
+with the categorized outcome in the response. Check both services' `/health`
+endpoints if a request fails. Stop both servers with Ctrl+C after the demo.
+
+The history cutoff prevents later scores from entering this replay; this is not
+an accuracy evaluation. The existing Elo implementation rebuilds ratings from
+the two selected teams' combined histories, rather than the whole league's
+history. Glicko-2 processes all completed snapshot games. The demo preserves
+these model behaviors. Restart both services after changing model registration.
+
 ---
 
 ## Project Structure
@@ -18,6 +133,8 @@ backend/
 │   │   │       ├── controller/       # HTTP endpoints
 │   │   │       ├── domain/           # Canonical Team, Game, Venue, GameStatus
 │   │   │       ├── data/             # Canonical provider and snapshot reference
+│   │   │       ├── ingestion/historical/ # Schedule JSON reader and canonical mappers
+│   │   │       ├── demo/             # Opt-in schedule provider and HTTP demo
 │   │   │       └── prediction/
 │   │   │           ├── contract/     # Shared execution records and enums
 │   │   │           ├── client/       # Python HTTP transport, decoder, configuration
