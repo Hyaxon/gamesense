@@ -1,0 +1,126 @@
+.upcoming-games-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.game-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.game-card:hover {
+  border-color: #b0b0b0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.game-card.selected {
+  border: 2px solid #2563eb;
+  background-color: #f8fafc;
+}
+
+.game-datetime {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.matchup-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.team-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.team-info.away-team {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.team-logo {
+  width: 36px;
+  height: 36px;
+  background: #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.team-rank {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.team-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.team-record {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-left: 6px;
+}
+
+.at-symbol {
+  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.prediction-summary {
+  background: #f1f5f9;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #334155;
+  margin-top: 8px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.details-btn {
+  background: #e2e8f0;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+}
+
+.game-card.selected .details-btn {
+  background: #2563eb;
+  color: #ffffff;
+}
