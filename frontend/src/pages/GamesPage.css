@@ -1,36 +1,332 @@
+/* 1. Page Layout */
 .games-page {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--layout-spacing);
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px 32px;
+  box-sizing: border-box;
 }
 
 .games-page-title {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: var(--color-text, #1a202c);
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  align-items: start;
+  box-sizing: border-box;
 }
 
 .games-region {
+  width: 100%;
   min-width: 0;
-  min-height: clamp(20rem, 60dvh, 44rem);
-  padding: var(--layout-spacing);
-  border: 2px solid var(--color-border);
-  border-radius: 24px;
-  background: var(--color-surface);
+  padding: 24px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 20px;
+  background: var(--color-surface, #ffffff);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
 }
 
-@media (max-width: 64rem) {
-  .games-page {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.game-breakdown.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-muted, #718096);
+  text-align: center;
+  font-size: 1.1rem;
+}
 
-  .games-region {
-    min-height: 14rem;
-    border-radius: 18px;
-  }
+/* 2. Game Breakdown Header & Banner */
+.game-breakdown-region {
+  padding: 20px 16px;
+}
+
+.game-breakdown-region .game-hero-banner {
+  width: 100%;
+  height: 110px;
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%),
+    url('https://www.ou.edu/content/dam/news/images/articles/2025/august/OU%20Football%20Stadium.jpg')
+      center/cover no-repeat;
+  margin-bottom: 8px;
+}
+
+.game-breakdown-region .breakdown-meta-header {
+  margin-bottom: 4px;
+  padding: 0 4px;
+  text-align: left;
+}
+
+.game-breakdown-region .breakdown-eyebrow {
+  color: #e53e3e;
+  font-weight: 700;
+  font-size: 0.75rem;
+  display: block;
+  margin-bottom: 1px;
+}
+
+.game-breakdown-region .breakdown-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0 0 2px 0;
+  color: #1a202c;
+  letter-spacing: -0.02em;
+}
+
+.game-breakdown-region .breakdown-sub-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  color: #a0aec0;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.game-breakdown-region .game-datetime,
+.game-breakdown-region .stadium-location {
+  color: #a0aec0;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* 3. Matchup Header Card */
+.game-breakdown-region .matchup-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 6px 0;
+  border-bottom: 1px solid #edf2f7;
+  margin-bottom: 8px;
+}
+
+.game-breakdown-region .team-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-breakdown-region .logo-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.game-breakdown-region .team-rank {
+  color: #a0aec0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.game-breakdown-region .team-logo-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f7fafc;
+  border: 1px solid #cbd5e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.75rem;
+  color: #1a202c;
+}
+
+.game-breakdown-region .team-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #1a202c;
+  text-align: center;
+}
+
+.game-breakdown-region .team-record {
+  color: #a0aec0;
+  font-size: 0.7rem;
+}
+
+.game-breakdown-region .vs-divider-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-breakdown-region .vs-line {
+  height: 20px;
+  width: 1px;
+  background-color: #e2e8f0;
+}
+
+.game-breakdown-region .vs-text {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #1a202c;
+}
+
+/* 4. Model Predictions Section & Rows */
+.game-breakdown-region .model-predictions-section {
+  margin-top: 2px;
+  padding: 0 4px;
+}
+
+.game-breakdown-region .model-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.game-breakdown-region .model-section-header h4,
+.game-breakdown-region .model-accuracy-label {
+  font-size: 0.75rem;
+  color: #718096;
+  font-weight: 600;
+}
+
+.game-breakdown-region .info-icon {
+  font-size: 0.7rem;
+  color: #a0aec0;
+  margin-left: 2px;
+}
+
+.game-breakdown-region .prediction-scroll-container {
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.game-breakdown-region .prediction-scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.game-breakdown-region .prediction-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.game-breakdown-region .prediction-scroll-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.game-breakdown-region .prediction-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 80px;
+  align-items: center;
+  padding: 4px 8px;
+  gap: 12px;
+  border-bottom: 1px solid #edf2f7;
+  max-width: 100%;
+}
+
+.game-breakdown-region .prediction-row.presage-card {
+  background-color: #fff5f5;
+  border: 1px solid #feb2b2;
+  border-radius: 8px;
+  padding: 5px 8px;
+  margin-bottom: 4px;
+}
+
+.game-breakdown-region .model-info-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.game-breakdown-region .model-icon {
+  font-size: 2rem;
+  min-width: 20px;
+  text-align: center;
+}
+
+.game-breakdown-region .model-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.game-breakdown-region .model-name {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #1a202c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.game-breakdown-region .model-desc {
+  font-size: 0.65rem;
+  color: #a0aec0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.game-breakdown-region .prediction-val-col {
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-align: left;
+  padding-left: 8px;
+}
+
+/* 5. Accuracy low, medium, high  */
+.game-breakdown-region .accuracy-tier-col {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.game-breakdown-region .tier-badge {
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.tier-high {
+  background-color: #e6fffa;
+  color: #234e52;
+}
+
+.tier-medium {
+  background-color: #fffaf0;
+  color: #744210;
+}
+
+.tier-low {
+  background-color: #fff5f5;
+  color: #9b2c2c;
+}
+
+.games-list-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.games-list-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.games-list-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.games-list-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
 }
