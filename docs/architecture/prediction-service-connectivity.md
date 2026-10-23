@@ -152,7 +152,8 @@ Paste these statements into JShell:
 
 ```java
 import com.ou.capstone.BackendApplication;
-import com.ou.capstone.prediction.*;
+import com.ou.capstone.prediction.client.*;
+import com.ou.capstone.prediction.contract.*;
 import java.util.UUID;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
