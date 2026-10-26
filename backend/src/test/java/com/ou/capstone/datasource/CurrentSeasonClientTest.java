@@ -142,7 +142,23 @@ class CurrentSeasonClientTest {
 
     assertThatThrownBy(() -> client.fetchCurrentSeason())
         .isInstanceOf(DataSourceException.class)
-        .hasMessageContaining("invalid JSON");
+        .hasMessageContaining("invalid JSON")
+        .hasMessageContaining("status 200")
+        .hasMessageContaining("text/html")
+        .hasMessageContaining("<html>Service down</html>");
+  }
+
+  @Test
+  void fetchSkipsHtmlStubInFrontOfJson() {
+    String body =
+        "<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\">"
+            + "<title>OU Capstone API</title> </head> </html>\n"
+            + "{\"teams\":[{\"name\":\"Air Force Falcons\",\"league\":\"Mountain West Conference\"}]}";
+    server
+        .expect(requestTo(SOURCE_URL))
+        .andRespond(withSuccess(body, MediaType.parseMediaType("text/html;charset=ISO-8859-1")));
+
+    assertThat(client.fetchCurrentSeason().teams().get(0).name()).isEqualTo("Air Force Falcons");
   }
 
   @Test

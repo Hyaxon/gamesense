@@ -115,6 +115,7 @@ Expected response:
 The backend can pull current-season college football data from the mentor-provided feed. `CurrentSeasonClient.fetchCurrentSeason()` calls the feed and returns a `SourceFeed` (teams, each with a day-by-day schedule).
 
 * The `Source*` records mirror the external format exactly (every value is a raw string). They are intentionally separate from our internal domain models; converting them into `Team`/`Game` is the job of the normalization step, not this client.
+* The feed puts a small HTML stub in front of the JSON, so the client skips ahead to the first `{` before parsing.
 * Any failure (unreachable, timeout, non-2xx status, invalid JSON, or a response with no teams) is thrown as a `DataSourceException`, so callers can handle it without the app crashing.
 * This is **not exposed through an HTTP endpoint yet**. It is only available to other backend code until a feature needs it.
 
