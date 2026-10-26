@@ -15,6 +15,16 @@ backend/
 │   │   ├── java/
 │   │   │   └── com/ou/capstone/
 │   │   │       ├── BackendApplication.java
+│   │   │       ├── controller/
+│   │   │       │   └── HealthController.java
+│   │   │       └── datasource/
+│   │   │           ├── CurrentSeasonClient.java
+│   │   │           ├── CurrentSeasonProperties.java
+│   │   │           ├── DataSourceConfig.java
+│   │   │           ├── DataSourceException.java
+│   │   │           ├── SourceFeed.java
+│   │   │           ├── SourceScheduleEntry.java
+│   │   │           └── SourceTeam.java
 │   │   │       ├── controller/       # HTTP endpoints
 │   │   │       ├── domain/           # Canonical Team, Game, Venue, GameStatus
 │   │   │       ├── data/             # Canonical provider and snapshot reference
@@ -29,6 +39,10 @@ backend/
 │       └── java/
 │           └── com/ou/capstone/
 │               ├── controller/
+│               │   └── HealthControllerTest.java
+│               └── datasource/
+│                   ├── CurrentSeasonClientTest.java
+│                   └── CurrentSeasonPropertiesTest.java
 │               └── prediction/      # Mirrors production subpackages
 ```
 
@@ -107,6 +121,31 @@ Expected response:
   "status": "ok"
 }
 ```
+
+---
+
+## Current-Season Data Source
+
+The backend can pull current-season college football data from the mentor-provided feed. `CurrentSeasonClient.fetchCurrentSeason()` calls the feed and returns a `SourceFeed` (teams, each with a day-by-day schedule).
+
+* The `Source*` records mirror the external format exactly (every value is a raw string). They are intentionally separate from our internal domain models; converting them into `Team`/`Game` is the job of the normalization step, not this client.
+* The feed puts a small HTML stub in front of the JSON, so the client skips ahead to the first `{` before parsing.
+* Any failure (unreachable, timeout, non-2xx status, invalid JSON, or a response with no teams) is thrown as a `DataSourceException`, so callers can handle it without the app crashing.
+* This is **not exposed through an HTTP endpoint yet**. It is only available to other backend code until a feature needs it.
+
+### Configuration
+
+Set in `src/main/resources/application.properties`:
+
+| Property | Default | Description |
+| --- | --- | --- |
+| `gamesense.datasource.url` | mentor feed URL | Full URL of the data source. |
+| `gamesense.datasource.connect-timeout` | `5s` | How long to wait to connect. |
+| `gamesense.datasource.read-timeout` | `30s` | How long to wait for the response. The feed is large, so keep this generous. |
+
+Override without changing code using environment variables, e.g. `GAMESENSE_DATASOURCE_URL=http://localhost:9000/feed ./mvnw spring-boot:run`.
+
+Tests use `MockRestServiceServer` and a fixture in `src/test/resources/datasource/`, so they never call the live source.
 
 ---
 
