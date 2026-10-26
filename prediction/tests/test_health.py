@@ -1,18 +1,12 @@
-"""Tests for the prediction service health endpoint.
+"""Verify the health endpoint using the configured synthetic-snapshot HTTP fixture.
 
-Verifies that the service responds successfully and returns the expected
-health-check response.
+Checks that the application still reports its expected health response alongside
+the model execution endpoint.
 """
 
-from fastapi.testclient import TestClient
 
-from gamesense_prediction.main import app
-
-client = TestClient(app)
-
-
-def test_health_check():
-    response = client.get("/health")
+def test_health_check(http_client):
+    response = http_client.get("/health")
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}

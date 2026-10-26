@@ -1,4 +1,4 @@
-package com.ou.capstone;
+package com.ou.capstone.prediction.prototype;
 
 // Simple data holder for one prediction result. Using a record here since this is just data
 public record Prediction(
