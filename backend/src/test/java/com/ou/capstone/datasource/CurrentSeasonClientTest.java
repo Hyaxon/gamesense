@@ -9,6 +9,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ou.capstone.ingestion.source.SourceFeed;
+import com.ou.capstone.ingestion.source.SourceScheduleEntry;
+import com.ou.capstone.ingestion.source.SourceTeam;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;

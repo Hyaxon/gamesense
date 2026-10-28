@@ -10,40 +10,25 @@ Java/Spring Boot service that sits between the frontend and the prediction servi
 backend/
 ├── pom.xml
 ├── mvnw / mvnw.cmd
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/ou/capstone/
-│   │   │       ├── BackendApplication.java
-│   │   │       ├── controller/
-│   │   │       │   └── HealthController.java
-│   │   │       └── datasource/
-│   │   │           ├── CurrentSeasonClient.java
-│   │   │           ├── CurrentSeasonProperties.java
-│   │   │           ├── DataSourceConfig.java
-│   │   │           ├── DataSourceException.java
-│   │   │           ├── SourceFeed.java
-│   │   │           ├── SourceScheduleEntry.java
-│   │   │           └── SourceTeam.java
-│   │   │       ├── controller/       # HTTP endpoints
-│   │   │       ├── domain/           # Canonical Team, Game, Venue, GameStatus
-│   │   │       ├── data/             # Canonical provider and snapshot reference
-│   │   │       └── prediction/
-│   │   │           ├── contract/     # Shared execution records and enums
-│   │   │           ├── client/       # Python HTTP transport, decoder, configuration
-│   │   │           ├── orchestration/ # Input validation, model coordination, outcomes
-│   │   │           └── prototype/    # Earlier standalone prediction validator
-│   │   └── resources/
-│   │       └── application.properties
-│   └── test/
-│       └── java/
-│           └── com/ou/capstone/
-│               ├── controller/
-│               │   └── HealthControllerTest.java
-│               └── datasource/
-│                   ├── CurrentSeasonClientTest.java
-│                   └── CurrentSeasonPropertiesTest.java
-│               └── prediction/      # Mirrors production subpackages
+└── src/
+    ├── main/
+    │   ├── java/com/ou/capstone/
+    │   │   ├── BackendApplication.java
+    │   │   ├── controller/        # HTTP endpoints
+    │   │   ├── domain/            # Canonical Team, Game, Conference, Venue, GameStatus
+    │   │   ├── data/              # Canonical provider interfaces and the in-memory store
+    │   │   ├── datasource/        # HTTP client for the current-season feed
+    │   │   ├── ingestion/         # Source records, shared mapping, historical and current-season loaders
+    │   │   └── prediction/
+    │   │       ├── contract/      # Shared execution records and enums
+    │   │       ├── client/        # Python HTTP transport, decoder, configuration
+    │   │       ├── orchestration/ # Input validation, model coordination, outcomes
+    │   │       └── prototype/     # Earlier standalone prediction validator
+    │   └── resources/
+    │       └── application.properties
+    └── test/
+        ├── java/com/ou/capstone/  # Mirrors the production packages
+        └── resources/             # Feed fixtures used by the ingestion tests
 ```
 
 ### `src/main/java/com/ou/capstone/`
@@ -128,7 +113,7 @@ Expected response:
 
 The backend can pull current-season college football data from the mentor-provided feed. `CurrentSeasonClient.fetchCurrentSeason()` calls the feed and returns a `SourceFeed` (teams, each with a day-by-day schedule).
 
-* The `Source*` records mirror the external format exactly (every value is a raw string). They are intentionally separate from our internal domain models; converting them into `Team`/`Game` is the job of the normalization step, not this client.
+* The `Source*` records (in `ingestion/source/`) mirror the external format exactly (every value is a raw string). They are shared by the current-season and historical paths and stay separate from the domain models; the shared mapper in `ingestion/` converts them into `Team`/`Game`. See [Data Ingestion and Retrieval](#data-ingestion-and-retrieval).
 * The feed puts a small HTML stub in front of the JSON, so the client skips ahead to the first `{` before parsing.
 * Any failure (unreachable, timeout, non-2xx status, invalid JSON, or a response with no teams) is thrown as a `DataSourceException`, so callers can handle it without the app crashing.
 * This is **not exposed through an HTTP endpoint yet**. It is only available to other backend code until a feature needs it.
@@ -146,6 +131,27 @@ Set in `src/main/resources/application.properties`:
 Override without changing code using environment variables, e.g. `GAMESENSE_DATASOURCE_URL=http://localhost:9000/feed ./mvnw spring-boot:run`.
 
 Tests use `MockRestServiceServer` and a fixture in `src/test/resources/datasource/`, so they never call the live source.
+
+---
+
+## Data Ingestion and Retrieval
+
+Two sources feed one in-memory store: historical schedule files and the current-season feed. Both go through the same `SourceFeedMapper`, which produces the canonical domain objects. Everything downstream reads them through `CanonicalDataProvider`, which extends the existing `PredictionDataProvider`, so consumers never see `Source*` records.
+
+```java
+// Loading is explicit; nothing loads at startup.
+historicalIngestionService.loadFile(Path.of("Schedule-2025.json"));
+currentSeasonIngestionService.loadCurrentSeason();
+
+// Retrieval, regardless of which source supplied the data.
+List<Game> games = canonicalDataProvider.findGames(2026);
+Optional<Game> game = canonicalDataProvider.findGame(gameId);
+Optional<Team> home = canonicalDataProvider.findTeam(games.get(0).homeTeamId());
+```
+
+* Team and game IDs are deterministic, so the same team or game keeps one identity across sources and reloads, and overlapping records collapse into one.
+* Loading adds to the store and never discards other seasons. The store is in memory only.
+* Full design, rules, and limits: [Data Ingestion and Retrieval](../docs/architecture/data-ingestion.md).
 
 ---
 

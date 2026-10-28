@@ -1,11 +1,11 @@
-package com.ou.capstone.ingestion.historical.mapper;
+package com.ou.capstone.ingestion.mapper;
 
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.GameStatus;
 import com.ou.capstone.domain.Team;
-import com.ou.capstone.ingestion.historical.MalformedRecordException;
-import com.ou.capstone.ingestion.historical.raw.RawScheduleEntry;
-import com.ou.capstone.ingestion.historical.raw.RawTeam;
+import com.ou.capstone.ingestion.MalformedRecordException;
+import com.ou.capstone.ingestion.source.SourceScheduleEntry;
+import com.ou.capstone.ingestion.source.SourceTeam;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -15,23 +15,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /** turns the schedule rows into games */
 public class GameMapper {
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
   // teamsByName is keyed by the team's full name (that's the externalId in this feed)
-  public GameMappingResult map(List<RawTeam> rawTeams, Map<String, Team> teamsByName) {
+  public GameMappingResult map(List<SourceTeam> rawTeams, Map<String, Team> teamsByName) {
     List<Game> games = new ArrayList<>();
     List<String> skipped = new ArrayList<>();
     Set<String> seen = new HashSet<>();
 
-    for (RawTeam rawTeam : rawTeams) {
+    for (SourceTeam rawTeam : rawTeams) {
       if (rawTeam.schedule() == null) {
         continue;
       }
-      for (RawScheduleEntry entry : rawTeam.schedule()) {
+      for (SourceScheduleEntry entry : rawTeam.schedule()) {
         if (isBye(entry)) {
           continue;
         }
@@ -51,13 +50,16 @@ public class GameMapper {
   }
 
   // true if this row is a "no game today" row
-  private boolean isBye(RawScheduleEntry entry) {
+  private boolean isBye(SourceScheduleEntry entry) {
     return "BYE".equalsIgnoreCase(clean(entry.location()));
   }
 
   // returns null if this game was already built from the other team's row
   private Game mapEntry(
-      RawTeam rawTeam, RawScheduleEntry entry, Map<String, Team> teamsByName, Set<String> seen) {
+      SourceTeam rawTeam,
+      SourceScheduleEntry entry,
+      Map<String, Team> teamsByName,
+      Set<String> seen) {
     String teamName = clean(rawTeam.name());
     String opponentName = clean(entry.opponent());
     String where = teamName + " vs " + opponentName + " on " + entry.timestamp();
@@ -134,7 +136,7 @@ public class GameMapper {
 
     seen.add(key);
     return new Game(
-        UUID.randomUUID().toString(),
+        CanonicalIds.gameId(key),
         key,
         season,
         null, // week, not in the feed

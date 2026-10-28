@@ -1,10 +1,10 @@
-package com.ou.capstone.ingestion.historical;
+package com.ou.capstone.ingestion.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.ou.capstone.domain.Team;
-import com.ou.capstone.ingestion.historical.mapper.TeamMapper;
-import com.ou.capstone.ingestion.historical.raw.RawTeam;
+import com.ou.capstone.ingestion.MalformedRecordException;
+import com.ou.capstone.ingestion.source.SourceTeam;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,8 @@ class TeamMapperTest {
 
   @Test
   void mapsValidTeam() {
-    Team team = mapper.map(new RawTeam("Michigan State Spartans", "Big Ten Conference", List.of()));
+    Team team =
+        mapper.map(new SourceTeam("Michigan State Spartans", "Big Ten Conference", List.of()));
     assertEquals("Michigan State Spartans", team.name());
     assertEquals("Michigan State Spartans", team.externalId());
     assertEquals("Big Ten Conference", team.conference());
@@ -25,13 +26,13 @@ class TeamMapperTest {
   void missingNameIsMalformed() {
     assertThrows(
         MalformedRecordException.class,
-        () -> mapper.map(new RawTeam("", "Big Ten Conference", List.of())));
+        () -> mapper.map(new SourceTeam("", "Big Ten Conference", List.of())));
   }
 
   @Test
   void missingConferenceIsMalformed() {
     assertThrows(
         MalformedRecordException.class,
-        () -> mapper.map(new RawTeam("Michigan State Spartans", null, List.of())));
+        () -> mapper.map(new SourceTeam("Michigan State Spartans", null, List.of())));
   }
 }
