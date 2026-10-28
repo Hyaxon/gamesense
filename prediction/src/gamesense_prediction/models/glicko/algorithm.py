@@ -76,9 +76,7 @@ def predict_matchup(
         else:
             home_result = 0.5
 
-        advantage = (
-            0.0 if game.is_neutral_site else HOME_ADVANTAGE_RATING_POINTS
-        )
+        advantage = 0.0 if game.is_neutral_site else HOME_ADVANTAGE_RATING_POINTS
         home_snapshot = Team()
         home_snapshot.rating, home_snapshot.rd = home_rating, home_rd
         away_snapshot = Team()

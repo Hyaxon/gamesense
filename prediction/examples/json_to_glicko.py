@@ -25,7 +25,7 @@ teams = {}
 # Make a team object for each team in the JSON data
 team_objects = []
 for team in data["teams"]:
-    name = team["name"] 
+    name = team["name"]
     teams[name] = Team(name)
     """
     # Used in test below
@@ -40,14 +40,16 @@ team_aliases = {
     "WEBB": "Gardner-Webb Runnin' Bulldogs",
 }
 
-missing_opponents = sorted({
-    game["opponent"]
-    for team in data["teams"]
-    for game in team["schedule"]
-    if game["outcome"] != ""
-    and game["opponent"]
-    and team_aliases.get(game["opponent"], game["opponent"]) not in teams
-})
+missing_opponents = sorted(
+    {
+        game["opponent"]
+        for team in data["teams"]
+        for game in team["schedule"]
+        if game["outcome"] != ""
+        and game["opponent"]
+        and team_aliases.get(game["opponent"], game["opponent"]) not in teams
+    }
+)
 for opponent_name in missing_opponents:
     teams[opponent_name] = Team(opponent_name)
 
@@ -67,6 +69,7 @@ def get_team(name):
             f"Unknown team '{name}'. Add it to team_aliases with its "
             "canonical schedule name."
         ) from error
+
 
 games = []
 set_games = set()
@@ -88,12 +91,14 @@ for team in data["teams"]:
                     result = 0
                 else:
                     result = 0.5
-                games.append({
-                    "timestamp": timestamp,
-                    "team_a": team_name,
-                    "team_b": opponent_name,
-                    "result": result
-                })
+                games.append(
+                    {
+                        "timestamp": timestamp,
+                        "team_a": team_name,
+                        "team_b": opponent_name,
+                        "result": result,
+                    }
+                )
 
 print("Loaded", len(games), "unique games")
 
@@ -110,7 +115,7 @@ print("\nRating periods:")
 
 for month in months:
     print(month, ":", len(games_by_month[month]), "games")
-    
+
 print("==============================")
 
 # Now to process each month
@@ -130,22 +135,15 @@ for month in months:
         result_b = 1.0 - result_a
 
         # Team A's perspective
-        team_games[team_a.name].append({
-            "opponent": team_b,
-            "result": result_a
-        })
+        team_games[team_a.name].append({"opponent": team_b, "result": result_a})
 
         # Team B's perspective
-        team_games[team_b.name].append({
-            "opponent": team_a,
-            "result": result_b
-        })
+        team_games[team_b.name].append({"opponent": team_a, "result": result_b})
 
     # Snapshot ratings so all updates in a rating period use the same
     # pre-period opponent values.
     period_ratings = {
-        team_name: (team.rating, team.rd)
-        for team_name, team in teams.items()
+        team_name: (team.rating, team.rd) for team_name, team in teams.items()
     }
 
     # --------------------------------------------------
@@ -165,11 +163,13 @@ for month in months:
             opponent = game["opponent"]
             opponent_rating, opponent_rd = period_ratings[opponent.name]
 
-            results.append({
-                "opponent_mu": rating_to_mu(opponent_rating),
-                "opponent_phi": rd_to_phi(opponent_rd),
-                "result": game["result"]
-            })
+            results.append(
+                {
+                    "opponent_mu": rating_to_mu(opponent_rating),
+                    "opponent_phi": rd_to_phi(opponent_rd),
+                    "result": game["result"],
+                }
+            )
 
         # Glicko-2 update. Assign the returned values; update_rating does
         # not mutate the Team object itself.
@@ -178,28 +178,24 @@ for month in months:
             rd_to_phi(team.rd),
             [r["opponent_mu"] for r in results],
             [r["opponent_phi"] for r in results],
-            [r["result"] for r in results]
+            [r["result"] for r in results],
         )
         team.rating = mu_to_rating(updated_mu)
         team.rd = phi_to_rd(updated_phi)
 
-rankings = sorted(
-    teams.values(),
-    key=lambda team: team.rating,
-    reverse=True
-)
+rankings = sorted(teams.values(), key=lambda team: team.rating, reverse=True)
 
 print("==============================")
 
 # And then get a prediction.
 # Read two teams and get a prediction.
 team_a_name = input("Enter the name of Team A: ")
-if(team_a_name not in teams):
+if team_a_name not in teams:
     print("Team A name is invalid.")
     exit()
 
 team_b_name = input("Enter the name of Team B: ")
-if(team_b_name not in teams):
+if team_b_name not in teams:
     print("Team B name is invalid.")
     exit()
 
