@@ -2,39 +2,23 @@
 # Functions to convert JSON data to Glicko-2 ratings and updates
 
 import json
-from pathlib import Path
 from collections import defaultdict
-from glicko2 import *
+from pathlib import Path
+
+from glicko2 import (
+    Team,
+    inactive_rd_update,
+    mu_to_rating,
+    phi_to_rd,
+    probability_prediction,
+    rating_to_mu,
+    rd_to_phi,
+    update_rating,
+)
 
 schedule_path = Path(__file__).resolve().with_name("Schedule.json")
 with schedule_path.open("r", encoding="utf-8") as file:
     data = json.load(file)
-
-"""
-# Test: Print names of all teams
-for team in data["teams"]:
-    print(team["name"])
-"""
-
-"""
-# Test: Print all games for each team
-for game in team["schedule"]:
-    if game["outcome"] != "":
-        print(
-            game["timestamp"],
-            game["opponent"],
-            game["outcome"]
-        )
-"""
-
-"""
-# Test: Create a team and print its initial Glicko-2 ratings
-team = Team("Michigan State Spartans")
-print(team.name)
-print(team.rating)
-print(team.rd)
-print(team.volatility)
-"""
 
 teams = {}
 
@@ -83,17 +67,6 @@ def get_team(name):
             f"Unknown team '{name}'. Add it to team_aliases with its "
             "canonical schedule name."
         ) from error
-
-
-"""
-# Test: Print all created team objects and their initial Glicko-2 ratings
-for team_obj in team_objects:
-    print(team_obj.name)
-    print(team_obj.rating)
-    print(team_obj.rd)
-    print(team_obj.volatility)
-    print()  # Add a blank line between teams for readability
-"""
 
 games = []
 set_games = set()
@@ -215,21 +188,7 @@ rankings = sorted(
     key=lambda team: team.rating,
     reverse=True
 )
-"""
-print("\n==============================")
-print("FINAL RANKINGS")
-print("==============================")
 
-for rank, team in enumerate(rankings, start=1):
-
-    print(
-        f"{rank:3}. "
-        f"{team.name:40} "
-        f"Rating: {team.rating:8.2f} "
-        f"RD: {team.rd:7.2f} "
-        f"Vol: {team.volatility:.5f}"
-    )
-"""
 print("==============================")
 
 # And then get a prediction.
