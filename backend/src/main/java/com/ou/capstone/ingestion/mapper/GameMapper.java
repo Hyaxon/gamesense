@@ -20,6 +20,15 @@ import java.util.Set;
 public class GameMapper {
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
+  // Codes the feed uses in a schedule row's "location" field.
+  private static final String HOME_LOCATION = "vs."; // this team is home
+  private static final String AWAY_LOCATION = "@"; // this team is away
+  private static final String NEUTRAL_LOCATION = "N"; // neutral site
+  private static final String BYE_LOCATION = "BYE"; // no game that day
+
+  // Code the feed uses in the "outcome" field for a game that has not been played yet.
+  private static final String UNPLAYED_OUTCOME = "-";
+
   // teamsByName is keyed by the team's full name (that's the externalId in this feed)
   public GameMappingResult map(List<SourceTeam> rawTeams, Map<String, Team> teamsByName) {
     List<Game> games = new ArrayList<>();
@@ -51,7 +60,7 @@ public class GameMapper {
 
   // true if this row is a "no game today" row
   private boolean isBye(SourceScheduleEntry entry) {
-    return "BYE".equalsIgnoreCase(clean(entry.location()));
+    return BYE_LOCATION.equalsIgnoreCase(clean(entry.location()));
   }
 
   // returns null if this game was already built from the other team's row
@@ -90,13 +99,13 @@ public class GameMapper {
     boolean neutral = false;
     Team home;
     Team away;
-    if ("vs.".equals(location)) {
+    if (HOME_LOCATION.equals(location)) {
       home = team;
       away = opponent;
-    } else if ("@".equals(location)) {
+    } else if (AWAY_LOCATION.equals(location)) {
       home = opponent;
       away = team;
-    } else if ("N".equals(location)) {
+    } else if (NEUTRAL_LOCATION.equals(location)) {
       // no real home team, so pick one the same way from both rows
       neutral = true;
       home = teamFirst ? team : opponent;
@@ -114,7 +123,7 @@ public class GameMapper {
     Integer homeScore = null;
     Integer awayScore = null;
     String winnerId = null;
-    if ("-".equals(outcome)) {
+    if (UNPLAYED_OUTCOME.equals(outcome)) {
       // unplayed, the 0 and 0 scores are placeholders
       status = GameStatus.SCHEDULED;
     } else {
