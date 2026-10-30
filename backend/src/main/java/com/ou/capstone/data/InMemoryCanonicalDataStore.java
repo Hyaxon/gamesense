@@ -3,6 +3,7 @@ package com.ou.capstone.data;
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.GameStatus;
 import com.ou.capstone.domain.Team;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -23,8 +24,10 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
   private final Map<String, Team> teams = new LinkedHashMap<>();
   private final Map<String, Game> games = new LinkedHashMap<>();
 
-  // Adds teams and games to the store. A team or game whose ID is already stored replaces
-  // the old one, except that a finished game is never replaced by an unfinished one.
+  // Adds teams and games to the store. A team or game whose ID is already stored
+  // replaces
+  // the old one, except that a finished game is never replaced by an unfinished
+  // one.
   public synchronized void load(Collection<Team> newTeams, Collection<Game> newGames) {
     for (Team team : newTeams) {
       teams.put(team.id(), team);
@@ -55,7 +58,8 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
         : Optional.empty();
   }
 
-  // A team is in a snapshot if it plays at least one game in that snapshot's season.
+  // A team is in a snapshot if it plays at least one game in that snapshot's
+  // season.
   @Override
   public synchronized Optional<Team> findTeam(PredictionSnapshot snapshot, String teamId) {
     boolean playsInSeason =
@@ -75,6 +79,27 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
   @Override
   public synchronized List<Game> findAllGames() {
     return new ArrayList<>(games.values());
+  }
+
+  // Filters the games list by specific attributes.
+  @Override
+  public synchronized List<Game> findGames(GameFilter filter) {
+    return games.values().stream()
+        .filter(
+            game ->
+                filter.teamId() == null
+                    || filter.teamId().equals(game.homeTeamId())
+                    || filter.teamId().equals(game.awayTeamId()))
+        .filter(
+            game ->
+                filter.date() == null
+                    || (game.scheduledAt() != null
+                        && filter
+                            .date()
+                            .equals(game.scheduledAt().atOffset(ZoneOffset.UTC).toLocalDate())))
+        .filter(game -> filter.status() == null || filter.status() == game.status())
+        .filter(game -> filter.season() == null || filter.season() == game.season())
+        .toList();
   }
 
   @Override

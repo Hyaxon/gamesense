@@ -8,15 +8,16 @@ Java/Spring Boot service that sits between the frontend and the prediction servi
 
 ```text
 backend/
+├── examples/                 # Standalone prediction orchestration demo
 ├── pom.xml
 ├── mvnw / mvnw.cmd
 └── src/
     ├── main/
     │   ├── java/com/ou/capstone/
     │   │   ├── BackendApplication.java
-    │   │   ├── controller/        # HTTP endpoints
+    │   │   ├── controller/        # HealthController and GamesController
     │   │   ├── domain/            # Canonical Team, Game, Conference, Venue, GameStatus
-    │   │   ├── data/              # Canonical provider interfaces and the in-memory store
+    │   │   ├── data/              # Provider interfaces, GameFilter, snapshots, and in-memory storage
     │   │   ├── datasource/        # HTTP client for the current-season feed
     │   │   ├── ingestion/         # Source records, shared mapping, historical and current-season loaders
     │   │   └── prediction/
@@ -30,6 +31,10 @@ backend/
         ├── java/com/ou/capstone/  # Mirrors the production packages
         └── resources/             # Feed fixtures used by the ingestion tests
 ```
+
+Historical datasets live outside the backend at `../data/historical/`; they are separate
+from the small test fixtures in `src/test/resources/`. Shared API schemas live in
+`../shared/schemas/`.
 
 ### `src/main/java/com/ou/capstone/`
 
@@ -48,16 +53,26 @@ JUnit tests that mirror the `main/` package structure. New tests should be writt
 
 ## Requirements
 
-* JDK 17 (matching CI; set `JAVA_HOME` to your JDK 17 installation)
-* Maven (or use the included wrapper, no local install required)
+- JDK 17 (matching CI; set `JAVA_HOME` to your JDK 17 installation)
+- Maven (or use the included wrapper, no local install required)
 
 Check your Java version:
 
 ```bash
-java -version
+./mvnw -version
 ```
 
 ---
+
+On macOS, select JDK 17 in the current terminal before running Maven:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+The JDK running Maven also runs Spotless. A newer incompatible JDK can cause formatter
+errors involving `com.sun.tools.javac`, even if compilation targets Java 17.
 
 ## Building
 
@@ -73,6 +88,8 @@ Run the following commands from the `backend/` directory.
 
 ## Running the Backend
 
+Run from `backend/` so the historical file's relative path resolves correctly:
+
 ```bash
 ./mvnw spring-boot:run
 ```
@@ -84,6 +101,21 @@ http://localhost:8080
 ```
 
 ---
+
+Startup ingestion is enabled by default. `BackendApplication` implements `ApplicationRunner`
+and loads the live current-season feed first, then `../data/historical/Schedule-2025.json`.
+Both network access and that historical file are required. An ingestion error fails startup;
+if the live fetch fails, the historical load is not attempted. Wait for startup to complete
+before testing loaded results. The store is rebuilt on every restart and has no scheduled refresh.
+
+To start without either data source:
+
+```bash
+GAMESENSE_INGESTION_ENABLED=false ./mvnw spring-boot:run
+```
+
+In that mode, `/games` returns `[]` until another caller loads data. Python is not required
+for the health or games endpoints. Stop the backend with `Ctrl+C`.
 
 ## Health Check
 
@@ -113,20 +145,21 @@ Expected response:
 
 The backend can pull current-season college football data from the mentor-provided feed. `CurrentSeasonClient.fetchCurrentSeason()` calls the feed and returns a `SourceFeed` (teams, each with a day-by-day schedule).
 
-* The `Source*` records (in `ingestion/source/`) mirror the external format exactly (every value is a raw string). They are shared by the current-season and historical paths and stay separate from the domain models; the shared mapper in `ingestion/` converts them into `Team`/`Game`. See [Data Ingestion and Retrieval](#data-ingestion-and-retrieval).
-* The feed puts a small HTML stub in front of the JSON, so the client skips ahead to the first `{` before parsing.
-* Any failure (unreachable, timeout, non-2xx status, invalid JSON, or a response with no teams) is thrown as a `DataSourceException`, so callers can handle it without the app crashing.
-* This is **not exposed through an HTTP endpoint yet**. It is only available to other backend code until a feature needs it.
+- The `Source*` records (in `ingestion/source/`) mirror the external format exactly (every value is a raw string). They are shared by the current-season and historical paths and stay separate from the domain models; the shared mapper in `ingestion/` converts them into `Team`/`Game`. See [Data Ingestion and Retrieval](#data-ingestion-and-retrieval).
+- The feed puts a small HTML stub in front of the JSON, so the client skips ahead to the first `{` before parsing.
+- Any failure (unreachable, timeout, non-2xx status, invalid JSON, or a response with no teams) is thrown as a `DataSourceException`, so callers can handle it. The startup runner lets this exception propagate, failing startup.
+- Loaded canonical games are exposed through `/games`. There is no HTTP endpoint to trigger ingestion or return the raw feed.
 
 ### Configuration
 
 Set in `src/main/resources/application.properties`:
 
-| Property | Default | Description |
-| --- | --- | --- |
-| `gamesense.datasource.url` | mentor feed URL | Full URL of the data source. |
-| `gamesense.datasource.connect-timeout` | `5s` | How long to wait to connect. |
-| `gamesense.datasource.read-timeout` | `30s` | How long to wait for the response. The feed is large, so keep this generous. |
+| Property                               | Default         | Description                                                                            |
+| -------------------------------------- | --------------- | -------------------------------------------------------------------------------------- |
+| `gamesense.ingestion.enabled`          | `true`          | Load live and historical data at startup; override with `GAMESENSE_INGESTION_ENABLED`. |
+| `gamesense.datasource.url`             | mentor feed URL | Full URL of the data source.                                                           |
+| `gamesense.datasource.connect-timeout` | `5s`            | How long to wait to connect.                                                           |
+| `gamesense.datasource.read-timeout`    | `30s`           | How long to wait for the response. The feed is large, so keep this generous.           |
 
 Override without changing code using environment variables, e.g. `GAMESENSE_DATASOURCE_URL=http://localhost:9000/feed ./mvnw spring-boot:run`.
 
@@ -139,19 +172,23 @@ Tests use `MockRestServiceServer` and a fixture in `src/test/resources/datasourc
 Two sources feed one in-memory store: historical schedule files and the current-season feed. Both go through the same `SourceFeedMapper`, which produces the canonical domain objects. Everything downstream reads them through `CanonicalDataProvider`, which extends the existing `PredictionDataProvider`, so consumers never see `Source*` records.
 
 ```java
-// Loading is explicit; nothing loads at startup.
-historicalIngestionService.loadFile(Path.of("Schedule-2025.json"));
+// These calls are made by the startup runner when ingestion is enabled.
 currentSeasonIngestionService.loadCurrentSeason();
+historicalIngestionService.loadFile(Path.of("../data/historical/Schedule-2025.json"));
 
 // Retrieval, regardless of which source supplied the data.
 List<Game> games = canonicalDataProvider.findGames(2026);
+List<Game> finals = canonicalDataProvider.findGames(
+    new GameFilter(null, LocalDate.of(2025, 9, 6), GameStatus.FINAL, 2025));
 Optional<Game> game = canonicalDataProvider.findGame(gameId);
 Optional<Team> home = canonicalDataProvider.findTeam(games.get(0).homeTeamId());
 ```
 
-* Team and game IDs are deterministic, so the same team or game keeps one identity across sources and reloads, and overlapping records collapse into one.
-* Loading adds to the store and never discards other seasons. The store is in memory only.
-* Full design, rules, and limits: [Data Ingestion and Retrieval](../docs/architecture/data-ingestion.md).
+- Team and game IDs are deterministic, so the same team or game keeps one identity across sources and reloads, and overlapping records collapse into one.
+- Loading adds to the store and never discards other seasons. A final result is not replaced by an unfinished game. The store is in memory only.
+- The feed provides dates without kickoff times. Mapping stores midnight UTC in `scheduledAt`; `week` is absent from the feed.
+- `GamesController` parses HTTP parameters, `GameFilter` carries optional criteria, and the store applies them by scanning loaded games.
+- Full design, rules, and limits: [Data Ingestion and Retrieval](../docs/architecture/data-ingestion.md).
 
 ---
 
@@ -162,6 +199,17 @@ Optional<Team> home = canonicalDataProvider.findTeam(games.get(0).homeTeamId());
 ```
 
 ---
+
+Full-application tests set `gamesense.ingestion.enabled=false` so configuration and health
+checks do not fetch live data or require historical files. Ingestion tests load fixtures
+explicitly. `GamesControllerTest` uses standalone MockMvc and a local test provider to check
+parameter binding, JSON responses, `404`, and invalid-input `400` responses.
+
+For the games API and store tests only:
+
+```bash
+./mvnw -Dtest=GamesControllerTest,InMemoryCanonicalDataStoreTest test
+```
 
 ## Linting / Formatting
 
@@ -198,8 +246,8 @@ This should pass (tests + Checkstyle + Spotless) before opening or updating a pu
 
 Dependencies are defined in `pom.xml` and managed by the Spring Boot parent POM.
 
-* **Spring Boot Starter Web** — exposes the backend as an HTTP API.
-* **Spring Boot Starter Test** — JUnit, AssertJ, and Spring test utilities.
+- **Spring Boot Starter Web** — exposes the backend as an HTTP API.
+- **Spring Boot Starter Test** — JUnit, AssertJ, and Spring test utilities.
 
 ---
 
@@ -219,6 +267,47 @@ Used to verify that the backend service is available.
 
 ---
 
+### `GET /games`
+
+Returns `200` with a JSON array of canonical games. No matches returns `[]`.
+All parameters are optional; multiple parameters combine with AND.
+
+| Parameter | Meaning                                                           |
+| --------- | ----------------------------------------------------------------- |
+| `teamId`  | Canonical team ID; matches home or away.                          |
+| `date`    | UTC calendar date in `YYYY-MM-DD` format; time of day is ignored. |
+| `status`  | `SCHEDULED`, `IN_PROGRESS`, `FINAL`, `POSTPONED`, or `CANCELLED`. |
+| `season`  | Integer season year, such as `2025`.                              |
+
+Malformed dates, unknown status values, and non-integer seasons return `400`.
+An unknown team ID returns an empty array. There is no pagination or explicit sorting.
+Games without a scheduled timestamp do not match a supplied date.
+
+### `GET /games/{gameId}`
+
+Returns `200` with one game object, or `404` when the canonical ID is not stored.
+Use `id`, not `externalId`, from a listing response. Responses follow the
+[shared game schema](../shared/schemas/game.schema.json); null fields are omitted.
+
+### Try the games endpoints
+
+Run these in another terminal after starting the backend. Replace `GAME_ID` and `TEAM_ID`
+with IDs returned by the listing endpoint. Quote query URLs so the shell preserves `?` and `&`.
+
+```bash
+curl -i 'http://localhost:8080/games'
+curl -i 'http://localhost:8080/games?date=2025-09-06&status=FINAL&season=2025'
+curl -i 'http://localhost:8080/games?teamId=TEAM_ID&season=2025'
+curl -i 'http://localhost:8080/games/GAME_ID'
+curl -i 'http://localhost:8080/games/nonexistent'
+```
+
+For readable JSON, omit headers and pipe the body to a formatter:
+
+```bash
+curl -s 'http://localhost:8080/games?season=2025' | python3 -m json.tool
+```
+
 ## Architecture
 
 Spring creates one reusable `PythonPredictionClient`. Backend services inject it
@@ -227,11 +316,11 @@ and call `execute(ModelExecutionRequest)` to send a single execution to Python's
 `PredictionServiceResponse` or throws a transport/invalid-response exception.
 Starting the backend alone does not send a prediction request.
 
-| Environment variable | Default |
-| --- | --- |
-| `PREDICTION_SERVICE_BASE_URL` | `http://127.0.0.1:8000` |
-| `PREDICTION_SERVICE_CONNECT_TIMEOUT` | `2s` |
-| `PREDICTION_SERVICE_REQUEST_TIMEOUT` | `30s` |
+| Environment variable                 | Default                 |
+| ------------------------------------ | ----------------------- |
+| `PREDICTION_SERVICE_BASE_URL`        | `http://127.0.0.1:8000` |
+| `PREDICTION_SERVICE_CONNECT_TIMEOUT` | `2s`                    |
+| `PREDICTION_SERVICE_REQUEST_TIMEOUT` | `30s`                   |
 
 Set overrides in the backend process environment. Spring binds them through
 `prediction.service.*` in `application.properties`. The URL must be an HTTP(S)
@@ -259,9 +348,9 @@ separate execution IDs. Independent failures do not discard successes; an all-fa
 request returns its failures. Interruption aborts orchestration and preserves the
 thread interrupt flag. Requests are not automatically retried.
 
-Orchestration is disabled by default, allowing the backend to start before a
-production canonical data provider exists. To enable it, supply a Spring bean
-implementing `PredictionDataProvider` and configure at least one model selection.
+Orchestration is disabled by default. The in-memory canonical store already implements
+`PredictionDataProvider`. To enable orchestration, configure at least one model selection
+and ensure the required data is loaded.
 For example, in a local Spring properties file:
 
 ```properties
@@ -286,17 +375,24 @@ only absent or empty configuration. Common `seed` and `trials` remain separate
 properties. Python validates each model's configuration schema and capabilities.
 
 Enabling orchestration without a provider, with no selections, or with invalid
-common controls fails startup. Startup performs no data lookups or model calls.
+common controls fails startup. Orchestration configuration performs no model calls;
+the separate startup ingestion runner loads game data by default.
 The orchestrator requires canonical team/game identities and an existing snapshot
 reference; the provider is responsible for team membership in that snapshot.
 The selected snapshot must also be available to Python. Unknown game location
 is rejected rather than inferred, and game status is not derived or changed.
 
-Production source integration, mapping, historical ingestion, and game-status
-handling belong to their separate tickets. Tests supply canonical fixtures and a
-fake client. No frontend endpoint, aggregation, or persistence is introduced.
+Source integration, mapping, historical ingestion, and game-status handling live in
+the ingestion packages. Orchestration tests supply canonical fixtures and a fake client.
+There is no HTTP prediction endpoint, aggregation layer, or persistent storage yet.
 
-### Run the orchestration example
+### Orchestration example
+
+The example predates the shared canonical store. It registers a second
+`PredictionDataProvider`, which can cause ambiguous injection alongside the in-memory
+store. Its provider wiring needs updating before treating it as a working smoke test.
+The commands below document its intended execution; disabling ingestion avoids external
+loading but does not resolve the duplicate-provider wiring.
 
 [RunOrchestration.java](examples/RunOrchestration.java) supplies explicit canonical
 fixture records and retrieves the real Spring-managed orchestrator. It runs two
@@ -315,7 +411,7 @@ In another terminal, from `backend/`, with JDK 17 selected:
 
 ```sh
 ./mvnw --batch-mode compile dependency:build-classpath -Dmdep.outputFile=target/smoke-classpath.txt
-PREDICTION_SERVICE_BASE_URL=http://127.0.0.1:8000 java --class-path "target/classes:$(cat target/smoke-classpath.txt)" examples/RunOrchestration.java
+GAMESENSE_INGESTION_ENABLED=false PREDICTION_SERVICE_BASE_URL=http://127.0.0.1:8000 java --class-path "target/classes:$(cat target/smoke-classpath.txt)" examples/RunOrchestration.java
 ```
 
 The Java source-file launcher compiles and runs the standalone example. It starts
