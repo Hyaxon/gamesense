@@ -8,13 +8,33 @@ from .glicko2 import (
     Team,
     expected_score,
     mu_to_rating,
+    phi_to_rd,
     rating_to_mu,
     rd_to_phi,
     update_rating,
+    update_rating_period,
 )
 
 HOME_ADVANTAGE_RATING_POINTS = 50.0
 RATING_SCALE = 173.7178
+
+
+def update_player(team: Team, matches: list[dict], tau: float = 0.5) -> Team:
+    """Update a team from a JSON-shaped rating period using the core algorithm."""
+    opponents = [match["opponent"] for match in matches]
+    updated_mu, updated_phi, updated_volatility = update_rating_period(
+        rating_to_mu(team.rating),
+        rd_to_phi(team.rd),
+        team.volatility,
+        [rating_to_mu(opponent["rating"]) for opponent in opponents],
+        [rd_to_phi(opponent["rd"]) for opponent in opponents],
+        [match["outcome"] for match in matches],
+        tau,
+    )
+    team.rating = mu_to_rating(updated_mu)
+    team.rd = int(phi_to_rd(updated_phi))
+    team.volatility = updated_volatility
+    return team
 
 
 @dataclass(frozen=True)

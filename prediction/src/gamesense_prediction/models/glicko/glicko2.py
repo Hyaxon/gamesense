@@ -4,9 +4,9 @@
 import math
 
 
-# Team object
 class Team:
-    def __init__(self):
+    def __init__(self, name=None):
+        self.name = name
         self.rating = 1500  # Initial Glicko-2 rating
         self.rd = 350  # Initial rating deviation
         self.volatility = 0.06  # Initial volatility
@@ -63,6 +63,62 @@ def update_rating(mu, phi, mu_opponents, phi_opponents, scores):
     # phi_new^2 / v when converting the estimated improvement to mu.
     mu_new = mu + (phi_new**2 / v) * delta
     return mu_new, phi_new
+
+
+def update_rating_period(
+    mu,
+    phi,
+    volatility,
+    mu_opponents,
+    phi_opponents,
+    scores,
+    tau=0.5,
+):
+    """Apply one complete Glicko-2 rating-period update.
+
+    Unlike ``update_rating``, this also updates volatility using the iterative
+    step from the Glicko-2 specification.  Inputs and outputs use the
+    internal ``mu``, ``phi`` and volatility units.
+    """
+    if not mu_opponents:
+        return mu, math.sqrt(phi**2 + volatility**2), volatility
+
+    v = calculate_variance(mu, mu_opponents, phi_opponents)
+    delta = calculate_delta(mu, mu_opponents, phi_opponents, scores)
+    a = math.log(volatility**2)
+
+    def volatility_objective(x):
+        exp_x = math.exp(x)
+        denominator = phi**2 + v + exp_x
+        return (
+            exp_x * (delta**2 - phi**2 - v - exp_x) / (2 * denominator**2)
+            - (x - a) / tau**2
+        )
+
+    if delta**2 > phi**2 + v:
+        bracket_b = math.log(delta**2 - phi**2 - v)
+    else:
+        k = 1
+        while volatility_objective(a - k * tau) < 0:
+            k += 1
+        bracket_b = a - k * tau
+
+    objective_b = volatility_objective(bracket_b)
+    bracket_a = a
+    for _ in range(100):
+        candidate = (bracket_a + bracket_b) / 2
+        objective_candidate = volatility_objective(candidate)
+        if abs(objective_candidate) < 1e-12:
+            break
+        if objective_candidate * objective_b < 0:
+            bracket_a = bracket_b
+        bracket_b, objective_b = candidate, objective_candidate
+
+    updated_volatility = math.exp(bracket_b / 2)
+    phi_star = math.sqrt(phi**2 + updated_volatility**2)
+    updated_phi = 1 / math.sqrt(1 / phi_star**2 + 1 / v)
+    updated_mu = mu + updated_phi**2 * delta / v
+    return updated_mu, updated_phi, updated_volatility
 
 
 def rating_to_mu(rating):
