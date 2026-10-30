@@ -6,6 +6,7 @@ import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.GameStatus;
 import com.ou.capstone.domain.Team;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -81,4 +82,49 @@ class InMemoryCanonicalDataStoreTest {
     assertThat(store.findTeam(snapshot, "idle")).isEmpty();
     assertThat(store.findSnapshot(2024)).isEmpty();
   }
+
+  @Test
+  void optionalFiltersMatchEitherTeamAndCombineWithAnd() {
+    Game finalGame = game("final", 2025, GameStatus.FINAL, 3, 1);
+    Game scheduled = game("scheduled", 2026, GameStatus.SCHEDULED, null, null);
+    store.load(List.of(), List.of(finalGame, scheduled));
+
+    assertThat(store.findGames(new GameFilter(null, null, null, null)))
+        .containsExactly(finalGame, scheduled);
+    for (String teamId : List.of("home", "away")) {
+      assertThat(store.findGames(new GameFilter(teamId, null, null, null)))
+          .containsExactly(finalGame, scheduled);
+    }
+    assertThat(store.findGames(new GameFilter("missing", null, null, null))).isEmpty();
+    assertThat(store.findGames(new GameFilter(null, null, GameStatus.FINAL, null)))
+        .containsExactly(finalGame);
+    assertThat(store.findGames(new GameFilter(null, null, null, 2026)))
+        .containsExactly(scheduled);
+    assertThat(store.findGames(
+        new GameFilter("away", LocalDate.of(1970, 1, 1), GameStatus.FINAL, 2025)))
+        .containsExactly(finalGame);
+    assertThat(store.findGames(new GameFilter(null, null, GameStatus.FINAL, 2026))).isEmpty();
+  }
+
+  @Test
+  void dateFilterUsesUtcCalendarDayAndExcludesMissingDates() {
+    Game late = new Game(
+        "late", "late", 2025, null, "home", "away", null, false,
+        Instant.parse("2025-09-06T23:59:59Z"), GameStatus.SCHEDULED, null, null, null);
+    Game nextDay = new Game(
+        "next", "next", 2025, null, "home", "away", null, false,
+        Instant.parse("2025-09-07T00:00:00Z"), GameStatus.SCHEDULED, null, null, null);
+    Game undated = new Game(
+        "undated", "undated", 2025, null, "home", "away", null, false,
+        null, GameStatus.SCHEDULED, null, null, null);
+    store.load(List.of(), List.of(late, nextDay, undated));
+
+    assertThat(store.findGames(new GameFilter(null, LocalDate.of(2025, 9, 6), null, null)))
+        .containsExactly(late);
+    assertThat(store.findGames(new GameFilter(null, LocalDate.of(2025, 9, 7), null, null)))
+        .containsExactly(nextDay);
+    assertThat(store.findGames(new GameFilter(null, null, null, null)))
+        .containsExactly(late, nextDay, undated);
+  }
+
 }
