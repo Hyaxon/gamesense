@@ -10,7 +10,9 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 
 // Verifies the /health endpoint responds successfully when the backend is running.
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    properties = "gamesense.ingestion.enabled=false",
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class HealthControllerTest {
 
   @LocalServerPort private int port;

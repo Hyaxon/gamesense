@@ -4,6 +4,7 @@ import com.ou.capstone.ingestion.currentseason.CurrentSeasonIngestionService;
 import com.ou.capstone.ingestion.historical.HistoricalIngestionService;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,12 +18,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BackendApplication implements ApplicationRunner {
   private final CurrentSeasonIngestionService currentSeasonIngestionService;
   private final HistoricalIngestionService historicalIngestionService;
+  private final boolean ingestionEnabled;
 
   public BackendApplication(
       CurrentSeasonIngestionService currentSeasonIngestionService,
-      HistoricalIngestionService historicalIngestionService) {
+      HistoricalIngestionService historicalIngestionService,
+      @Value("${gamesense.ingestion.enabled:true}") boolean ingestionEnabled) {
     this.currentSeasonIngestionService = currentSeasonIngestionService;
     this.historicalIngestionService = historicalIngestionService;
+    this.ingestionEnabled = ingestionEnabled;
   }
 
   /**
@@ -36,6 +40,10 @@ public class BackendApplication implements ApplicationRunner {
    */
   @Override
   public void run(ApplicationArguments args) throws IOException {
+    // Allow context tests to start without network access or local historical files.
+    if (!ingestionEnabled) {
+      return;
+    }
     currentSeasonIngestionService.loadCurrentSeason();
     historicalIngestionService.loadFile(Path.of("../data/historical/Schedule-2025.json"));
   }
