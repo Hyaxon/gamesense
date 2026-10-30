@@ -35,7 +35,7 @@ IDs are derived from source identifiers, not generated randomly:
 * **Team:** the ID comes from the full team name, which is the feed's only identifier. `Team.externalId` keeps the name.
 * **Game:** the ID comes from the game key, which is the date plus the two team names in alphabetical order. The key is the same whichever team's row it is built from, so the two mirrored rows of a game give one game. `Game.externalId` keeps the key.
 
-The same team or game therefore gets the same ID from any source, on every load, and after every restart. IDs are name-based UUIDs. The schemas only require `format: uuid`, but note that [the domain model conventions](domain-model.md#conventions) describe random v4 UUIDs.
+The same team or game therefore gets the same ID from any source, on every load, and after every restart. IDs are valid version 4 UUIDs, as the prediction service requires, but they are derived from a hash of the source identifier instead of being random. The IDs must never change between releases, and a test pins example values to guard that.
 
 ## Overlapping records
 
