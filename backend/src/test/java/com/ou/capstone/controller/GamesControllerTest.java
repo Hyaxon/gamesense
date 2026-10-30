@@ -1,5 +1,6 @@
 package com.ou.capstone.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -7,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.ou.capstone.data.GameFilter;
 import com.ou.capstone.data.InMemoryCanonicalDataStore;
-import static org.assertj.core.api.Assertions.assertThat;
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.GameStatus;
 import java.time.Instant;
@@ -47,13 +47,26 @@ class GamesControllerTest {
 
   private MockMvc mvc;
 
-  private final Game game = new Game(
-      "game-1", "source-1", 2025, null, "home", "away", null, false,
-      Instant.parse("2025-09-06T00:00:00Z"), GameStatus.FINAL, 21, 7, "home");
+  private final Game game =
+      new Game(
+          "game-1",
+          "source-1",
+          2025,
+          null,
+          "home",
+          "away",
+          null,
+          false,
+          Instant.parse("2025-09-06T00:00:00Z"),
+          GameStatus.FINAL,
+          21,
+          7,
+          "home");
 
   @BeforeEach
   void setUp() {
-    // Exercise HTTP binding and serialization without triggering startup ingestion or live requests.
+    // Exercise HTTP binding and serialization without triggering startup ingestion or live
+    // requests.
     mvc = MockMvcBuilders.standaloneSetup(new GamesController(provider)).build();
   }
 
@@ -75,9 +88,7 @@ class GamesControllerTest {
   void emptyListIsSuccessful() throws Exception {
     provider.results = List.of();
 
-    mvc.perform(get("/games"))
-        .andExpect(status().isOk())
-        .andExpect(content().json("[]"));
+    mvc.perform(get("/games")).andExpect(status().isOk()).andExpect(content().json("[]"));
   }
 
   @Test
@@ -85,11 +96,12 @@ class GamesControllerTest {
     GameFilter filter = new GameFilter("away", LocalDate.of(2025, 9, 6), GameStatus.FINAL, 2025);
     provider.results = List.of(game);
 
-    mvc.perform(get("/games")
-            .param("teamId", "away")
-            .param("date", "2025-09-06")
-            .param("status", "FINAL")
-            .param("season", "2025"))
+    mvc.perform(
+            get("/games")
+                .param("teamId", "away")
+                .param("date", "2025-09-06")
+                .param("status", "FINAL")
+                .param("season", "2025"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value("game-1"));
     assertThat(provider.filter).isEqualTo(filter);

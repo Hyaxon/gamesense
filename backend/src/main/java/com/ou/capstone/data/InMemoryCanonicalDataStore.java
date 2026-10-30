@@ -13,12 +13,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 /**
- * Holds all canonical teams and games in memory and serves them through
- * CanonicalDataProvider.
- * Loading adds to what is already there, so historical seasons and the current
- * season coexist.
- * Records with the same canonical ID are merged into one. Nothing is persisted:
- * data is gone on
+ * Holds all canonical teams and games in memory and serves them through CanonicalDataProvider.
+ * Loading adds to what is already there, so historical seasons and the current season coexist.
+ * Records with the same canonical ID are merged into one. Nothing is persisted: data is gone on
  * restart and must be loaded again.
  */
 @Component
@@ -37,9 +34,10 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
     }
     for (Game game : newGames) {
       Game existing = games.get(game.id());
-      boolean wouldUndoResult = existing != null
-          && existing.status() == GameStatus.FINAL
-          && game.status() != GameStatus.FINAL;
+      boolean wouldUndoResult =
+          existing != null
+              && existing.status() == GameStatus.FINAL
+              && game.status() != GameStatus.FINAL;
       if (!wouldUndoResult) {
         games.put(game.id(), game);
       }
@@ -64,10 +62,12 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
   // season.
   @Override
   public synchronized Optional<Team> findTeam(PredictionSnapshot snapshot, String teamId) {
-    boolean playsInSeason = games.values().stream()
-        .anyMatch(
-            game -> game.season() == snapshot.season()
-                && (teamId.equals(game.homeTeamId()) || teamId.equals(game.awayTeamId())));
+    boolean playsInSeason =
+        games.values().stream()
+            .anyMatch(
+                game ->
+                    game.season() == snapshot.season()
+                        && (teamId.equals(game.homeTeamId()) || teamId.equals(game.awayTeamId())));
     return playsInSeason ? Optional.ofNullable(teams.get(teamId)) : Optional.empty();
   }
 
@@ -86,14 +86,17 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
   public synchronized List<Game> findGames(GameFilter filter) {
     return games.values().stream()
         .filter(
-            game -> filter.teamId() == null
-                || filter.teamId().equals(game.homeTeamId())
-                || filter.teamId().equals(game.awayTeamId()))
+            game ->
+                filter.teamId() == null
+                    || filter.teamId().equals(game.homeTeamId())
+                    || filter.teamId().equals(game.awayTeamId()))
         .filter(
-            game -> filter.date() == null
-                || (game.scheduledAt() != null
-                    && filter.date().equals(
-                        game.scheduledAt().atOffset(ZoneOffset.UTC).toLocalDate())))
+            game ->
+                filter.date() == null
+                    || (game.scheduledAt() != null
+                        && filter
+                            .date()
+                            .equals(game.scheduledAt().atOffset(ZoneOffset.UTC).toLocalDate())))
         .filter(game -> filter.status() == null || filter.status() == game.status())
         .filter(game -> filter.season() == null || filter.season() == game.season())
         .toList();
