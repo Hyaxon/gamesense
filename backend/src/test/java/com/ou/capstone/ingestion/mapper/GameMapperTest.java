@@ -1,13 +1,12 @@
-package com.ou.capstone.ingestion.historical;
+package com.ou.capstone.ingestion.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.GameStatus;
 import com.ou.capstone.domain.Team;
-import com.ou.capstone.ingestion.historical.mapper.GameMapper;
-import com.ou.capstone.ingestion.historical.raw.RawScheduleEntry;
-import com.ou.capstone.ingestion.historical.raw.RawTeam;
+import com.ou.capstone.ingestion.source.SourceScheduleEntry;
+import com.ou.capstone.ingestion.source.SourceTeam;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -29,18 +28,18 @@ class GameMapperTest {
     return map;
   }
 
-  private static RawScheduleEntry row(
+  private static SourceScheduleEntry row(
       String date,
       String location,
       String opponent,
       String outcome,
       String scored,
       String allowed) {
-    return new RawScheduleEntry(date, location, opponent, outcome, scored, allowed);
+    return new SourceScheduleEntry("0", date, null, location, opponent, outcome, scored, allowed);
   }
 
-  private static RawTeam rawTeam(String name, RawScheduleEntry... rows) {
-    return new RawTeam(name, "Test Conference", List.of(rows));
+  private static SourceTeam rawTeam(String name, SourceScheduleEntry... rows) {
+    return new SourceTeam(name, "Test Conference", List.of(rows));
   }
 
   @Test

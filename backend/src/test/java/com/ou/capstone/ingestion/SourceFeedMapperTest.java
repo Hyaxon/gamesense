@@ -1,29 +1,30 @@
-package com.ou.capstone.ingestion.historical;
+package com.ou.capstone.ingestion;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.Team;
-import com.ou.capstone.ingestion.historical.raw.RawFeed;
-import com.ou.capstone.ingestion.historical.raw.RawScheduleEntry;
-import com.ou.capstone.ingestion.historical.raw.RawTeam;
+import com.ou.capstone.ingestion.historical.HistoricalJsonReader;
+import com.ou.capstone.ingestion.source.SourceFeed;
+import com.ou.capstone.ingestion.source.SourceScheduleEntry;
+import com.ou.capstone.ingestion.source.SourceTeam;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
-class HistoricalIngestionServiceTest {
-  private final HistoricalIngestionService service = new HistoricalIngestionService();
+class SourceFeedMapperTest {
+  private final SourceFeedMapper mapper = new SourceFeedMapper();
 
-  private static RawScheduleEntry entry(
+  private static SourceScheduleEntry entry(
       String date,
       String location,
       String opponent,
       String outcome,
       String scored,
       String allowed) {
-    return new RawScheduleEntry(date, location, opponent, outcome, scored, allowed);
+    return new SourceScheduleEntry("0", date, null, location, opponent, outcome, scored, allowed);
   }
 
   @Test
@@ -31,7 +32,7 @@ class HistoricalIngestionServiceTest {
     Path path =
         Path.of(getClass().getResource("/fixtures/historical/sample-schedule.json").toURI());
 
-    IngestionResult result = service.ingest(path);
+    IngestionResult result = mapper.map(new HistoricalJsonReader().read(path));
 
     assertEquals(3, result.teams().size());
     assertEquals(2, result.conferences().size());
@@ -47,17 +48,17 @@ class HistoricalIngestionServiceTest {
 
   @Test
   void badTeamIsSkippedAndTheRestStillLoads() {
-    RawFeed feed =
-        new RawFeed(
+    SourceFeed feed =
+        new SourceFeed(
             List.of(
-                new RawTeam(
+                new SourceTeam(
                     "Michigan State",
                     "Big Ten Conference",
                     List.of(entry("10/25/2025", "vs.", "Michigan", "L", "20", "31"))),
-                new RawTeam("Michigan", "Big Ten Conference", List.of()),
-                new RawTeam("No Conference U", "", List.of())));
+                new SourceTeam("Michigan", "Big Ten Conference", List.of()),
+                new SourceTeam("No Conference U", "", List.of())));
 
-    IngestionResult result = service.ingest(feed);
+    IngestionResult result = mapper.map(feed);
 
     assertEquals(2, result.teams().size());
     assertEquals(1, result.conferences().size());
@@ -67,18 +68,18 @@ class HistoricalIngestionServiceTest {
 
   @Test
   void processesMultipleSeasons() {
-    RawFeed feed =
-        new RawFeed(
+    SourceFeed feed =
+        new SourceFeed(
             List.of(
-                new RawTeam(
+                new SourceTeam(
                     "Michigan State",
                     "Big Ten Conference",
                     List.of(
                         entry("10/25/2024", "vs.", "Michigan", "W", "24", "17"),
                         entry("10/25/2025", "vs.", "Michigan", "L", "20", "31"))),
-                new RawTeam("Michigan", "Big Ten Conference", List.of())));
+                new SourceTeam("Michigan", "Big Ten Conference", List.of())));
 
-    IngestionResult result = service.ingest(feed);
+    IngestionResult result = mapper.map(feed);
 
     Set<Integer> seasons = result.games().stream().map(Game::season).collect(Collectors.toSet());
     assertEquals(Set.of(2024, 2025), seasons);

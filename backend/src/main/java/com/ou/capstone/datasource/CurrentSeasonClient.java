@@ -1,6 +1,7 @@
 package com.ou.capstone.datasource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ou.capstone.ingestion.source.SourceFeed;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.springframework.http.ResponseEntity;

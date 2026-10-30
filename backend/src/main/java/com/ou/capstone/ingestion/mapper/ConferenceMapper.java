@@ -1,7 +1,7 @@
-package com.ou.capstone.ingestion.historical.mapper;
+package com.ou.capstone.ingestion.mapper;
 
 import com.ou.capstone.domain.Conference;
-import com.ou.capstone.ingestion.historical.raw.RawTeam;
+import com.ou.capstone.ingestion.source.SourceTeam;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -10,11 +10,11 @@ import java.util.Set;
 /** builds the list of conferences */
 public class ConferenceMapper {
 
-  public List<Conference> map(List<RawTeam> rawTeams) {
+  public List<Conference> map(List<SourceTeam> rawTeams) {
 
     // set so each conference only shows up once
     Set<String> names = new LinkedHashSet<>();
-    for (RawTeam raw : rawTeams) {
+    for (SourceTeam raw : rawTeams) {
 
       // blank leagues are skipped here, TeamMapper already flags them as malformed
       if (raw.league() == null || raw.league().isBlank()) {
