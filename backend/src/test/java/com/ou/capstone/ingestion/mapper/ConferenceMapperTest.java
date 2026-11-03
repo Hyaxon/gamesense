@@ -1,10 +1,9 @@
-package com.ou.capstone.ingestion.historical;
+package com.ou.capstone.ingestion.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.ou.capstone.domain.Conference;
-import com.ou.capstone.ingestion.historical.mapper.ConferenceMapper;
-import com.ou.capstone.ingestion.historical.raw.RawTeam;
+import com.ou.capstone.ingestion.source.SourceTeam;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -13,11 +12,11 @@ class ConferenceMapperTest {
 
   @Test
   void mapsDistinctConferences() {
-    List<RawTeam> teams =
+    List<SourceTeam> teams =
         List.of(
-            new RawTeam("Michigan State Spartans", "Big Ten Conference", List.of()),
-            new RawTeam("Michigan Wolverines", "Big Ten Conference", List.of()),
-            new RawTeam("Washington State Cougars", "Pacific 12 Conference", List.of()));
+            new SourceTeam("Michigan State Spartans", "Big Ten Conference", List.of()),
+            new SourceTeam("Michigan Wolverines", "Big Ten Conference", List.of()),
+            new SourceTeam("Washington State Cougars", "Pacific 12 Conference", List.of()));
 
     List<Conference> result = mapper.map(teams);
 
@@ -29,11 +28,11 @@ class ConferenceMapperTest {
 
   @Test
   void skipsBlankConferences() {
-    List<RawTeam> teams =
+    List<SourceTeam> teams =
         List.of(
-            new RawTeam("Some Team", "", List.of()),
-            new RawTeam("Other Team", null, List.of()),
-            new RawTeam("Michigan State Spartans", "Big Ten Conference", List.of()));
+            new SourceTeam("Some Team", "", List.of()),
+            new SourceTeam("Other Team", null, List.of()),
+            new SourceTeam("Michigan State Spartans", "Big Ten Conference", List.of()));
 
     List<Conference> result = mapper.map(teams);
 

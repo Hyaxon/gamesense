@@ -1,4 +1,4 @@
-package com.ou.capstone.ingestion.historical;
+package com.ou.capstone.ingestion;
 
 import com.ou.capstone.domain.Conference;
 import com.ou.capstone.domain.Game;

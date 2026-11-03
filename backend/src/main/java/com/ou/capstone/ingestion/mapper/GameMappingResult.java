@@ -1,4 +1,4 @@
-package com.ou.capstone.ingestion.historical.mapper;
+package com.ou.capstone.ingestion.mapper;
 
 import com.ou.capstone.domain.Game;
 import java.util.List;

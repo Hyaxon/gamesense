@@ -1,12 +1,13 @@
-package com.ou.capstone.ingestion.historical;
+package com.ou.capstone.ingestion;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.ou.capstone.ingestion.historical.raw.RawFeed;
-import com.ou.capstone.ingestion.historical.raw.RawScheduleEntry;
-import com.ou.capstone.ingestion.historical.raw.RawTeam;
+import com.ou.capstone.ingestion.historical.HistoricalJsonReader;
+import com.ou.capstone.ingestion.source.SourceFeed;
+import com.ou.capstone.ingestion.source.SourceScheduleEntry;
+import com.ou.capstone.ingestion.source.SourceTeam;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,31 +17,31 @@ import org.junit.jupiter.api.io.TempDir;
 
 /** Edge cases for the whole pipeline: missing, malformed, and unusual records. */
 class IngestionEdgeCaseTest {
-  private final HistoricalIngestionService service = new HistoricalIngestionService();
+  private final SourceFeedMapper mapper = new SourceFeedMapper();
   private final HistoricalJsonReader reader = new HistoricalJsonReader();
 
-  private static RawScheduleEntry entry(
+  private static SourceScheduleEntry entry(
       String date,
       String location,
       String opponent,
       String outcome,
       String scored,
       String allowed) {
-    return new RawScheduleEntry(date, location, opponent, outcome, scored, allowed);
+    return new SourceScheduleEntry("0", date, null, location, opponent, outcome, scored, allowed);
   }
 
   // two valid teams, with the given row on Michigan State's schedule
-  private static RawFeed twoTeams(RawScheduleEntry row) {
-    return new RawFeed(
+  private static SourceFeed twoTeams(SourceScheduleEntry row) {
+    return new SourceFeed(
         List.of(
-            new RawTeam("Michigan State", "Big Ten Conference", List.of(row)),
-            new RawTeam("Michigan", "Big Ten Conference", List.of())));
+            new SourceTeam("Michigan State", "Big Ten Conference", List.of(row)),
+            new SourceTeam("Michigan", "Big Ten Conference", List.of())));
   }
 
   @Test
   void unknownLocationIsSkipped() {
     IngestionResult result =
-        service.ingest(twoTeams(entry("10/25/2025", "X", "Michigan", "L", "20", "31")));
+        mapper.map(twoTeams(entry("10/25/2025", "X", "Michigan", "L", "20", "31")));
 
     assertEquals(2, result.teams().size());
     assertTrue(result.games().isEmpty());
@@ -50,7 +51,7 @@ class IngestionEdgeCaseTest {
   @Test
   void missingOutcomeIsSkipped() {
     IngestionResult result =
-        service.ingest(twoTeams(entry("10/25/2025", "vs.", "Michigan", "", "20", "31")));
+        mapper.map(twoTeams(entry("10/25/2025", "vs.", "Michigan", "", "20", "31")));
 
     assertTrue(result.games().isEmpty());
     assertEquals(1, result.skipped().size());
@@ -59,7 +60,7 @@ class IngestionEdgeCaseTest {
   @Test
   void negativeScoreIsSkipped() {
     IngestionResult result =
-        service.ingest(twoTeams(entry("10/25/2025", "vs.", "Michigan", "L", "-5", "31")));
+        mapper.map(twoTeams(entry("10/25/2025", "vs.", "Michigan", "L", "-5", "31")));
 
     assertTrue(result.games().isEmpty());
     assertEquals(1, result.skipped().size());
@@ -67,8 +68,7 @@ class IngestionEdgeCaseTest {
 
   @Test
   void missingOpponentOnARealGameIsSkipped() {
-    IngestionResult result =
-        service.ingest(twoTeams(entry("10/25/2025", "vs.", "", "L", "20", "31")));
+    IngestionResult result = mapper.map(twoTeams(entry("10/25/2025", "vs.", "", "L", "20", "31")));
 
     assertTrue(result.games().isEmpty());
     assertEquals(1, result.skipped().size());
@@ -76,9 +76,10 @@ class IngestionEdgeCaseTest {
 
   @Test
   void teamWithNoScheduleStillLoads() {
-    RawFeed feed = new RawFeed(List.of(new RawTeam("Michigan State", "Big Ten Conference", null)));
+    SourceFeed feed =
+        new SourceFeed(List.of(new SourceTeam("Michigan State", "Big Ten Conference", null)));
 
-    IngestionResult result = service.ingest(feed);
+    IngestionResult result = mapper.map(feed);
 
     assertEquals(1, result.teams().size());
     assertEquals(1, result.conferences().size());
@@ -88,8 +89,8 @@ class IngestionEdgeCaseTest {
 
   @Test
   void emptyFeedGivesEmptyResult() {
-    IngestionResult nullTeams = service.ingest(new RawFeed(null));
-    IngestionResult noTeams = service.ingest(new RawFeed(List.of()));
+    IngestionResult nullTeams = mapper.map(new SourceFeed(null));
+    IngestionResult noTeams = mapper.map(new SourceFeed(List.of()));
 
     assertTrue(nullTeams.teams().isEmpty());
     assertTrue(nullTeams.games().isEmpty());
@@ -99,13 +100,13 @@ class IngestionEdgeCaseTest {
 
   @Test
   void duplicateTeamNameIsSkipped() {
-    RawFeed feed =
-        new RawFeed(
+    SourceFeed feed =
+        new SourceFeed(
             List.of(
-                new RawTeam("Michigan State", "Big Ten Conference", List.of()),
-                new RawTeam("Michigan State", "Big Ten Conference", List.of())));
+                new SourceTeam("Michigan State", "Big Ten Conference", List.of()),
+                new SourceTeam("Michigan State", "Big Ten Conference", List.of())));
 
-    IngestionResult result = service.ingest(feed);
+    IngestionResult result = mapper.map(feed);
 
     assertEquals(1, result.teams().size());
     assertEquals(1, result.skipped().size());
@@ -113,16 +114,16 @@ class IngestionEdgeCaseTest {
 
   @Test
   void extraSpacesInNamesAreTrimmed() {
-    RawFeed feed =
-        new RawFeed(
+    SourceFeed feed =
+        new SourceFeed(
             List.of(
-                new RawTeam(
+                new SourceTeam(
                     " Michigan State ",
                     "Big Ten Conference",
                     List.of(entry("10/25/2025", "vs.", " Michigan ", "L", "20", "31"))),
-                new RawTeam("Michigan", "Big Ten Conference", List.of())));
+                new SourceTeam("Michigan", "Big Ten Conference", List.of())));
 
-    IngestionResult result = service.ingest(feed);
+    IngestionResult result = mapper.map(feed);
 
     assertEquals("Michigan State", result.teams().get(0).name());
     assertEquals(1, result.games().size());

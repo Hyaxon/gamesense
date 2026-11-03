@@ -1,9 +1,8 @@
-package com.ou.capstone.ingestion.historical.mapper;
+package com.ou.capstone.ingestion.mapper;
 
 import com.ou.capstone.domain.Team;
-import com.ou.capstone.ingestion.historical.MalformedRecordException;
-import com.ou.capstone.ingestion.historical.raw.RawTeam;
-import java.util.UUID;
+import com.ou.capstone.ingestion.MalformedRecordException;
+import com.ou.capstone.ingestion.source.SourceTeam;
 
 /**
  * turns one raw team into one canonical Team.
@@ -12,7 +11,7 @@ import java.util.UUID;
  */
 public class TeamMapper {
 
-  public Team map(RawTeam raw) {
+  public Team map(SourceTeam raw) {
 
     // required fields, blank counts as missing
     if (raw.name() == null || raw.name().isBlank()) {
@@ -23,7 +22,7 @@ public class TeamMapper {
     }
     String name = raw.name().trim();
     return new Team(
-        UUID.randomUUID().toString(),
+        CanonicalIds.teamId(name),
         name, // externalId, the feed has no other id
         name,
         null, // shortName, not in the feed

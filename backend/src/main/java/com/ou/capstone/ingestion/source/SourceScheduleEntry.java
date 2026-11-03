@@ -1,4 +1,4 @@
-package com.ou.capstone.datasource;
+package com.ou.capstone.ingestion.source;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
