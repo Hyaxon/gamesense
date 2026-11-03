@@ -25,17 +25,19 @@ Commit `package.json` and `package-lock.json` when dependencies change. Do not c
 
 Run these commands from `frontend/`:
 
-| Command                | Purpose                                                         |
-| ---------------------- | --------------------------------------------------------------- |
-| `npm ci`               | Install the exact locked dependencies for a clean installation. |
-| `npm test`             | Run the frontend JavaScript unit tests once with Vitest.        |
-| `npm run test:watch`   | Rerun unit tests as files change during development.            |
-| `npm run build`        | Create the production build in `dist/`.                         |
-| `npm run preview`      | Serve the production build locally after building.              |
-| `npm run lint`         | Run ESLint on JavaScript and JSX, including tests.              |
-| `npm run lint:fix`     | Apply automatic ESLint fixes.                                   |
-| `npm run format:check` | Check frontend formatting with Prettier.                        |
-| `npm run format`       | Apply Prettier formatting.                                      |
+| Command                     | Purpose                                                         |
+| --------------------------- | --------------------------------------------------------------- |
+| `npm ci`                    | Install the exact locked dependencies for a clean installation. |
+| `npm test`                  | Run the frontend JavaScript unit tests once with Vitest.        |
+| `npm run test:watch`        | Rerun unit tests as files change during development.            |
+| `npm run build`             | Create the production build in `dist/`.                         |
+| `npm run preview`           | Serve the production build locally after building.              |
+| `npm run lint`              | Run ESLint on JavaScript and JSX, including tests.              |
+| `npm run lint:markdown`     | Check repository Markdown spacing.                              |
+| `npm run lint:markdown:fix` | Apply automatic Markdown spacing fixes across the repository.   |
+| `npm run lint:fix`          | Apply automatic ESLint fixes.                                   |
+| `npm run format:check`      | Check frontend formatting with Prettier.                        |
+| `npm run format`            | Apply Prettier formatting.                                      |
 
 ESLint is configured in `eslint.config.js`; Prettier uses the repository's `.prettierrc.json`. See [standards](../docs/standards/README.md) for the shared conventions.
 
@@ -79,6 +81,30 @@ Production hosting must serve `index.html` for application routes so direct visi
 At widths of 1024px and below, the sections stack with Upcoming Games first. The region headings and the Upcoming Games subheading are the only visible placeholder content. No game data, controls, images, or API calls are required. Future Games List and Game Breakdown components can replace the comments beneath each heading; these components should reuse or replace the region headings as appropriate to avoid duplicate titles.
 
 To validate, visit `/games` at a desktop width (for example, 1440px) and confirm the two equally sized regions appear side by side. Resize to 1024px, 768px, and 320px and confirm they stack, retain spacing, and stay within the viewport. Reload `/games` directly and verify the Games navigation item remains active.
+
+## Backend API integration
+
+The Games page currently renders layout only; it does not fetch game data. The backend now
+provides `GET /games` and `GET /games/{gameId}` on `http://localhost:8080`. See the
+[backend setup and API reference](../backend/README.md) for startup requirements and examples.
+The frontend can still run on its own for layout development.
+
+The list endpoint accepts optional `teamId`, `date` (`YYYY-MM-DD` in UTC), `status`, and
+`season` parameters. Supplied filters combine with AND, and `teamId` matches either team.
+For example, from a terminal:
+
+```bash
+curl 'http://localhost:8080/games?date=2025-09-06&status=FINAL&season=2025'
+```
+
+Responses are arrays of canonical games, including an empty array when no games match.
+Use a returned game's `id` for single-game requests and its `homeTeamId` or `awayTeamId`
+for team filters. A missing single game returns `404`.
+
+There is currently no Vite API proxy or backend CORS configuration. Browser integration
+will need a development proxy or an explicit backend CORS policy for the frontend origin.
+The frontend `/games` page route and backend `/games` API share a path but run on different
+ports; a relative fetch currently goes to the Vite server.
 
 ## Project structure
 

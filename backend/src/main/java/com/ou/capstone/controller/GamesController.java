@@ -29,18 +29,20 @@ public class GamesController {
     this.canonicalDataProvider = canonicalDataProvider;
   }
 
-  // One handler allows optional criteria to be combined without competing route
-  // mappings.
+  // One handler allows optional criteria to be combined without 
+  // competing route mappings.
   // example usage:
   // GET /games?teamId={teamId}&date=2025-09-06&status=FINAL&season=2025
   @GetMapping
-  public List<Game> getGames(
+  public List<GameResponse> getGames(
       @RequestParam(name = "teamId", required = false) String teamId,
       @RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
           LocalDate date,
       @RequestParam(name = "status", required = false) GameStatus status,
       @RequestParam(name = "season", required = false) Integer season) {
-    return canonicalDataProvider.findGames(new GameFilter(teamId, date, status, season));
+    return canonicalDataProvider.findGames(new GameFilter(teamId, date, status, season)).stream()
+        .map(this::toResponse)
+        .toList();
   }
 
   // Uses canonical IDs to keep lookups independent of
@@ -49,7 +51,14 @@ public class GamesController {
   // successful lookup.
   // example usage: GET /games/{gameId}
   @GetMapping("/{gameId}")
-  public ResponseEntity<Game> getGame(@PathVariable String gameId) {
-    return ResponseEntity.of(canonicalDataProvider.findGame(gameId));
+  public ResponseEntity<GameResponse> getGame(@PathVariable String gameId) {
+    return ResponseEntity.of(canonicalDataProvider.findGame(gameId).map(this::toResponse));
+  }
+
+  private GameResponse toResponse(Game game) {
+    return new GameResponse(
+        game,
+        canonicalDataProvider.findTeam(game.homeTeamId()).orElse(null),
+        canonicalDataProvider.findTeam(game.awayTeamId()).orElse(null));
   }
 }

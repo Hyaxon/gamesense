@@ -104,6 +104,7 @@ def main():
     if missing:
         raise ValidationError(f'Schemas without examples: {missing}')
 
+    validators['game-response'].validate(examples['game'])
     checks = []
 
     def reject(name, mutate):
@@ -113,6 +114,10 @@ def main():
             raise ValidationError(f'Accepted invalid {name}: {payload}')
         checks.append(name)
 
+    reject('game-response', lambda p: p['homeTeam'].pop('conference'))
+    reject('game-response', lambda p: p.update(homeTeam=None))
+    reject('game-response', lambda p: p.update(extra=True))
+    reject('game-response', lambda p: p.pop('homeTeamId'))
     reject('custom-prediction-request', lambda p: p.pop('matchup'))
     reject('custom-prediction-request', lambda p: p['matchup'].update(season=None))
     reject('custom-prediction-request', lambda p: p['matchup'].update(season='2025'))

@@ -269,7 +269,7 @@ Used to verify that the backend service is available.
 
 ### `GET /games`
 
-Returns `200` with a JSON array of canonical games. No matches returns `[]`.
+Returns `200` with a JSON array of enriched game responses. No matches returns `[]`.
 All parameters are optional; multiple parameters combine with AND.
 
 | Parameter | Meaning                                                           |
@@ -287,7 +287,16 @@ Games without a scheduled timestamp do not match a supplied date.
 
 Returns `200` with one game object, or `404` when the canonical ID is not stored.
 Use `id`, not `externalId`, from a listing response. Responses follow the
-[shared game schema](../shared/schemas/game.schema.json); null fields are omitted.
+[shared game response schema](../shared/schemas/game-response.schema.json); null fields are omitted.
+Both endpoints retain the canonical game fields at the top level and add `homeTeam` and
+`awayTeam`, each following the complete [Team schema](../shared/schemas/team.schema.json).
+These include `id`, `name`, and `conference`, plus available optional fields such as
+`shortName` and `logoUrl`. If a team lookup is unavailable, that team object is omitted;
+`homeTeamId` and `awayTeamId` remain present. Embedded teams reflect the currently loaded
+team data, not historical names or conference membership at game time.
+The internal Game model and its schema remain unchanged. Consumers validating HTTP
+responses must use GameResponse instead of Game. See the
+[example response](../shared/examples/game-response.json).
 
 ### Try the games endpoints
 

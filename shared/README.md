@@ -51,3 +51,7 @@ Schema validation does not establish whether referenced teams exist, a winner be
 ## Contract review
 
 The API contracts are proposed for team review. Confirm season semantics and the proposed simulation trial limit before accepting them. Structural validation and application-level semantic checks are documented separately in the API schema documentation.
+
+Game HTTP endpoints use [GameResponse](schemas/game-response.schema.json), which preserves
+canonical Game fields and embeds available complete Team objects as `homeTeam` and
+`awayTeam`. Missing teams are omitted. Internal Game contracts remain unchanged.

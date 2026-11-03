@@ -10,6 +10,7 @@ import com.ou.capstone.data.GameFilter;
 import com.ou.capstone.data.InMemoryCanonicalDataStore;
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.GameStatus;
+import com.ou.capstone.domain.Team;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -67,6 +68,17 @@ class GamesControllerTest {
   void setUp() {
     // Exercise HTTP binding and serialization without triggering startup ingestion or live
     // requests.
+    provider.load(
+        List.of(
+            new Team("home", null, "Oklahoma Sooners", "Oklahoma", "Southeastern Conference", null),
+            new Team(
+                "away",
+                null,
+                "Texas Longhorns",
+                "Texas",
+                "Southeastern Conference",
+                "https://example.com/texas.png")),
+        List.of());
     mvc = MockMvcBuilders.standaloneSetup(new GamesController(provider)).build();
   }
 
@@ -80,7 +92,9 @@ class GamesControllerTest {
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.length()").value(1))
         .andExpect(jsonPath("$[0].id").value("game-1"))
-        .andExpect(jsonPath("$[0].status").value("FINAL"));
+        .andExpect(jsonPath("$[0].status").value("FINAL"))
+        .andExpect(jsonPath("$[0].homeTeam.name").value("Oklahoma Sooners"))
+        .andExpect(jsonPath("$[0].awayTeam.name").value("Texas Longhorns"));
     assertThat(provider.filter).isEqualTo(filter);
   }
 
@@ -125,8 +139,38 @@ class GamesControllerTest {
     mvc.perform(get("/games/game-1"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value("game-1"))
-        .andExpect(jsonPath("$.homeScore").value(21));
+        .andExpect(jsonPath("$.homeScore").value(21))
+        .andExpect(jsonPath("$.homeTeamId").value("home"))
+        .andExpect(jsonPath("$.awayTeamId").value("away"))
+        .andExpect(jsonPath("$.homeTeam.id").value("home"))
+        .andExpect(jsonPath("$.homeTeam.conference").value("Southeastern Conference"))
+        .andExpect(jsonPath("$.homeTeam.logoUrl").doesNotExist())
+        .andExpect(jsonPath("$.awayTeam.id").value("away"))
+        .andExpect(jsonPath("$.awayTeam.shortName").value("Texas"))
+        .andExpect(jsonPath("$.awayTeam.logoUrl").value("https://example.com/texas.png"))
+        .andExpect(jsonPath("$.game").doesNotExist());
     assertThat(provider.gameId).isEqualTo("game-1");
+  }
+
+  @Test
+  void missingTeamsAreOmittedWithoutLosingGameReferences() throws Exception {
+    RecordingProvider emptyTeams = new RecordingProvider();
+    emptyTeams.result = Optional.of(game);
+    emptyTeams.results = List.of(game);
+    MockMvc missingTeamsMvc =
+        MockMvcBuilders.standaloneSetup(new GamesController(emptyTeams)).build();
+    missingTeamsMvc
+        .perform(get("/games/game-1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.homeTeamId").value("home"))
+        .andExpect(jsonPath("$.awayTeamId").value("away"))
+        .andExpect(jsonPath("$.homeTeam").doesNotExist())
+        .andExpect(jsonPath("$.awayTeam").doesNotExist());
+    missingTeamsMvc
+        .perform(get("/games"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].id").value("game-1"))
+        .andExpect(jsonPath("$[0].homeTeam").doesNotExist());
   }
 
   @Test

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/game-response.schema.json",
+  "title": "GameResponse",
+  "description": "GET /games items and GET /games/{gameId}: canonical game fields with available teams. Team objects are omitted when unavailable; IDs remain present. Embedded team IDs match their corresponding game references.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "game.schema.json#/properties/id"
+    },
+    "externalId": {
+      "$ref": "game.schema.json#/properties/externalId"
+    },
+    "season": {
+      "$ref": "game.schema.json#/properties/season"
+    },
+    "week": {
+      "$ref": "game.schema.json#/properties/week"
+    },
+    "homeTeamId": {
+      "$ref": "game.schema.json#/properties/homeTeamId"
+    },
+    "awayTeamId": {
+      "$ref": "game.schema.json#/properties/awayTeamId"
+    },
+    "venue": {
+      "$ref": "game.schema.json#/properties/venue"
+    },
+    "isNeutralSite": {
+      "$ref": "game.schema.json#/properties/isNeutralSite"
+    },
+    "scheduledAt": {
+      "$ref": "game.schema.json#/properties/scheduledAt"
+    },
+    "status": {
+      "$ref": "game.schema.json#/properties/status"
+    },
+    "homeScore": {
+      "$ref": "game.schema.json#/properties/homeScore"
+    },
+    "awayScore": {
+      "$ref": "game.schema.json#/properties/awayScore"
+    },
+    "winnerTeamId": {
+      "$ref": "game.schema.json#/properties/winnerTeamId"
+    },
+    "homeTeam": {
+      "$ref": "team.schema.json"
+    },
+    "awayTeam": {
+      "$ref": "team.schema.json"
+    }
+  },
+  "required": [
+    "id",
+    "season",
+    "homeTeamId",
+    "awayTeamId",
+    "scheduledAt",
+    "status"
+  ],
+  "additionalProperties": false
+}
