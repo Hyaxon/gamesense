@@ -24,10 +24,8 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
   private final Map<String, Team> teams = new LinkedHashMap<>();
   private final Map<String, Game> games = new LinkedHashMap<>();
 
-  // Adds teams and games to the store. A team or game whose ID is already stored
-  // replaces
-  // the old one, except that a finished game is never replaced by an unfinished
-  // one.
+  // Adds teams and games to the store. A team or game whose ID is already stored replaces
+  // the old one, except that a finished game is never replaced by an unfinished one.
   public synchronized void load(Collection<Team> newTeams, Collection<Game> newGames) {
     for (Team team : newTeams) {
       teams.put(team.id(), team);
@@ -58,8 +56,7 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
         : Optional.empty();
   }
 
-  // A team is in a snapshot if it plays at least one game in that snapshot's
-  // season.
+  // A team is in a snapshot if it plays at least one game in that snapshot's season.
   @Override
   public synchronized Optional<Team> findTeam(PredictionSnapshot snapshot, String teamId) {
     boolean playsInSeason =

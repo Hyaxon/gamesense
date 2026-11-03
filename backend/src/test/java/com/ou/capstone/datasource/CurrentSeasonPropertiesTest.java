@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
     properties = {
-      "gamesense.ingestion.enabled=false",
       "gamesense.datasource.url=http://other-source.test/feed",
       "gamesense.datasource.read-timeout=10s"
     })

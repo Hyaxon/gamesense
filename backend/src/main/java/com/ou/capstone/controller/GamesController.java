@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Exposes canonical game data through /games. Uses CanonicalDataProvider so HTTP handlers remain
- * independent of the storage implementation. Loading happens during startup so retrieval requests
- * do not fetch the source feed again.
+ * independent of the storage implementation. Retrieval reads already loaded data and does not fetch
+ * source feeds.
  */
 @RestController
 @RequestMapping("/games")
@@ -29,7 +29,7 @@ public class GamesController {
     this.canonicalDataProvider = canonicalDataProvider;
   }
 
-  // One handler allows optional criteria to be combined without 
+  // One handler allows optional criteria to be combined without
   // competing route mappings.
   // example usage:
   // GET /games?teamId={teamId}&date=2025-09-06&status=FINAL&season=2025
