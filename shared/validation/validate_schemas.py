@@ -104,6 +104,8 @@ def main():
     if missing:
         raise ValidationError(f'Schemas without examples: {missing}')
 
+    # The loop above validates the enriched game-response example. Also accept a
+    # canonical game when team lookups are unavailable and embedded teams are omitted.
     validators['game-response'].validate(examples['game'])
     checks = []
 
