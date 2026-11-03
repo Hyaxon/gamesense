@@ -88,7 +88,7 @@ Run the following commands from the `backend/` directory.
 
 ## Running the Backend
 
-Run from `backend/` so the historical file's relative path resolves correctly:
+Run from `backend/`:
 
 ```bash
 ./mvnw spring-boot:run
@@ -103,10 +103,24 @@ http://localhost:8080
 ---
 
 Startup ingestion is enabled by default. `BackendApplication` implements `ApplicationRunner`
-and loads the live current-season feed first, then `../data/historical/Schedule-2025.json`.
-Both network access and that historical file are required. An ingestion error fails startup;
+and loads the live current-season feed first, then the packaged historical dataset.
+Maven copies `data/historical/Schedule-2025.json` into the application classpath at build time,
+so historical loading does not depend on the launch directory. Network access is still required
+for the live feed. An ingestion error fails startup;
 if the live fetch fails, the historical load is not attempted. Wait for startup to complete
 before testing loaded results. The store is rebuilt on every restart and has no scheduled refresh.
+
+To use an external dataset, set `GAMESENSE_INGESTION_HISTORICAL_LOCATION` to an absolute
+file URI. For example, from the repository root after packaging:
+
+```bash
+GAMESENSE_INGESTION_HISTORICAL_LOCATION=file:/absolute/path/Schedule.json \
+  java -jar backend/target/backend-0.1.0.jar
+```
+
+Without the override, the JAR uses `classpath:historical/Schedule-2025.json`.
+Relative file overrides remain relative to the working directory; use an absolute URI
+for deployments. Missing or invalid configured datasets fail startup.
 
 To start without either data source:
 
@@ -174,7 +188,9 @@ Two sources feed one in-memory store: historical schedule files and the current-
 ```java
 // These calls are made by the startup runner when ingestion is enabled.
 currentSeasonIngestionService.loadCurrentSeason();
-historicalIngestionService.loadFile(Path.of("../data/historical/Schedule-2025.json"));
+// Startup reads the configured historical resource via loadStream.
+// Backend callers can also explicitly load an external file:
+historicalIngestionService.loadFile(Path.of("/absolute/path/Schedule.json"));
 
 // Retrieval, regardless of which source supplied the data.
 List<Game> games = canonicalDataProvider.findGames(2026);

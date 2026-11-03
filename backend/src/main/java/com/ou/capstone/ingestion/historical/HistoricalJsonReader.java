@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ou.capstone.ingestion.source.SourceFeed;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 /**
@@ -16,5 +17,9 @@ public class HistoricalJsonReader {
 
   public SourceFeed read(Path path) throws IOException {
     return mapper.readValue(path.toFile(), SourceFeed.class);
+  }
+
+  public SourceFeed read(InputStream input) throws IOException {
+    return mapper.readValue(input, SourceFeed.class);
   }
 }
