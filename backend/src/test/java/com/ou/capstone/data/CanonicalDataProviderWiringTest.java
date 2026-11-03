@@ -8,7 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 // Verifies the application supplies the canonical store as the existing PredictionDataProvider, so
 // orchestration and every other consumer use the same single access path.
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(
+    properties = "gamesense.ingestion.enabled=false",
+    webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class CanonicalDataProviderWiringTest {
 
   @Autowired private PredictionDataProvider predictionDataProvider;
