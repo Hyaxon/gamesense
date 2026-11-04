@@ -1,11 +1,11 @@
 // Circular gauge showing a prediction's confidence percentage and winner
 export default function ConfidenceGauge({
-  percentage = 50,
+  percentage,
   logo = '',
   color = '#3182ce',
 }) {
   // Ring size and how much of it to fill based on the percentage
-  const r = 26  
+  const r = 26
   const circ = 2 * Math.PI * r
   const offset = circ - (percentage / 100) * circ
 

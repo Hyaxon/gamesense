@@ -26,7 +26,7 @@ const DEFAULT_GAMES = [
 ]
 
 export default function GamesPage() {
-  const [games] = useState(DEFAULT_GAMES)
+  const games = DEFAULT_GAMES
   // Currently selected game, shared with the Game Breakdown later
   const [selectedGameId, setSelectedGameId] = useState(DEFAULT_GAMES[0].id)
 
