@@ -3,8 +3,11 @@ import { getUpcomingGames } from '../services/gamesApi'
 import { mapGameToCard } from '../utils/mapGameToCard'
 
 // A stable selector avoids remapping unchanged data on each render.
-// TanStack Query retains the original responses in the shared cache.
-const selectGameCards = (games) => games.map(mapGameToCard)
+// Sort a copy by kickoff time, earliest first, preserving the cached response order.
+const selectGameCards = (games) =>
+  [...games]
+    .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
+    .map(mapGameToCard)
 
 /** Shares scheduled games and request state through the application's query client. */
 export function useUpcomingGames() {
