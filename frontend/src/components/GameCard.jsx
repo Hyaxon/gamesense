@@ -2,7 +2,6 @@ import ConfidenceGauge from './ConfidenceGauge'
 
 // Reusable card for a single matchup in the Games List
 export default function GameCard({ game, isSelected, onSelect }) {
-
   // Prediction may be missing; use a neutral color when it is
   const pred = game.prediction
   const accentColor = pred ? pred.color : '#3182ce'
@@ -10,16 +9,13 @@ export default function GameCard({ game, isSelected, onSelect }) {
   // Clicking anywhere on the card selects this game
   return (
     <div
-      className={`game-list-item ${isSelected ? 'selected' : ''}`}
       onClick={() => onSelect(game)}
       style={{
         padding: '16px',
         marginBottom: '16px',
         borderRadius: '12px',
         cursor: 'pointer',
-        border: isSelected
-          ? `2px solid ${accentColor}`
-          : '1px solid #e2e8f0',
+        border: isSelected ? `2px solid ${accentColor}` : '1px solid #e2e8f0',
         backgroundColor: '#ffffff',
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
         transition: 'all 0.2s ease',
@@ -79,15 +75,14 @@ export default function GameCard({ game, isSelected, onSelect }) {
               }}
             >
               #{game.awayTeam.ranking || ''} {game.awayTeam.name} (
-              {game.awayTeam.record})<br />#
-              {game.homeTeam.ranking || ''} {game.homeTeam.name} (
-              {game.homeTeam.record})
+              {game.awayTeam.record})<br />#{game.homeTeam.ranking || ''}{' '}
+              {game.homeTeam.name} ({game.homeTeam.record})
             </div>
           </div>
         </div>
 
         {/* Predicted winner and confidence, or a label if unavailable */}
-        {pred ? (
+        {pred?.percentage != null ? (
           <ConfidenceGauge
             percentage={pred.percentage}
             logo={pred.winnerLogo}
