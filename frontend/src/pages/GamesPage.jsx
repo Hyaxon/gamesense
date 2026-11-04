@@ -14,14 +14,14 @@ const DEFAULT_GAMES = [
       record: '5-2',
       logo: 'MSST',
     },
-    prediction: { winnerLogo: 'OU', percentage: 58, color: '#841617' },
+    prediction: { winnerLogo: 'OU', percentage: 58, color: '#841617' }, //removing this line will cause the confidence gauge to show "Prediction not available" for this game
   },
   {
     id: 2,
     dateTime: 'Sat, Oct 24 • 12:00 PM',
     awayTeam: { name: 'Michigan', ranking: 12, record: '5-2', logo: 'MICH' },
     homeTeam: { name: 'Oregon', ranking: 4, record: '7-0', logo: 'ORE' },
-    prediction: { winnerLogo: 'ORE', percentage: 61, color: '#154734' },
+    prediction: { winnerLogo: 'ORE', percentage: 61, color: '#154734' }, //removing this line will cause the confidence gauge to show "Prediction not available" for this game
   },
 ]
 
