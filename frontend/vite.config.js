@@ -4,6 +4,7 @@ import { defineConfig } from 'vitest/config'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Development only: forward API paths unchanged to Java on port 8080.
   server: {
     proxy: {
       '/api': {

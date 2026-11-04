@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.jsx'
 
+// Share one in-memory cache across renders and routes; a full reload resets it.
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')).render(

@@ -4,6 +4,7 @@ import GamesList from '../components/GamesList'
 import { useUpcomingGames } from '../hooks/useUpcomingGames'
 import './GamesPage.css'
 
+// Coordinates list request states and selection; fetching stays in the query hook.
 export default function GamesPage() {
   const {
     data: games,
@@ -30,6 +31,8 @@ export default function GamesPage() {
         <p className="section-subheading">
           Predictions provided by multiple prediction models
         </p>
+        {/* Distinguish absent data from a successful empty list. Keep cached cards
+            visible during background refreshes, including failed refreshes. */}
         {isPending ? (
           <p role="status">
             {isFetching
