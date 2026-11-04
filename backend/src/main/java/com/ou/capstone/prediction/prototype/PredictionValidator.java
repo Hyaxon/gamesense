@@ -1,4 +1,4 @@
-package com.ou.capstone;
+package com.ou.capstone.prediction.prototype;
 
 // Checks whether a Prediction is well-formed before it gets used downstream (stored, displayed, or
 // compared against other methods).

@@ -273,9 +273,11 @@ python examples/run_elo.py
 **Checkpoint:** the result has `status: "SUCCESS"`, `method: "ELO"`, and a
 prediction with a matchup team as winner. A deterministic result has no simulation.
 
-This script registers the model for a local run. Wiring the model into future
-service startup is separate integration work. Do not add an HTTP endpoint to
-complete your model ticket.
+This script registers the model for a local run. To make an additional model
+available through the service, register it in trusted startup code as described
+in the [connectivity guide](prediction-service-connectivity.md). The existing
+execution endpoint delegates to the shared runner; individual model packages
+do not need their own HTTP endpoints.
 
 ## Step 7: Add framework integration tests
 

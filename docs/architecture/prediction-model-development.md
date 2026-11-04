@@ -9,7 +9,7 @@ The Python framework implements the common invocation and validation machinery
 specified in [Prediction Model Interface](prediction-model-interface.md).
 The [shared JSON schemas](../../shared/schemas/) remain the wire contracts.
 This guide explains the Python extension points for Elo, Monte Carlo, and other
-model packages. Algorithms, production ingestion, and Java transport are separate
+model packages. Additional algorithms and production ingestion are separate
 implementation work.
 
 ## Run the framework example
@@ -26,14 +26,16 @@ The [example adapter](../../prediction/examples/example_adapter.py) runs through
 the real registry and runner for all three execution kinds. Its probabilities are
 synthetic demonstration values; it does not implement Elo, random sampling, or
 an actual repeated-trial simulation. It rejects explicit seeds because it uses no
-randomness. It is not registered in the FastAPI application's production startup.
+randomness. It is not registered in FastAPI startup; the running service registers
+the real coin-flip adapter instead. See the
+[connectivity guide](prediction-service-connectivity.md).
 
 ## Directory structure
 
 ```text
 prediction/
 ├── src/gamesense_prediction/
-│   ├── main.py                     # FastAPI health endpoint
+│   ├── main.py                     # FastAPI health and execution endpoints
 │   ├── contracts.py                # Immutable Python DTOs and JSON conversion
 │   ├── context.py                  # Read-only teams, history, records, ratings
 │   ├── snapshots.py                # Trusted startup snapshot providers
@@ -231,8 +233,10 @@ resolves context, invokes the adapter once, and checks the response against the
 request and registered descriptor. Adapters must return the typed success/error
 union, not an arbitrary dictionary. A descriptor cannot change after registration.
 
-No prediction REST endpoint, Java transport, or production model registration is
-added by this framework. Those integrations can later use the same runner.
+The [HTTP integration](prediction-service-connectivity.md) now uses this runner
+from `POST /model-executions`. Startup explicitly registers coin flip and loads
+the configured snapshot. Additional adapters must be registered in trusted startup
+code; Java uses the same execution contract regardless of model family.
 
 ## 6. Test and submit your package
 

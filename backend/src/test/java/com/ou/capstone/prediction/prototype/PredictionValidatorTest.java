@@ -1,4 +1,4 @@
-package com.ou.capstone;
+package com.ou.capstone.prediction.prototype;
 
 import static org.junit.jupiter.api.Assertions.*;
 

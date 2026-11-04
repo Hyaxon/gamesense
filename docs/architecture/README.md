@@ -20,7 +20,10 @@ GameSense/
 
 - [Shared Domain Model](domain-model.md): the domain entities and data schema shared across the frontend, backend, and prediction service.
 - [Ingestion Notes](ingestion-notes.md): how Adam's data feed maps to the domain model, for whoever builds ingestion.
+- [Data Ingestion and Retrieval](data-ingestion.md): how historical and current-season data are mapped, merged into one store, and retrieved.
 - [Core API JSON Schemas](api-schemas.md): proposed payload contracts, examples, validation rules, and deferred additions.
 - [Prediction Model Interface](prediction-model-interface.md): common model invocation, capabilities, configuration, results, and errors.
 - [Prediction Model Development](prediction-model-development.md): implemented Python framework, model package structure, data access, registration, and testing.
 - [Prediction Model Walkthrough](prediction-model-walkthrough.md): step-by-step implementation instructions using the working coin-flip model and an Elo adapter example.
+
+- [Prediction Service Connectivity](prediction-service-connectivity.md): Java client, Python HTTP boundary, configuration, errors, and local testing.
