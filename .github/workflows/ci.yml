@@ -23,10 +23,10 @@ jobs:
         env:
           BRANCH_NAME: ${{ github.head_ref }}
         run: |
-          if [[ ! "$BRANCH_NAME" =~ ^s[0-9]+-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+          if [[ ! "$BRANCH_NAME" =~ ^tickets/s[0-9]+-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
             echo "Invalid branch name: $BRANCH_NAME"
-            echo "Expected format: tickets/<number>-<description>"
-            echo "Example: tickets/3-create-readme"
+            echo "Expected format: tickets/s<number>-<number>-<name>"
+            echo "Example: tickets/s2-8-games-api-connection"
             exit 1
           fi
 
