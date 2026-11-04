@@ -4,6 +4,7 @@ import com.ou.capstone.data.InMemoryCanonicalDataStore;
 import com.ou.capstone.ingestion.IngestionResult;
 import com.ou.capstone.ingestion.SourceFeedMapper;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,13 @@ public class HistoricalIngestionService {
   // Loads one historical file. Data already in the store is kept; the result lists skipped records.
   public IngestionResult loadFile(Path path) throws IOException {
     IngestionResult result = mapper.map(reader.read(path));
+    store.load(result.teams(), result.games());
+    return result;
+  }
+
+  // Supports packaged classpath resources as well as external files.
+  public IngestionResult loadStream(InputStream input) throws IOException {
+    IngestionResult result = mapper.map(reader.read(input));
     store.load(result.teams(), result.games());
     return result;
   }

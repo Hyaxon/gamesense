@@ -15,6 +15,9 @@ public interface CanonicalDataProvider extends PredictionDataProvider {
   // Every loaded game, across all seasons.
   List<Game> findAllGames();
 
+  // Queries the same canonical data with optional criteria, independent of storage technology.
+  List<Game> findGames(GameFilter filter);
+
   // Every loaded game in one season, or an empty list.
   List<Game> findGames(int season);
 
