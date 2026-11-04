@@ -87,7 +87,7 @@ class GamesControllerTest {
     GameFilter filter = new GameFilter(null, null, null, null);
     provider.results = List.of(game);
 
-    mvc.perform(get("/games"))
+    mvc.perform(get("/api/games"))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.length()").value(1))
@@ -102,7 +102,7 @@ class GamesControllerTest {
   void emptyListIsSuccessful() throws Exception {
     provider.results = List.of();
 
-    mvc.perform(get("/games")).andExpect(status().isOk()).andExpect(content().json("[]"));
+    mvc.perform(get("/api/games")).andExpect(status().isOk()).andExpect(content().json("[]"));
   }
 
   @Test
@@ -111,7 +111,7 @@ class GamesControllerTest {
     provider.results = List.of(game);
 
     mvc.perform(
-            get("/games")
+            get("/api/games")
                 .param("teamId", "away")
                 .param("date", "2025-09-06")
                 .param("status", "FINAL")
@@ -126,7 +126,7 @@ class GamesControllerTest {
     GameFilter filter = new GameFilter(null, null, GameStatus.SCHEDULED, null);
     provider.results = List.of();
 
-    mvc.perform(get("/games").param("status", "SCHEDULED"))
+    mvc.perform(get("/api/games").param("status", "SCHEDULED"))
         .andExpect(status().isOk())
         .andExpect(content().json("[]"));
     assertThat(provider.filter).isEqualTo(filter);
@@ -136,7 +136,7 @@ class GamesControllerTest {
   void knownIdReturnsGame() throws Exception {
     provider.result = Optional.of(game);
 
-    mvc.perform(get("/games/game-1"))
+    mvc.perform(get("/api/games/game-1"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value("game-1"))
         .andExpect(jsonPath("$.homeScore").value(21))
@@ -160,14 +160,14 @@ class GamesControllerTest {
     MockMvc missingTeamsMvc =
         MockMvcBuilders.standaloneSetup(new GamesController(emptyTeams)).build();
     missingTeamsMvc
-        .perform(get("/games/game-1"))
+        .perform(get("/api/games/game-1"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.homeTeamId").value("home"))
         .andExpect(jsonPath("$.awayTeamId").value("away"))
         .andExpect(jsonPath("$.homeTeam").doesNotExist())
         .andExpect(jsonPath("$.awayTeam").doesNotExist());
     missingTeamsMvc
-        .perform(get("/games"))
+        .perform(get("/api/games"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value("game-1"))
         .andExpect(jsonPath("$[0].homeTeam").doesNotExist());
@@ -177,7 +177,7 @@ class GamesControllerTest {
   void unknownIdReturnsNotFound() throws Exception {
     provider.result = Optional.empty();
 
-    mvc.perform(get("/games/missing"))
+    mvc.perform(get("/api/games/missing"))
         .andExpect(status().isNotFound())
         .andExpect(content().string(""));
   }
@@ -186,7 +186,7 @@ class GamesControllerTest {
   @CsvSource({"date,not-a-date", "date,2025-13-06", "status,UNKNOWN", "season,abc"})
   void invalidParametersReturnBadRequestBeforeQueryingStore(String parameter, String value)
       throws Exception {
-    mvc.perform(get("/games").param(parameter, value)).andExpect(status().isBadRequest());
+    mvc.perform(get("/api/games").param(parameter, value)).andExpect(status().isBadRequest());
     assertThat(provider.filter).isNull();
     assertThat(provider.gameId).isNull();
   }

@@ -358,7 +358,7 @@ Example: [team.json](../../shared/examples/team.json).
 
 ### GameResponse
 
-`GET /games` returns an array of GameResponse objects; `GET /games/{gameId}` returns one.
+`GET /api/games` returns an array of GameResponse objects; `GET /api/games/{gameId}` returns one.
 The response preserves every Game field at the top level, referencing its existing field
 schemas and required fields. Optional `homeTeam` and `awayTeam` each reference the full
 Team schema, including required `id`, `name`, and `conference`. The backend resolves each
