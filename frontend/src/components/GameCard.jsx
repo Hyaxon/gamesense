@@ -1,16 +1,11 @@
-import { useState } from 'react'
 import ConfidenceGauge from './ConfidenceGauge'
 
 // Reusable card for a single matchup in the Games List
 export default function GameCard({ game, isSelected, onSelect }) {
-// State tracking whether this card's details are expanded
-  const [isExpanded, setIsExpanded] = useState(false)
-// Fall back to a default prediction when none is provided
-  const pred = game.prediction || {
-    percentage: 50,
-    winnerLogo: game.awayTeam.logo,
-    color: '#3182ce',
-  }
+
+  // Prediction may be missing; use a neutral color when it is
+  const pred = game.prediction
+  const accentColor = pred ? pred.color : '#3182ce'
 
   // Clicking anywhere on the card selects this game
   return (
@@ -23,7 +18,7 @@ export default function GameCard({ game, isSelected, onSelect }) {
         borderRadius: '12px',
         cursor: 'pointer',
         border: isSelected
-          ? `2px solid ${pred.color}`
+          ? `2px solid ${accentColor}`
           : '1px solid #e2e8f0',
         backgroundColor: '#ffffff',
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
@@ -52,13 +47,13 @@ export default function GameCard({ game, isSelected, onSelect }) {
               height: '44px',
               borderRadius: '8px',
               backgroundColor: '#f7fafc',
-              border: `1px solid ${pred.color}40`,
+              border: `1px solid ${accentColor}40`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: '800',
               fontSize: '1rem',
-              color: pred.color,
+              color: accentColor,
               flexShrink: 0,
             }}
           >
@@ -91,12 +86,26 @@ export default function GameCard({ game, isSelected, onSelect }) {
           </div>
         </div>
 
-        {/* Predicted winner and confidence */}
-        <ConfidenceGauge
-          percentage={pred.percentage}
-          logo={pred.winnerLogo}
-          color={pred.color}
-        />
+        {/* Predicted winner and confidence, or a label if unavailable */}
+        {pred ? (
+          <ConfidenceGauge
+            percentage={pred.percentage}
+            logo={pred.winnerLogo}
+            color={pred.color}
+          />
+        ) : (
+          <span
+            style={{
+              width: '64px',
+              textAlign: 'center',
+              fontSize: '0.7rem',
+              fontWeight: '600',
+              color: '#718096',
+            }}
+          >
+            Prediction not available
+          </span>
+        )}
 
         {/* Game Date and Time header */}
         <div
@@ -120,12 +129,8 @@ export default function GameCard({ game, isSelected, onSelect }) {
           <div style={{ fontSize: '0.75rem', color: '#a0aec0' }}>
             {game.dateTime.split('•')[1] || ''}
           </div>
-          {/* Toggle details button */}
+          {/* Visual cue that the card is clickable */}
           <span
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsExpanded(!isExpanded)
-            }}
             style={{
               fontSize: '0.75rem',
               fontWeight: '600',
@@ -134,53 +139,10 @@ export default function GameCard({ game, isSelected, onSelect }) {
               cursor: 'pointer',
             }}
           >
-            {isExpanded ? 'More Details v' : 'More Details >'}
+            More Details &gt;
           </span>
         </div>
       </div>
-
-      {/* EXPANDED DETAILS: Only shows when toggled via Details button */}
-      {isExpanded && (
-        <div
-          style={{
-            marginTop: '12px',
-            paddingTop: '10px',
-            borderTop: '1px solid #edf2f7',
-            fontSize: '0.8rem',
-            color: '#4a5568',
-            backgroundColor: '#f7fafc',
-            padding: '10px 12px',
-            borderRadius: '8px',
-          }}
-        >
-          <div
-            style={{
-              fontWeight: '700',
-              color: '#1a202c',
-              marginBottom: '6px',
-            }}
-          >
-            {' '}
-            More Details Here:
-          </div>
-          {game.predictions?.map((p, idx) => (
-            <div
-              key={idx}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '2px 0',
-              }}
-            >
-              <span>{p.method}:</span>
-              <span style={{ fontWeight: '600' }}>
-                {p.predictedWinner} (
-                {(p.confidenceScore * 100).toFixed(0)}%)
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   )
 }
