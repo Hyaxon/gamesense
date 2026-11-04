@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Exposes canonical game data through /games. Uses CanonicalDataProvider so HTTP handlers remain
- * independent of the storage implementation. Retrieval reads already loaded data and does not fetch
- * source feeds.
+ * Exposes canonical game data through /api/games. Uses CanonicalDataProvider so HTTP handlers
+ * remain independent of the storage implementation. Retrieval reads already loaded data and does
+ * not fetch source feeds.
  */
 @RestController
-@RequestMapping("/games")
+@RequestMapping("/api/games")
 public class GamesController {
 
   private final CanonicalDataProvider canonicalDataProvider;
@@ -32,7 +32,7 @@ public class GamesController {
   // One handler allows optional criteria to be combined without
   // competing route mappings.
   // example usage:
-  // GET /games?teamId={teamId}&date=2025-09-06&status=FINAL&season=2025
+  // GET /api/games?teamId={teamId}&date=2025-09-06&status=FINAL&season=2025
   @GetMapping
   public List<GameResponse> getGames(
       @RequestParam(name = "teamId", required = false) String teamId,
@@ -49,7 +49,7 @@ public class GamesController {
   // source-specific identifiers.
   // A missing game returns 404 so clients can distinguish absence from a
   // successful lookup.
-  // example usage: GET /games/{gameId}
+  // example usage: GET /api/games/{gameId}
   @GetMapping("/{gameId}")
   public ResponseEntity<GameResponse> getGame(@PathVariable String gameId) {
     return ResponseEntity.of(canonicalDataProvider.findGame(gameId).map(this::toResponse));

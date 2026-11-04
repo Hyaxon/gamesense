@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://gamesense.dev/schemas/game-response.schema.json",
   "title": "GameResponse",
-  "description": "GET /games items and GET /games/{gameId}: canonical game fields with available teams. Team objects are omitted when unavailable; IDs remain present. Embedded team IDs match their corresponding game references.",
+  "description": "GET /api/games items and GET /api/games/{gameId}: canonical game fields with available teams. Team objects are omitted when unavailable; IDs remain present. Embedded team IDs match their corresponding game references.",
   "type": "object",
   "properties": {
     "id": {

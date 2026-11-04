@@ -1,6 +1,6 @@
 # GameSense Frontend
 
-The React frontend for GameSense, built with Vite. The shared application shell provides branding, responsive navigation, and a consistent content container. The Games page has a two-region layout for upcoming games and game breakdowns. Other application routes render a blank canvas; component content and backend integration will be added in later work.
+The React frontend for GameSense, built with Vite. The shared application shell provides branding, responsive navigation, and a consistent content container. The Games page has a two-region layout for upcoming games and game breakdowns. The upcoming list retrieves scheduled games from Java; breakdown integration is deferred. Other application routes render a blank canvas.
 
 ## Requirements
 
@@ -76,19 +76,91 @@ Production hosting must serve `index.html` for application routes so direct visi
 
 `src/pages/GamesPage.jsx` defines two labeled sections: Upcoming Games on the left and Game Breakdown on the right. Both regions use equal-width columns, rounded white surfaces, and a responsive gap from 16px to 24px. The page inherits its outer gutters, vertical spacing, and maximum width from `MainLayout`.
 
-At widths of 1024px and below, the sections stack with Upcoming Games first. The region headings and the Upcoming Games subheading are the only visible placeholder content. No game data, controls, images, or API calls are required. Future Games List and Game Breakdown components can replace the comments beneath each heading; these components should reuse or replace the region headings as appropriate to avoid duplicate titles.
+At widths of 1024px and below, the sections stack with Upcoming Games first. GamesList renders backend games through GameCard. Clicking a card highlights the selection. The Game Breakdown section displays a temporary message; its import, selected-game lookup, and component rendering remain commented out for later integration.
 
 To validate, visit `/games` at a desktop width (for example, 1440px) and confirm the two equally sized regions appear side by side. Resize to 1024px, 768px, and 320px and confirm they stack, retain spacing, and stay within the viewport. Reload `/games` directly and verify the Games navigation item remains active.
+
+## Upcoming games API integration
+
+Start Java in a separate terminal from the repository root:
+
+```bash
+cd backend
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+./mvnw spring-boot:run
+```
+
+The Java selection command above is for macOS. On other systems, configure
+`JAVA_HOME` for JDK 17. Wait for startup ingestion to finish; the current-season
+feed requires network access. Python is not required for games. See the
+[backend instructions](../backend/README.md#running-the-backend) for details.
+Then start Vite using the local development commands above and open `/games`.
+
+Vite forwards `/api` requests unchanged to `http://localhost:8080`. The list calls
+`GET /api/games?status=SCHEDULED`; the React page itself uses `/games`. The proxy
+is development-only. Production hosting must route `/api` to Java separately
+from the frontend's SPA fallback.
+
+### Responsibilities
+
+| File                            | Responsibility                                                                                                         |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `src/services/gamesApi.js`      | Fetch scheduled games, pass cancellation through, and throw for failed HTTP responses. Return the original JSON array. |
+| `src/utils/mapGameToCard.js`    | Map game responses to card fields, format timestamps in the viewer's timezone, and supply missing-team fallbacks.      |
+| `src/hooks/useUpcomingGames.js` | Define the query key, mapping selector, cache policy, retries, and refetch triggers.                                   |
+| `src/main.jsx`                  | Create one QueryClient and provide it above the router.                                                                |
+| `src/pages/GamesPage.jsx`       | Render initial loading, connection waiting, errors with retry, cached refresh states, and selection.                   |
+
+The mapper assumes the [GameResponse contract](../docs/architecture/api-schemas.md#gameresponse)
+and does not validate arbitrary JSON. Missing embedded teams display as Unknown
+team with a dash badge; shortName supplies available text badges. Rankings,
+records, and predictions are not fabricated. GameCard omits unavailable ranking
+and record punctuation and shows Prediction not available. An empty successful
+array displays No upcoming games found; request failures are not converted to
+empty arrays. Mock games are no longer the list's runtime data source.
+
+### Cache behavior
+
+The query key is `['games', { status: 'SCHEDULED' }]`. Original API responses stay
+in the cache; the selector supplies mapped cards to consumers. Successful data is
+fresh for five minutes. Stale data can refresh when a consumer mounts, the window
+regains focus, or the network reconnects. There is no polling interval. Unused
+entries are retained for thirty minutes after their last consumer unmounts.
+Failures retry once automatically, and the page provides a manual retry button.
+Cached games remain visible during a refresh and after a refresh failure.
+
+This cache lives in browser memory and resets on a full page reload. Navigating
+between React routes preserves it. See the
+[query cache decision](../docs/decisions/2026-11-04-frontend-query-cache.md) for
+alternatives and tradeoffs. Breakdown requests and prediction execution are not
+part of this integration.
+
+### Manual validation
+
+1. Visit `/api/games?status=SCHEDULED` on the Vite URL and confirm a JSON array.
+2. Visit `/games` and compare the rendered teams and dates with that response.
+3. Use browser network throttling and reload to observe initial loading.
+4. After a successful load, navigate away and back within five minutes. The list
+   should reuse fresh data without a new games request.
+5. Stop Java and reload the page to test initial failure and retry. Restart Java
+   and click Try again to recover.
+6. To test an empty store, stop Java and restart from `backend/` with
+   `GAMESENSE_INGESTION_ENABLED=false ./mvnw spring-boot:run`. Reload the frontend
+   to clear its cache and confirm the empty message. Restart Java normally afterward.
+7. For a failed background refresh, load games successfully, stop Java, wait until
+   the data is stale, then leave and refocus the browser window. Cached cards should
+   remain visible with a refresh error after the retry completes.
 
 ## Project structure
 
 ```text
 frontend/
 ├── src/
-│   ├── components/  # MainLayout and TopNavigation
+│   ├── components/  # Layout, navigation, game cards, and breakdown components
+│   ├── hooks/       # Cached API queries, including useUpcomingGames
 │   ├── pages/       # GamesPage and its page-level styles
-│   ├── services/    # Future API and service code
-│   ├── utils/       # Prediction validation and shared helper functions
+│   ├── services/    # HTTP requests to the Java API
+│   ├── utils/       # Game-to-card mapping and prediction validation
 │   ├── App.jsx      # Root React component
 │   ├── index.css    # Global styles
 │   ├── main.jsx     # React entry point

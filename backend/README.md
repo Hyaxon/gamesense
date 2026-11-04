@@ -128,7 +128,7 @@ To start without either data source:
 GAMESENSE_INGESTION_ENABLED=false ./mvnw spring-boot:run
 ```
 
-In that mode, `/games` returns `[]` until another caller loads data. Python is not required
+In that mode, `/api/games` returns `[]` until another caller loads data. Python is not required
 for the health or games endpoints. Stop the backend with `Ctrl+C`.
 
 ## Health Check
@@ -162,7 +162,7 @@ The backend can pull current-season college football data from the mentor-provid
 - The `Source*` records (in `ingestion/source/`) mirror the external format exactly (every value is a raw string). They are shared by the current-season and historical paths and stay separate from the domain models; the shared mapper in `ingestion/` converts them into `Team`/`Game`. See [Data Ingestion and Retrieval](#data-ingestion-and-retrieval).
 - The feed puts a small HTML stub in front of the JSON, so the client skips ahead to the first `{` before parsing.
 - Any failure (unreachable, timeout, non-2xx status, invalid JSON, or a response with no teams) is thrown as a `DataSourceException`, so callers can handle it. The startup runner lets this exception propagate, failing startup.
-- Loaded canonical games are exposed through `/games`. There is no HTTP endpoint to trigger ingestion or return the raw feed.
+- Loaded canonical games are exposed through `/api/games`. There is no HTTP endpoint to trigger ingestion or return the raw feed.
 
 ### Configuration
 
@@ -283,7 +283,7 @@ Used to verify that the backend service is available.
 
 ---
 
-### `GET /games`
+### `GET /api/games`
 
 Returns `200` with a JSON array of enriched game responses. No matches returns `[]`.
 All parameters are optional; multiple parameters combine with AND.
@@ -299,7 +299,7 @@ Malformed dates, unknown status values, and non-integer seasons return `400`.
 An unknown team ID returns an empty array. There is no pagination or explicit sorting.
 Games without a scheduled timestamp do not match a supplied date.
 
-### `GET /games/{gameId}`
+### `GET /api/games/{gameId}`
 
 Returns `200` with one game object, or `404` when the canonical ID is not stored.
 Use `id`, not `externalId`, from a listing response. Responses follow the
@@ -320,17 +320,17 @@ Run these in another terminal after starting the backend. Replace `GAME_ID` and 
 with IDs returned by the listing endpoint. Quote query URLs so the shell preserves `?` and `&`.
 
 ```bash
-curl -i 'http://localhost:8080/games'
-curl -i 'http://localhost:8080/games?date=2025-09-06&status=FINAL&season=2025'
-curl -i 'http://localhost:8080/games?teamId=TEAM_ID&season=2025'
-curl -i 'http://localhost:8080/games/GAME_ID'
-curl -i 'http://localhost:8080/games/nonexistent'
+curl -i 'http://localhost:8080/api/games'
+curl -i 'http://localhost:8080/api/games?date=2025-09-06&status=FINAL&season=2025'
+curl -i 'http://localhost:8080/api/games?teamId=TEAM_ID&season=2025'
+curl -i 'http://localhost:8080/api/games/GAME_ID'
+curl -i 'http://localhost:8080/api/games/nonexistent'
 ```
 
 For readable JSON, omit headers and pipe the body to a formatter:
 
 ```bash
-curl -s 'http://localhost:8080/games?season=2025' | python3 -m json.tool
+curl -s 'http://localhost:8080/api/games?season=2025' | python3 -m json.tool
 ```
 
 ## Architecture
