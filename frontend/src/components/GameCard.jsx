@@ -74,9 +74,13 @@ export default function GameCard({ game, isSelected, onSelect }) {
                 lineHeight: '1.3',
               }}
             >
-              #{game.awayTeam.ranking || ''} {game.awayTeam.name} (
-              {game.awayTeam.record})<br />#{game.homeTeam.ranking || ''}{' '}
-              {game.homeTeam.name} ({game.homeTeam.record})
+              {game.awayTeam.ranking != null && `#${game.awayTeam.ranking} `}
+              {game.awayTeam.name}
+              {game.awayTeam.record && ` (${game.awayTeam.record})`}
+              <br />
+              {game.homeTeam.ranking != null && `#${game.homeTeam.ranking} `}
+              {game.homeTeam.name}
+              {game.homeTeam.record && ` (${game.homeTeam.record})`}
             </div>
           </div>
         </div>
