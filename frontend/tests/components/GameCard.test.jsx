@@ -21,7 +21,7 @@ it('shows scores and W/L in the original card with no prediction UI', () => {
   )
   expect(html).toContain('Team A - 30 W')
   expect(html).toContain('Team B - 0 L')
-  expect(html).toContain('>TA</div>')
+  expect(html).toContain('>TA</span>')
   expect(html).toContain('More Details')
   expect(html).not.toContain('<svg')
   expect(html).not.toContain('Prediction not available')
@@ -66,3 +66,21 @@ it('labels equal final scores as ties without a winner', () => {
   expect(card.awayTeam.outcome).toBe('T')
   expect(card.homeTeam.outcome).toBe('T')
 })
+
+it.each([false, true])(
+  'exposes native button semantics and selected=%s',
+  (isSelected) => {
+    const html = renderToStaticMarkup(
+      <GameCard
+        game={mapPastGameToCard(GAME)}
+        isSelected={isSelected}
+        onSelect={() => {}}
+      />,
+    )
+    expect(html).toMatch(/^<button /)
+    expect(html).toContain('type="button"')
+    expect(html).toContain(`aria-pressed="${isSelected}"`)
+    expect(html).not.toContain('<div')
+    expect(html).not.toContain('tabindex="-1"')
+  },
+)
