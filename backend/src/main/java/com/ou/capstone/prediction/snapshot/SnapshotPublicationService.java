@@ -29,9 +29,12 @@ public class SnapshotPublicationService {
   }
 
   public void publishSeason(int season) throws IOException {
+    // Local file-based setups and tests can keep ingestion without contacting Python.
     if (!enabled) {
       return;
     }
+    // Let failures reach the startup callback, which owns logging and continuing startup.
+    // Store the ID only after acknowledgement; failure must preserve the previous selection.
     String snapshotId = client.publishSnapshot(builder.build(season));
     store.recordPublishedSnapshot(season, snapshotId);
     LOGGER.info("Published prediction snapshot {} for season {}", snapshotId, season);

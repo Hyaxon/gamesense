@@ -10,7 +10,11 @@ import java.util.Map;
 import java.util.Objects;
 import org.springframework.stereotype.Component;
 
-/** Builds a season snapshot without dropping or repairing malformed records. */
+/**
+ * Assembles the canonical data Python needs to execute predictions for one season. A malformed
+ * record fails the whole build: dropping games here could silently change the history a model uses.
+ * Python still performs full contract validation on receipt.
+ */
 @Component
 public class PredictionSnapshotBuilder {
   private final CanonicalDataProvider dataProvider;
@@ -27,6 +31,8 @@ public class PredictionSnapshotBuilder {
     if (games.isEmpty()) {
       throw new IllegalArgumentException("No games available for season " + season);
     }
+    // Include only teams referenced by these games, once each. Loading unrelated seasons
+    // into the same store must not expand this snapshot's team membership.
     Map<String, Team> teams = new LinkedHashMap<>();
     for (Game game : games) {
       validateGame(game, season);
@@ -46,6 +52,8 @@ public class PredictionSnapshotBuilder {
         games);
   }
 
+  // IN_PROGRESS, POSTPONED, and CANCELLED retain their supplied fields. Python accepts
+  // them but excludes them from completed-game history.
   private static void validateGame(Game game, int season) {
     if (game.season() != season || game.status() == null || game.scheduledAt() == null) {
       throw invalidGame(
@@ -60,6 +68,8 @@ public class PredictionSnapshotBuilder {
         || (game.awayScore() != null && game.awayScore() < 0)) {
       throw invalidGame(game, "Scores cannot be negative.");
     }
+    // Final scores become model history, so missing scores or an inconsistent winner
+    // must be rejected instead of inferred or repaired during publication.
     if (game.status() == GameStatus.FINAL) {
       if (game.homeScore() == null || game.awayScore() == null || game.isNeutralSite() == null) {
         throw invalidGame(game, "Final games require scores and an explicit location policy.");

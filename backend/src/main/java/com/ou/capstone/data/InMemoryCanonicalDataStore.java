@@ -26,6 +26,7 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
   private final Map<String, Team> teams = new LinkedHashMap<>();
   private final Map<String, Game> games = new LinkedHashMap<>();
 
+  // Loaded games do not prove that Python has their data. Track acknowledged IDs separately.
   private final Map<Integer, PredictionSnapshot> snapshots = new LinkedHashMap<>();
   private final PredictionSnapshot fallback;
 
@@ -37,6 +38,7 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
   public InMemoryCanonicalDataStore(
       @Value("${prediction.snapshot.fallback-season:0}") int fallbackSeason,
       @Value("${prediction.snapshot.fallback-id:}") String fallbackId) {
+    // Require the pair so a local file ID cannot accidentally be reused for another season.
     if (fallbackSeason == 0 && fallbackId.isBlank()) {
       fallback = null;
     } else if (fallbackSeason > 0 && !fallbackId.isBlank()) {
@@ -46,6 +48,8 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
     }
   }
 
+  // The publication service calls this after Python accepts the dataset. Replacing the
+  // selected ID affects future requests; Python keeps the earlier snapshot immutable.
   public synchronized void recordPublishedSnapshot(int season, String snapshotId) {
     if (season < 1 || snapshotId == null || snapshotId.isBlank()) {
       throw new IllegalArgumentException(
@@ -77,7 +81,8 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
     return Optional.ofNullable(games.get(gameId));
   }
 
-  // Only acknowledged IDs or an explicitly configured file snapshot are available.
+  // Prefer an acknowledged publication. The fallback is an explicit promise that Python
+  // loaded the matching file; without either, let orchestration report missing data.
   @Override
   public synchronized Optional<PredictionSnapshot> findSnapshot(int season) {
     PredictionSnapshot published = snapshots.get(season);

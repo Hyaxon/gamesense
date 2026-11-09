@@ -2,7 +2,10 @@ package com.ou.capstone.prediction.client;
 
 import com.ou.capstone.prediction.contract.ErrorResponse;
 
-/** A valid error response from Python rejecting a snapshot publication. */
+/**
+ * Python understood the request but rejected publication with a valid error response. Keeps that
+ * rejection separate from connection failures and untrustworthy responses.
+ */
 public final class SnapshotPublicationRejectedException extends RuntimeException {
   private final ErrorResponse error;
 

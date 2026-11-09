@@ -46,7 +46,8 @@ public class BackendApplication implements ApplicationRunner {
    * Reloads on every startup because the in-memory store does not survive a process restart. The
    * historical resource defaults to the packaged dataset, independent of working directory. An
    * ingestion failure propagates and causes startup to fail; if the live load fails, the historical
-   * load is not attempted.
+   * load is not attempted. Snapshot publication follows successful ingestion but is best-effort, so
+   * prediction-service availability does not determine whether game endpoints can start.
    *
    * @throws IOException if the historical file cannot be read
    */
@@ -60,10 +61,14 @@ public class BackendApplication implements ApplicationRunner {
     try (var input = historicalData.getInputStream()) {
       historicalIngestionService.loadStream(input);
     }
+    // Use the live feed's seasons rather than the calendar year (a season can cross New Year).
+    // Historical-only seasons are loaded for browsing, but are not published by this flow.
     for (int season : currentSeason.games().stream().map(Game::season).distinct().toList()) {
       try {
         snapshotPublicationService.publishSeason(season);
       } catch (Exception error) {
+        // Keep this boundary outside ingestion: malformed snapshots, rejections, and network
+        // failures should disable predictions for missing data, not stop game browsing.
         LOGGER.warn(
             "Snapshot publication failed for season {}; backend will continue serving games.",
             season,

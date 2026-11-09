@@ -22,9 +22,8 @@ import java.time.Duration;
 /**
  * Synchronous HTTP client for model execution and snapshot publication.
  *
- * <p>Serializes requests, posts to Python's /model-executions endpoint, validates HTTP metadata,
- * and delegates body validation to the decoder. Model selection and orchestration belong to
- * callers.
+ * <p>Posts execution and snapshot requests to Python, validates HTTP metadata, and delegates body
+ * validation to the decoder. Model selection and orchestration belong to callers.
  */
 public class PythonPredictionClient {
   private final PredictionResponseDecoder decoder = new PredictionResponseDecoder();
@@ -41,6 +40,8 @@ public class PythonPredictionClient {
     this.objectMapper = objectMapper;
     this.executionUri = baseUri.resolve("/model-executions");
     this.snapshotUri = baseUri.resolve("/snapshots");
+    // Python requires ISO timestamps ending in Z. Copy the mapper so this wire-format
+    // requirement does not change date serialization elsewhere in the backend.
     this.snapshotWriter =
         objectMapper
             .copy()
@@ -83,10 +84,14 @@ public class PythonPredictionClient {
     return decoded;
   }
 
-  /** Publishes a dataset and returns the ID assigned by Python. */
+  /**
+   * Returns Python's ID only after a valid success response. A valid rejection is distinct from a
+   * malformed response or transport failure so the caller can report the actual cause.
+   */
   public String publishSnapshot(SnapshotPublishRequest request) throws IOException {
     HttpResponse<String> response = post(snapshotUri, snapshotWriter.writeValueAsString(request));
     if (response.statusCode() == 200) {
+      // Treat the ID as opaque; Java must not reconstruct it from the season or UUID format.
       return decoder.decodeSnapshotId(response.body());
     }
     ErrorResponse error = decoder.decodeBoundaryError(response.body());
@@ -97,6 +102,8 @@ public class PythonPredictionClient {
     throw new SnapshotPublicationRejectedException(error);
   }
 
+  // Both endpoints share transport policy so publishing has the same timeout, interruption,
+  // and content-type guarantees as model execution.
   private HttpResponse<String> post(URI uri, String payload) {
 
     HttpRequest httpRequest =
