@@ -67,6 +67,32 @@ public final class PredictionResponseDecoder {
     }
   }
 
+  public String decodeSnapshotId(String body) {
+    if (body == null || body.isBlank()) {
+      throw invalid();
+    }
+    try {
+      JsonNode root = mapper.readTree(body);
+      object(root, "dataSnapshotId", "");
+      return text(root, "dataSnapshotId");
+    } catch (JsonProcessingException | IllegalArgumentException e) {
+      throw invalid();
+    }
+  }
+
+  public ErrorResponse decodeBoundaryError(String body) {
+    if (body == null || body.isBlank()) {
+      throw invalid();
+    }
+    try {
+      JsonNode root = mapper.readTree(body);
+      error(root);
+      return mapper.treeToValue(root, ErrorResponse.class);
+    } catch (JsonProcessingException | IllegalArgumentException e) {
+      throw invalid();
+    }
+  }
+
   private void success(JsonNode root, ModelExecutionRequest request) {
     object(
         root,
