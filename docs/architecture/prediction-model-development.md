@@ -136,7 +136,8 @@ prediction output still follows the MVP's two-outcome policy.
 Snapshot provenance must document any ordering-time convention for date-only
 sources; it must not imply that a substituted time is a known kickoff.
 Season selects the supplied data; there is no automatic historical evaluation
-cutoff or protection from future-data leakage in backtesting.
+cutoff or protection from future-data leakage when a model is called directly.
+The [backtesting framework](backtesting.md) supplies that cutoff.
 
 Elo may build private ratings from this history. Initial ratings, update rules,
 and no-history policies belong to the Elo implementation. The framework never
