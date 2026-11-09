@@ -104,7 +104,7 @@ export default function GameBreakdown({ game }) {
 
         <div className="prediction-scroll-container">
           <div className="prediction-rows-list">
-            {/* Presage Summary Row (Weighted Average and dynamically changes to hightlight as predicted winning team color) */}
+            {/* Presage summary row (weighted average; highlights in the predicted winning team's color). */}
             <PredictionRow
               isPresage={true}
               icon="♞"
