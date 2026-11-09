@@ -4,7 +4,7 @@ import json
 from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from types import MappingProxyType
+from threading import Lock
 from typing import Protocol
 
 from .context import CompletedGame, MissingContextError, PredictionContext, Team
@@ -100,17 +100,28 @@ def context_from_wire(payload, *, catalog=None) -> PredictionContext:
 class InMemorySnapshotProvider:
     """Publish validated snapshots once; duplicate IDs are rejected."""
 
-    def __init__(self, snapshots: Iterable[dict], *, catalog=None):
-        contexts = {}
+    def __init__(self, snapshots: Iterable[dict] = (), *, catalog=None):
+        self._catalog = catalog or SchemaCatalog.default()
+        self._lock = Lock()
+        self._contexts: dict[str, PredictionContext] = {}
         for payload in snapshots:
-            context = context_from_wire(payload, catalog=catalog)
-            if context.data_snapshot_id in contexts:
+            self.publish(payload)
+
+    def publish(self, payload: dict) -> str:
+        """Validate before atomically adding a snapshot without replacing any ID."""
+        context = context_from_wire(payload, catalog=self._catalog)
+        with self._lock:
+            if context.data_snapshot_id in self._contexts:
                 raise ValueError("Duplicate snapshot ID")
-            contexts[context.data_snapshot_id] = context
-        self._contexts = MappingProxyType(contexts)
+            self._contexts = {
+                **self._contexts,
+                context.data_snapshot_id: context,
+            }
+        return context.data_snapshot_id
 
     def get(self, data_snapshot_id: str, season: int) -> PredictionContext:
-        context = self._contexts.get(data_snapshot_id)
+        with self._lock:
+            context = self._contexts.get(data_snapshot_id)
         if context is None or context.season != season:
             raise MissingContextError("Required snapshot or season is unavailable")
         return context
