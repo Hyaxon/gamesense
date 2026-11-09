@@ -385,8 +385,12 @@ The FastAPI application exposes `GET /health`, `POST /snapshots`, and
 `POST /model-executions`. At initialization it registers the coin-flip adapter and
 optionally loads the snapshot specified by `PREDICTION_SNAPSHOT_PATH`.
 The execution endpoint delegates to the shared runner.
-The Java backend now provides a configurable client for this endpoint. Production
-data ingestion and request orchestration remain separate work.
+The Java backend publishes live-season snapshots after startup ingestion and stores
+the returned ID for prediction orchestration. Publication failures are logged without
+stopping the backend. Set `PREDICTION_SNAPSHOT_PUBLISH_ENABLED=false` to disable
+publication. For file-based use, configure Java with matching
+`PREDICTION_SNAPSHOT_FALLBACK_SEASON` and `PREDICTION_SNAPSHOT_FALLBACK_ID` values
+and matching canonical teams and games.
 
 See the [connectivity guide](../docs/architecture/prediction-service-connectivity.md)
 for the HTTP status/error policy, Java client usage, and a local end-to-end check.

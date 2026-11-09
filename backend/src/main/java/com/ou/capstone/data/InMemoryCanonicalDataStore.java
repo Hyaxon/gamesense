@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,6 +25,34 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
 
   private final Map<String, Team> teams = new LinkedHashMap<>();
   private final Map<String, Game> games = new LinkedHashMap<>();
+
+  private final Map<Integer, PredictionSnapshot> snapshots = new LinkedHashMap<>();
+  private final PredictionSnapshot fallback;
+
+  public InMemoryCanonicalDataStore() {
+    this(0, "");
+  }
+
+  @Autowired
+  public InMemoryCanonicalDataStore(
+      @Value("${prediction.snapshot.fallback-season:0}") int fallbackSeason,
+      @Value("${prediction.snapshot.fallback-id:}") String fallbackId) {
+    if (fallbackSeason == 0 && fallbackId.isBlank()) {
+      fallback = null;
+    } else if (fallbackSeason > 0 && !fallbackId.isBlank()) {
+      fallback = new PredictionSnapshot(fallbackId, fallbackSeason);
+    } else {
+      throw new IllegalArgumentException("Snapshot fallback requires a positive season and an ID.");
+    }
+  }
+
+  public synchronized void recordPublishedSnapshot(int season, String snapshotId) {
+    if (season < 1 || snapshotId == null || snapshotId.isBlank()) {
+      throw new IllegalArgumentException(
+          "Published snapshot requires a positive season and an ID.");
+    }
+    snapshots.put(season, new PredictionSnapshot(snapshotId, season));
+  }
 
   // Adds teams and games to the store. A team or game whose ID is already stored replaces
   // the old one, except that a finished game is never replaced by an unfinished one.
@@ -47,13 +77,14 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
     return Optional.ofNullable(games.get(gameId));
   }
 
-  // A season has a snapshot once at least one of its games is loaded.
+  // Only acknowledged IDs or an explicitly configured file snapshot are available.
   @Override
   public synchronized Optional<PredictionSnapshot> findSnapshot(int season) {
-    boolean hasGames = games.values().stream().anyMatch(game -> game.season() == season);
-    return hasGames
-        ? Optional.of(new PredictionSnapshot("season-" + season, season))
-        : Optional.empty();
+    PredictionSnapshot published = snapshots.get(season);
+    return Optional.ofNullable(
+        published != null
+            ? published
+            : fallback != null && fallback.season() == season ? fallback : null);
   }
 
   // A team is in a snapshot if it plays at least one game in that snapshot's season.
