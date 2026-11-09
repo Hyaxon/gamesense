@@ -23,23 +23,34 @@ function mapTeam(team, teamId) {
 /**
  * Converts a GameResponse into the fields consumed by GameCard.
  * Assumes the required scheduledAt timestamp follows the API contract; this is
- * a presentation mapper, not a schema validator. Formats in the viewer's timezone.
+ * a presentation mapper, not a schema validator. Midnight UTC represents a
+ * date-only feed value; preserve its UTC date and do not invent a kickoff time.
  * Rankings, records, and predictions remain absent because the API omits them.
  */
 export function mapGameToCard(game) {
   const scheduledAt = new Date(game.scheduledAt)
+  // The current API cannot distinguish a real midnight kickoff from date-only
+  // ingestion. Treat exact midnight UTC as unknown until precision is explicit.
+  const isDateOnly =
+    scheduledAt.getUTCHours() === 0 &&
+    scheduledAt.getUTCMinutes() === 0 &&
+    scheduledAt.getUTCSeconds() === 0 &&
+    scheduledAt.getUTCMilliseconds() === 0
 
   const date = scheduledAt.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
+    ...(isDateOnly ? { timeZone: 'UTC' } : {}),
   })
 
-  const time = scheduledAt.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZoneName: 'short',
-  })
+  const time = isDateOnly
+    ? 'Kickoff unavailable'
+    : scheduledAt.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZoneName: 'short',
+      })
 
   return {
     id: game.id,

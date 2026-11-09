@@ -103,13 +103,13 @@ from the frontend's SPA fallback.
 
 ### Responsibilities
 
-| File                            | Responsibility                                                                                                         |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `src/services/gamesApi.js`      | Fetch scheduled games, pass cancellation through, and throw for failed HTTP responses. Return the original JSON array. |
-| `src/utils/mapGameToCard.js`    | Map game responses to card fields, format timestamps in the viewer's timezone, and supply missing-team fallbacks.      |
-| `src/hooks/useUpcomingGames.js` | Define the query key, mapping selector, cache policy, retries, and refetch triggers.                                   |
-| `src/main.jsx`                  | Create one QueryClient and provide it above the router.                                                                |
-| `src/pages/GamesPage.jsx`       | Render initial loading, connection waiting, errors with retry, cached refresh states, and selection.                   |
+| File                            | Responsibility                                                                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/services/gamesApi.js`      | Fetch scheduled games, pass cancellation through, and throw for failed HTTP responses. Return the original JSON array.                     |
+| `src/utils/mapGameToCard.js`    | Map game responses to card fields, preserve date-only UTC dates and format known kickoff times locally, and supply missing-team fallbacks. |
+| `src/hooks/useUpcomingGames.js` | Define the query key, mapping selector, cache policy, retries, and refetch triggers.                                                       |
+| `src/main.jsx`                  | Create one QueryClient and provide it above the router.                                                                                    |
+| `src/pages/GamesPage.jsx`       | Render initial loading, connection waiting, errors with retry, cached refresh states, and selection.                                       |
 
 The mapper assumes the [GameResponse contract](../docs/architecture/api-schemas.md#gameresponse)
 and does not validate arbitrary JSON. Missing embedded teams display as Unknown
@@ -200,3 +200,13 @@ frontend/
 ```
 
 Empty folders contain `.gitkeep` files so Git preserves them. Remove each placeholder when adding files to that folder.
+
+### Date-only game schedules
+
+The ingestion feed supplies calendar dates without kickoff times. Java stores
+these as midnight UTC. Card mapping preserves that UTC calendar date and displays
+Kickoff unavailable rather than shifting it to the previous local day. Non-midnight
+timestamps still display in the viewer's timezone. This applies to upcoming and
+history cards. The current contract cannot distinguish a genuine midnight UTC
+kickoff from a date-only value; an explicit precision field would be needed to
+remove that ambiguity when timed feeds are introduced.

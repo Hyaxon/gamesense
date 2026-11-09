@@ -25,7 +25,7 @@ jobs:
         run: |
           if [[ ! "$BRANCH_NAME" =~ ^tickets/s[0-9]+-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
             echo "Invalid branch name: $BRANCH_NAME"
-            echo "Expected format: tickets/s<number>-<number>-<name>"
+            echo "Expected format: tickets/s<sprint>-<number>-<name>"
             echo "Example: tickets/s2-8-games-api-connection"
             exit 1
           fi
