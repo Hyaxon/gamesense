@@ -24,7 +24,9 @@ export default function GameCard({ game, isSelected, onSelect }) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr auto 110px',
+          gridTemplateColumns: game.isFinal
+            ? 'minmax(0, 1fr) 110px'
+            : '1fr auto 110px',
           alignItems: 'center',
           gap: '12px',
         }}
@@ -38,6 +40,7 @@ export default function GameCard({ game, isSelected, onSelect }) {
           }}
         >
           <div
+            title={`${game.awayTeam.name} logo placeholder`}
             style={{
               width: '44px',
               height: '44px',
@@ -64,7 +67,8 @@ export default function GameCard({ game, isSelected, onSelect }) {
                 lineHeight: '1.2',
               }}
             >
-              {game.awayTeam.name} @ {game.homeTeam.name}
+              {game.awayTeam.name} {game.isNeutralSite ? 'vs.' : '@'}{' '}
+              {game.homeTeam.name}
             </div>
             <div
               style={{
@@ -74,37 +78,56 @@ export default function GameCard({ game, isSelected, onSelect }) {
                 lineHeight: '1.3',
               }}
             >
-              {game.awayTeam.ranking != null && `#${game.awayTeam.ranking} `}
-              {game.awayTeam.name}
-              {game.awayTeam.record && ` (${game.awayTeam.record})`}
-              <br />
-              {game.homeTeam.ranking != null && `#${game.homeTeam.ranking} `}
-              {game.homeTeam.name}
-              {game.homeTeam.record && ` (${game.homeTeam.record})`}
+              {game.isFinal ? (
+                <>
+                  {[game.awayTeam, game.homeTeam].map((team) => (
+                    <div
+                      key={team.id}
+                      style={{ fontWeight: team.outcome === 'W' ? 700 : 400 }}
+                    >
+                      {team.name} - {team.score ?? 'Score unavailable'}
+                      {team.outcome && ` ${team.outcome}`}
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {game.awayTeam.ranking != null &&
+                    `#${game.awayTeam.ranking} `}
+                  {game.awayTeam.name}
+                  {game.awayTeam.record && ` (${game.awayTeam.record})`}
+                  <br />
+                  {game.homeTeam.ranking != null &&
+                    `#${game.homeTeam.ranking} `}
+                  {game.homeTeam.name}
+                  {game.homeTeam.record && ` (${game.homeTeam.record})`}
+                </>
+              )}
             </div>
           </div>
         </div>
 
         {/* Predicted winner and confidence, or a label if unavailable */}
-        {pred?.percentage != null ? (
-          <ConfidenceGauge
-            percentage={pred.percentage}
-            logo={pred.winnerLogo}
-            color={pred.color}
-          />
-        ) : (
-          <span
-            style={{
-              width: '64px',
-              textAlign: 'center',
-              fontSize: '0.7rem',
-              fontWeight: '600',
-              color: '#718096',
-            }}
-          >
-            Prediction not available
-          </span>
-        )}
+        {!game.isFinal &&
+          (pred?.percentage != null ? (
+            <ConfidenceGauge
+              percentage={pred.percentage}
+              logo={pred.winnerLogo}
+              color={pred.color}
+            />
+          ) : (
+            <span
+              style={{
+                width: '64px',
+                textAlign: 'center',
+                fontSize: '0.7rem',
+                fontWeight: '600',
+                color: '#718096',
+              }}
+            >
+              Prediction not available
+            </span>
+          ))}
 
         {/* Game Date and Time header */}
         <div

@@ -15,3 +15,18 @@ export async function getUpcomingGames({ signal } = {}) {
 
   return response.json()
 }
+
+/** Retrieves completed games for one season; failures remain query errors. */
+export async function getPastGames({ season, signal }) {
+  const params = new URLSearchParams({
+    status: 'FINAL',
+    season: String(season),
+  })
+  const response = await fetch(`/api/games?${params}`, { signal })
+
+  if (!response.ok) {
+    throw new Error(`Unable to load past games (${response.status})`)
+  }
+
+  return response.json()
+}

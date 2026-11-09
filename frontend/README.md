@@ -47,7 +47,7 @@ The prototype prediction validator lives in `src/utils/predictionValidation.js`,
 
 ## Shared layout and routes
 
-`App.jsx` defines nested React Router routes beneath `MainLayout`. The layout renders `TopNavigation` and a main content container with an `Outlet` for the current page. The root URL redirects to `/games`, which renders `GamesPage`. All other routes currently leave the main content area blank, including unknown URLs.
+`App.jsx` defines nested React Router routes beneath `MainLayout`. The layout renders `TopNavigation` and a main content container with an `Outlet` for the current page. The root URL redirects to `/games`, which renders `GamesPage`. Game History renders current-season final results at `/game-history`. Other routes currently leave the main content area blank, including unknown URLs.
 
 | URL             | Navigation label                |
 | --------------- | ------------------------------- |
@@ -113,7 +113,9 @@ from the frontend's SPA fallback.
 
 The mapper assumes the [GameResponse contract](../docs/architecture/api-schemas.md#gameresponse)
 and does not validate arbitrary JSON. Missing embedded teams display as Unknown
-team with a dash badge; shortName supplies available text badges. Rankings,
+team with a question-mark badge. The original 44 × 44 logo placeholder uses
+shortName when available, otherwise up to three initials from the full team name.
+These initials are display placeholders, not official team abbreviations. Rankings,
 records, and predictions are not fabricated. GameCard omits unavailable ranking
 and record punctuation and shows Prediction not available. An empty successful
 array displays No upcoming games found; request failures are not converted to
@@ -150,6 +152,31 @@ part of this integration.
 7. For a failed background refresh, load games successfully, stop Java, wait until
    the data is stale, then leave and refocus the browser window. Cached cards should
    remain visible with a refresh error after the retry completes.
+
+## Game history
+
+The Game History navigation item opens `/game-history`. This page uses the same
+layout, logo placeholders, selection behavior, and date/details column as Games.
+History cards replace repeated team names with away and home result lines such as
+`Team A - 30 W` and `Team B - 0 L`. The winning line is bold. No prediction gauge
+or prediction-unavailable message is rendered for final games. Missing scores
+show Score unavailable, missing winners are not assumed, and equal scores with no
+winner show T for a tie. Neutral-site cards use vs. instead of @.
+
+`getPastGames` calls `/api/games?status=FINAL&season=2026` for season 2026.
+`getCurrentSeason` follows GameMapper's July season boundary in UTC, so January
+through June belong to the previous year's season. `usePastGames` keys its cache by
+status and season, sorts a copy newest-first, and maps through `mapPastGameToCard`.
+It uses five-minute freshness, thirty-minute unused retention, one retry, and
+stale-data refresh on mount, focus, or reconnect. The page handles loading, empty,
+error, and cached-refresh states just like Upcoming Games. Breakdown is deferred.
+
+To validate, open Game History and compare it with the filtered API response.
+Check the current-season heading, newest-first ordering, zero scores, both home
+and away winners, logo placeholders, and absence of circles. Use the empty-store
+and backend-unavailable steps above to verify empty and error states. Automated
+tests cover season boundaries, service filters and failures, score outcomes, and
+preservation of upcoming prediction rendering.
 
 ## Project structure
 
