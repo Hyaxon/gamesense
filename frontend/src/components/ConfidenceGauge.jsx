@@ -10,7 +10,7 @@ export default function ConfidenceGauge({
   const offset = circ - (percentage / 100) * circ
 
   return (
-    <div
+    <span
       style={{
         position: 'relative',
         width: '64px',
@@ -49,16 +49,22 @@ export default function ConfidenceGauge({
         />
       </svg>
       {/* Percentage and winner label centered in the ring */}
-      <div
+      <span
         style={{ position: 'absolute', textAlign: 'center', lineHeight: '1.1' }}
       >
-        <div
-          style={{ fontWeight: '800', fontSize: '0.85rem', color: '#1a202c' }}
+        <span
+          style={{
+            display: 'block',
+            fontWeight: '800',
+            fontSize: '0.85rem',
+            color: '#1a202c',
+          }}
         >
           {percentage}%
-        </div>
-        <div
+        </span>
+        <span
           style={{
+            display: 'block',
             fontWeight: '700',
             fontSize: '0.65rem',
             color: '#718096',
@@ -66,8 +72,8 @@ export default function ConfidenceGauge({
           }}
         >
           {logo}
-        </div>
-      </div>
-    </div>
+        </span>
+      </span>
+    </span>
   )
 }

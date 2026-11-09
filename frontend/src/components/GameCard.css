@@ -1,0 +1,4 @@
+/* Keep the original block layout with phrasing content valid inside a button. */
+.game-card-block {
+  display: block;
+}

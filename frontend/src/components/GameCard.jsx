@@ -1,16 +1,23 @@
 import ConfidenceGauge from './ConfidenceGauge'
+import './GameCard.css'
 
 // Reusable card for a single matchup in the Games List
-export default function GameCard({ game, isSelected, onSelect }) {
+export default function GameCard({ game, isSelected = false, onSelect }) {
   // Prediction may be missing; use a neutral color when it is
   const pred = game.prediction
   const accentColor = pred ? pred.color : '#3182ce'
 
-  // Clicking anywhere on the card selects this game
+  // Native buttons support Tab, Enter, and Space; pressed state reflects selection.
   return (
-    <div
+    <button
+      type="button"
+      aria-pressed={isSelected}
       onClick={() => onSelect(game)}
       style={{
+        display: 'block',
+        width: '100%',
+        textAlign: 'left',
+        color: 'inherit',
         padding: '16px',
         marginBottom: '16px',
         borderRadius: '12px',
@@ -21,23 +28,29 @@ export default function GameCard({ game, isSelected, onSelect }) {
         transition: 'all 0.2s ease',
       }}
     >
-      <div
+      <span
+        className="game-card-block"
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr auto 110px',
+          gridTemplateColumns: game.isFinal
+            ? 'minmax(0, 1fr) 110px'
+            : '1fr auto 110px',
           alignItems: 'center',
           gap: '12px',
         }}
       >
         {/* Matchup row */}
-        <div
+        <span
+          className="game-card-block"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
           }}
         >
-          <div
+          <span
+            className="game-card-block"
+            title={`${game.awayTeam.name} logo placeholder`}
             style={{
               width: '44px',
               height: '44px',
@@ -54,9 +67,10 @@ export default function GameCard({ game, isSelected, onSelect }) {
             }}
           >
             {game.awayTeam.logo}
-          </div>
-          <div>
-            <div
+          </span>
+          <span className="game-card-block">
+            <span
+              className="game-card-block"
               style={{
                 fontWeight: '800',
                 fontSize: '1rem',
@@ -64,9 +78,11 @@ export default function GameCard({ game, isSelected, onSelect }) {
                 lineHeight: '1.2',
               }}
             >
-              {game.awayTeam.name} @ {game.homeTeam.name}
-            </div>
-            <div
+              {game.awayTeam.name} {game.isNeutralSite ? 'vs.' : '@'}{' '}
+              {game.homeTeam.name}
+            </span>
+            <span
+              className="game-card-block"
               style={{
                 fontSize: '0.75rem',
                 color: '#a0aec0',
@@ -74,36 +90,61 @@ export default function GameCard({ game, isSelected, onSelect }) {
                 lineHeight: '1.3',
               }}
             >
-              #{game.awayTeam.ranking || ''} {game.awayTeam.name} (
-              {game.awayTeam.record})<br />#{game.homeTeam.ranking || ''}{' '}
-              {game.homeTeam.name} ({game.homeTeam.record})
-            </div>
-          </div>
-        </div>
+              {game.isFinal ? (
+                <>
+                  {[game.awayTeam, game.homeTeam].map((team) => (
+                    <span
+                      className="game-card-block"
+                      key={team.id}
+                      style={{ fontWeight: team.outcome === 'W' ? 700 : 400 }}
+                    >
+                      {team.name} - {team.score ?? 'Score unavailable'}
+                      {team.outcome && ` ${team.outcome}`}
+                    </span>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {game.awayTeam.ranking != null &&
+                    `#${game.awayTeam.ranking} `}
+                  {game.awayTeam.name}
+                  {game.awayTeam.record && ` (${game.awayTeam.record})`}
+                  <br />
+                  {game.homeTeam.ranking != null &&
+                    `#${game.homeTeam.ranking} `}
+                  {game.homeTeam.name}
+                  {game.homeTeam.record && ` (${game.homeTeam.record})`}
+                </>
+              )}
+            </span>
+          </span>
+        </span>
 
         {/* Predicted winner and confidence, or a label if unavailable */}
-        {pred?.percentage != null ? (
-          <ConfidenceGauge
-            percentage={pred.percentage}
-            logo={pred.winnerLogo}
-            color={pred.color}
-          />
-        ) : (
-          <span
-            style={{
-              width: '64px',
-              textAlign: 'center',
-              fontSize: '0.7rem',
-              fontWeight: '600',
-              color: '#718096',
-            }}
-          >
-            Prediction not available
-          </span>
-        )}
+        {!game.isFinal &&
+          (pred?.percentage != null ? (
+            <ConfidenceGauge
+              percentage={pred.percentage}
+              logo={pred.winnerLogo}
+              color={pred.color}
+            />
+          ) : (
+            <span
+              style={{
+                width: '64px',
+                textAlign: 'center',
+                fontSize: '0.7rem',
+                fontWeight: '600',
+                color: '#718096',
+              }}
+            >
+              Prediction not available
+            </span>
+          ))}
 
         {/* Game Date and Time header */}
-        <div
+        <span
+          className="game-card-block"
           style={{
             textAlign: 'right',
             display: 'flex',
@@ -112,7 +153,8 @@ export default function GameCard({ game, isSelected, onSelect }) {
             gap: '4px',
           }}
         >
-          <div
+          <span
+            className="game-card-block"
             style={{
               fontSize: '0.8rem',
               fontWeight: '700',
@@ -120,10 +162,13 @@ export default function GameCard({ game, isSelected, onSelect }) {
             }}
           >
             {game.dateTime.split('•')[0]}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: '#a0aec0' }}>
+          </span>
+          <span
+            className="game-card-block"
+            style={{ fontSize: '0.75rem', color: '#a0aec0' }}
+          >
             {game.dateTime.split('•')[1] || ''}
-          </div>
+          </span>
           {/* Visual cue that the card is clickable */}
           <span
             style={{
@@ -136,8 +181,8 @@ export default function GameCard({ game, isSelected, onSelect }) {
           >
             More Details &gt;
           </span>
-        </div>
-      </div>
-    </div>
+        </span>
+      </span>
+    </button>
   )
 }
