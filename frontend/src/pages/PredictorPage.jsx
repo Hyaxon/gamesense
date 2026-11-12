@@ -18,7 +18,9 @@ export default function PredictorPage() {
           <div className="predictor-section-heading">
             <div>
               <h2 id="matchup-title">1. Build your matchup</h2>
-              <p className="region-description">Choose two teams and the conditions for your prediction.</p>
+              <p className="region-description">
+                Choose two teams and the conditions for your prediction.
+              </p>
             </div>
             <span className="section-index">01</span>
           </div>
@@ -57,7 +59,9 @@ export default function PredictorPage() {
           <div className="predictor-section-heading">
             <div>
               <h2 id="results-title">Your Prediction</h2>
-              <p className="region-description">[A] vs [B] * [Year] season * [Venue]</p>
+              <p className="region-description">
+                [A] vs [B] * [Year] season * [Venue]
+              </p>
             </div>
           </div>
           <div className="prediction-empty-state">
