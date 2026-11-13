@@ -198,6 +198,10 @@ class DataIngestionIntegrationTest {
   void snapshotsAndSeasonScopedTeamLookupFollowTheLoadedData() throws Exception {
     loadAllThreeSeasons();
 
+    assertThat(store.findSnapshot(2025)).isEmpty();
+    assertThat(store.findSnapshot(2026)).isEmpty();
+    store.recordPublishedSnapshot(2025, "published-2025");
+    store.recordPublishedSnapshot(2026, "published-2026");
     PredictionSnapshot snapshot2025 = store.findSnapshot(2025).orElseThrow();
     assertThat(snapshot2025.season()).isEqualTo(2025);
     assertThat(snapshot2025.dataSnapshotId()).isNotBlank();

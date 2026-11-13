@@ -67,6 +67,36 @@ public final class PredictionResponseDecoder {
     }
   }
 
+  // Validate the acknowledgement before its ID becomes the backend's selected snapshot.
+  // The ID is opaque, but missing/blank IDs and unexpected fields are contract failures.
+  public String decodeSnapshotId(String body) {
+    if (body == null || body.isBlank()) {
+      throw invalid();
+    }
+    try {
+      JsonNode root = mapper.readTree(body);
+      object(root, "dataSnapshotId", "");
+      return text(root, "dataSnapshotId");
+    } catch (JsonProcessingException | IllegalArgumentException e) {
+      throw invalid();
+    }
+  }
+
+  // Publication errors have no execution ID; they use the same boundary error contract
+  // as requests rejected before model execution begins.
+  public ErrorResponse decodeBoundaryError(String body) {
+    if (body == null || body.isBlank()) {
+      throw invalid();
+    }
+    try {
+      JsonNode root = mapper.readTree(body);
+      error(root);
+      return mapper.treeToValue(root, ErrorResponse.class);
+    } catch (JsonProcessingException | IllegalArgumentException e) {
+      throw invalid();
+    }
+  }
+
   private void success(JsonNode root, ModelExecutionRequest request) {
     object(
         root,

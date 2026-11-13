@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://gamesense.dev/internal/snapshot.schema.json",
-  "title": "Internal development snapshot",
-  "description": "Trusted local snapshot format; not a frontend API contract.",
+  "title": "Prediction snapshot",
+  "description": "Validated snapshot storage format. HTTP publication omits dataSnapshotId, which Python assigns; local files supply it.",
   "type": "object",
   "properties": {
     "dataSnapshotId": { "$ref": "https://gamesense.dev/schemas/common.schema.json#/$defs/nonBlankString" },

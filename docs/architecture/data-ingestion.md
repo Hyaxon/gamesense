@@ -56,7 +56,7 @@ Consumers depend on `CanonicalDataProvider`, which extends the existing `Predict
 | `findGames(season)` | Every loaded game in a season. |
 | `findAllGames()` | Every loaded game across all seasons. |
 | `findTeam(teamId)` | A team by canonical ID. Use a game's `homeTeamId` and `awayTeamId` to get its teams. |
-| `findSnapshot(season)` | The snapshot reference for a season, if any of its games are loaded. |
+| `findSnapshot(season)` | The acknowledged Python snapshot ID, or an explicit season-specific fallback; otherwise empty. |
 | `findTeam(snapshot, teamId)` | A team, only if it plays at least one game in the snapshot's season. |
 
 The `InMemoryCanonicalDataStore` is registered as a Spring bean and is the application's `PredictionDataProvider`, so prediction orchestration and every other consumer use the same single access path.
@@ -65,11 +65,17 @@ The `InMemoryCanonicalDataStore` is registered as a Spring bean and is the appli
 
 A game's season comes from its date: July to December belong to that calendar year, January to June to the previous one. The feed gives dates only, so `scheduledAt` is midnight UTC.
 
-A snapshot reference is `season-<year>`. It is a label for the games loaded for that season. It does not change when more data is loaded for the season, and publishing a snapshot to the Python service is a separate responsibility that is not implemented here.
+After startup ingestion succeeds, the backend builds and publishes a snapshot for each season represented in the live feed. The builder uses `findGames(season)`, includes the teams referenced by those games, and adds provenance. Malformed final or scheduled records fail the whole publish; games are not silently dropped. Python validates the complete payload before storing it.
+
+`POST /snapshots` receives the payload without `dataSnapshotId`. Python returns a versioned ID such as `season-2026-<uuid>`. Java stores that exact ID by season only after a successful response, and prediction orchestration uses it in `ModelExecutionRequest`. Loading games alone no longer creates a snapshot reference.
+
+Publication failures are logged and do not stop backend startup or game endpoints. Ingestion failures still stop startup. Set `PREDICTION_SNAPSHOT_PUBLISH_ENABLED=false` to disable publishing. For file-based development, configure both `PREDICTION_SNAPSHOT_FALLBACK_SEASON` and `PREDICTION_SNAPSHOT_FALLBACK_ID` to match a file loaded by Python; canonical Java teams and games must also match that dataset. An acknowledged publication takes precedence over the fallback.
+
+Python snapshots and Java's selected IDs are held in memory. Run Python with one worker. A Python restart loses published data; restart the backend after Python to republish it. Automatic refresh, restart recovery, durable storage, and historical-season publication are outside this startup flow.
 
 ## Loading
 
-Loading is explicit. Nothing loads at startup, and there is no scheduled refresh.
+At startup, `BackendApplication` loads the live feed and then the packaged historical dataset before publishing live-season snapshots. Set `GAMESENSE_INGESTION_ENABLED=false` to skip this startup flow. The ingestion services also support explicit loading; there is no scheduled refresh.
 
 ```java
 IngestionResult historicalResult = historicalIngestionService.loadFile(path);

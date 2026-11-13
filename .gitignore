@@ -34,6 +34,9 @@ build/
 dist/
 pip-wheel-metadata/
 
+# Trained prediction model artifacts (produced locally, never committed)
+prediction/artifacts/
+
 # Jupyter
 .ipynb_checkpoints/
 
