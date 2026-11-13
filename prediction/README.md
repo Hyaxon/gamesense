@@ -109,7 +109,7 @@ Editable mode allows changes under `src/` to be used without reinstalling the pa
 
 ## Running the Prediction Service
 
-From `prediction/`, with the virtual environment activated, set the required
+From `prediction/`, with the virtual environment activated, optionally set the
 `PREDICTION_SNAPSHOT_PATH` environment variable and start the development server.
 For local testing, use the synthetic snapshot included with the tests:
 
@@ -129,7 +129,8 @@ uvicorn gamesense_prediction.main:app --reload
 
 `PREDICTION_SNAPSHOT_PATH` points to one snapshot JSON file. Relative paths resolve
 from the process's working directory; an absolute path can also be used. There is
-no default: an unset variable, unreadable file, or invalid snapshot prevents startup.
+no default file: an unset or empty variable starts an empty snapshot provider.
+An explicitly configured unreadable file or invalid snapshot prevents startup.
 The application reads the environment directly; it does not automatically load a
 `.env` file.
 
@@ -137,6 +138,55 @@ The file is loaded and validated once when the application initializes. Restart
 the service after changing the snapshot file or environment setting. The fixture
 contains synthetic season-2025 data with snapshot ID `development-2025`.
 Prediction requests reference that ID in `dataSnapshotId`, not the file path.
+
+### Registered models
+
+At startup the service registers every model that is ready for use
+(`service_registry.py`). Each method has one model, which is also its default:
+
+| Model ID | Method | Execution kind | Registered |
+| --- | --- | --- | --- |
+| `elo-v1` | `ELO` | `DETERMINISTIC` | Always |
+| `glicko2` | `GLICKO2` | `DETERMINISTIC` | Always |
+| `bradley-terry-v1` | `BRADLEY_TERRY` | `DETERMINISTIC` | Always |
+| `monte-carlo-v1` | `MONTE_CARLO` | `SIMULATION` (seed supported) | Always |
+| `coin-flip-v1` | `RANDOM` | `SIMULATION` (seed supported) | Always |
+| `xgboost-v1` | `MACHINE_LEARNING` | `DETERMINISTIC` | Only with a trained artifact |
+
+XGBoost needs a trained artifact, and the service never trains at startup. Train
+one offline, then point `PREDICTION_XGBOOST_MODEL_PATH` at it:
+
+```bash
+mkdir -p artifacts
+python src/scripts/train_xgboost.py --output artifacts/xgboost.json
+export PREDICTION_XGBOOST_MODEL_PATH=artifacts/xgboost.json
+uvicorn gamesense_prediction.main:app --reload
+```
+
+`prediction/artifacts/` is ignored by git. If the variable is unset, or the file is
+missing or cannot be loaded, the service logs a warning that starts with
+`XGBoost not registered` and starts without XGBoost; requests for `xgboost-v1`
+then return `NOT_FOUND`. Every other model is unaffected. The Java backend leaves
+XGBoost out of its default model selections for the same reason; add it there
+after configuring an artifact.
+
+Not registered: `TRUESKILL` and `HOME_GROWN` exist in the contract but have no
+implemented model.
+
+### Publishing snapshots
+
+`POST /snapshots` accepts a JSON snapshot with `season`, `provenance`, `teams`,
+`games`, and optional `ratings`, following the snapshot schema except that
+`dataSnapshotId` must be omitted. Python assigns a versioned ID and returns HTTP
+200 with `{"dataSnapshotId": "season-2026-<uuid>"}`. Use the returned ID in
+subsequent model execution requests. Repeated content receives a new ID.
+
+Invalid JSON, schema or semantic validation failures, caller-supplied IDs, and
+ID collisions return HTTP 400 with the shared `ErrorResponse` envelope and code
+`VALIDATION_ERROR`. Validation rejects the entire snapshot; no games are dropped.
+File-loaded snapshots retain their configured IDs and can coexist with published
+snapshots. Published snapshots are held in memory and lost when Python restarts.
+Run a single worker so publication and execution share the same in-memory store.
 
 By default, the service will run at:
 
@@ -365,11 +415,17 @@ immutable season snapshot. Adapters own calculations and convert their outputs
 into the common success/error contract. The registry resolves model IDs and
 configured defaults per method; consumers do not parse algorithm-specific outputs.
 
-The FastAPI application exposes `GET /health` and `POST /model-executions`. At
-initialization it registers the coin-flip adapter and loads the snapshot specified
-by `PREDICTION_SNAPSHOT_PATH`. The execution endpoint delegates to the shared runner.
-The Java backend now provides a configurable client for this endpoint. Production
-data ingestion and request orchestration remain separate work.
+The FastAPI application exposes `GET /health`, `POST /snapshots`, and
+`POST /model-executions`. At initialization it registers every ready model (see
+[Registered models](#registered-models)) and optionally loads the snapshot
+specified by `PREDICTION_SNAPSHOT_PATH`.
+The execution endpoint delegates to the shared runner.
+The Java backend publishes live-season snapshots after startup ingestion and stores
+the returned ID for prediction orchestration. Publication failures are logged without
+stopping the backend. Set `PREDICTION_SNAPSHOT_PUBLISH_ENABLED=false` to disable
+publication. For file-based use, configure Java with matching
+`PREDICTION_SNAPSHOT_FALLBACK_SEASON` and `PREDICTION_SNAPSHOT_FALLBACK_ID` values
+and matching canonical teams and games.
 
 See the [connectivity guide](../docs/architecture/prediction-service-connectivity.md)
 for the HTTP status/error policy, Java client usage, and a local end-to-end check.

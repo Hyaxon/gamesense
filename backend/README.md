@@ -108,7 +108,11 @@ Maven copies `data/historical/Schedule-2025.json` into the application classpath
 so historical loading does not depend on the launch directory. Network access is still required
 for the live feed. An ingestion error fails startup;
 if the live fetch fails, the historical load is not attempted. Wait for startup to complete
-before testing loaded results. The store is rebuilt on every restart and has no scheduled refresh.
+before testing loaded results. After ingestion succeeds, Java publishes live-season snapshots
+to Python and stores the returned IDs. Start Python first; it can start without a snapshot
+file. Publication failures are logged without failing backend startup. Set
+`PREDICTION_SNAPSHOT_PUBLISH_ENABLED=false` to skip publishing while retaining ingestion.
+The store is rebuilt on every restart and has no scheduled refresh.
 
 To use an external dataset, set `GAMESENSE_INGESTION_HISTORICAL_LOCATION` to an absolute
 file URI. For example, from the repository root after packaging:
@@ -339,17 +343,28 @@ Spring creates one reusable `PythonPredictionClient`. Backend services inject it
 and call `execute(ModelExecutionRequest)` to send a single execution to Python's
 `POST /model-executions` endpoint. The client returns a validated
 `PredictionServiceResponse` or throws a transport/invalid-response exception.
-Starting the backend alone does not send a prediction request.
+The startup runner also calls `publishSnapshot(SnapshotPublishRequest)` against
+`POST /snapshots` and records Python's returned ID. Starting the backend publishes
+data by default but does not send a prediction execution request.
 
 | Environment variable                 | Default                 |
 | ------------------------------------ | ----------------------- |
 | `PREDICTION_SERVICE_BASE_URL`        | `http://127.0.0.1:8000` |
 | `PREDICTION_SERVICE_CONNECT_TIMEOUT` | `2s`                    |
 | `PREDICTION_SERVICE_REQUEST_TIMEOUT` | `30s`                   |
+| `PREDICTION_SNAPSHOT_PUBLISH_ENABLED` | `true` |
+| `PREDICTION_SNAPSHOT_FALLBACK_SEASON` | `0` (disabled) |
+| `PREDICTION_SNAPSHOT_FALLBACK_ID` | Empty (disabled) |
 
 Set overrides in the backend process environment. Spring binds them through
 `prediction.service.*` in `application.properties`. The URL must be an HTTP(S)
-root address; timeouts must be positive.
+root address; timeouts must be positive. Snapshot settings bind through
+`prediction.snapshot.publish.enabled`, `prediction.snapshot.fallback-season`, and
+`prediction.snapshot.fallback-id`. For file-based use, configure both fallback values
+to match Python's optional startup file and load matching canonical teams and games
+into Java. An acknowledged publication takes precedence over that season's fallback.
+Without either, snapshot lookup returns empty. See the connectivity guide below for
+single-worker and restart limitations.
 
 The existing `prediction.prototype` types `Prediction` and `PredictionValidator` are prototype
 types, not the Java/Python wire contract. Model selection, game-data retrieval,
@@ -373,23 +388,31 @@ separate execution IDs. Independent failures do not discard successes; an all-fa
 request returns its failures. Interruption aborts orchestration and preserves the
 thread interrupt flag. Requests are not automatically retried.
 
-Orchestration is disabled by default. The in-memory canonical store already implements
-`PredictionDataProvider`. To enable orchestration, configure at least one model selection
-and ensure the required data is loaded.
-For example, in a local Spring properties file:
+Orchestration is enabled by default. The in-memory canonical store implements
+`PredictionDataProvider`, and `application.properties` selects every model the Python
+service always registers:
+
+| Index | Model ID | Execution kind | Trials |
+| --- | --- | --- | --- |
+| 0 | `elo-v1` | `DETERMINISTIC` | - |
+| 1 | `glicko2` | `DETERMINISTIC` | - |
+| 2 | `bradley-terry-v1` | `DETERMINISTIC` | - |
+| 3 | `monte-carlo-v1` | `SIMULATION` | 10000 |
+| 4 | `coin-flip-v1` | `SIMULATION` | 1000 |
+
+Set `PREDICTION_ORCHESTRATION_ENABLED=false` to disable orchestration. Model IDs must
+be registered in Python; Java configuration does not install adapters or discover
+their capabilities. A Python test checks that every default selection is registered.
+
+XGBoost is not selected by default because Python registers it only when a trained
+artifact is configured (see the prediction service's
+[Registered models](../prediction/README.md#registered-models)). After configuring
+one, add it in a local Spring properties file:
 
 ```properties
-prediction.orchestration.enabled=true
-prediction.orchestration.models[0].model-id=coin-flip-v1
-prediction.orchestration.models[0].execution-kind=SIMULATION
-prediction.orchestration.models[0].trials=1000
-prediction.orchestration.models[0].seed=42
+prediction.orchestration.models[5].model-id=xgboost-v1
+prediction.orchestration.models[5].execution-kind=DETERMINISTIC
 ```
-
-The enable flag can also be set with `PREDICTION_ORCHESTRATION_ENABLED=true`.
-Add entries at indices `[1]`, `[2]`, etc. for additional executions. Model IDs must
-be registered in Python. The current Python startup registers only coin flip;
-Java configuration does not install adapters or discover their capabilities.
 
 Optional `configuration-json` supplies a JSON object of model-specific settings.
 For a model that supports such a setting, an example is
