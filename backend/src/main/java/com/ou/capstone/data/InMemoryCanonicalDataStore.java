@@ -2,9 +2,10 @@ package com.ou.capstone.data;
 
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.GameStatus;
+import com.ou.capstone.domain.GameStatusResolver;
 import com.ou.capstone.domain.Team;
+import java.time.Clock;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,14 +16,25 @@ import org.springframework.stereotype.Component;
 /**
  * Holds all canonical teams and games in memory and serves them through CanonicalDataProvider.
  * Loading adds to what is already there, so historical seasons and the current season coexist.
- * Records with the same canonical ID are merged into one. Nothing is persisted: data is gone on
- * restart and must be loaded again.
+ * Records with the same canonical ID are merged into one. Game status is worked out from the clock
+ * each time games are read, so it stays current without reloading. Nothing is persisted: data is
+ * gone on restart and must be loaded again.
  */
 @Component
 public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
 
   private final Map<String, Team> teams = new LinkedHashMap<>();
   private final Map<String, Game> games = new LinkedHashMap<>();
+  private final Clock clock;
+
+  public InMemoryCanonicalDataStore() {
+    this(Clock.systemUTC());
+  }
+
+  // A fixed or adjustable clock lets tests control what time the store thinks it is.
+  public InMemoryCanonicalDataStore(Clock clock) {
+    this.clock = clock;
+  }
 
   // Adds teams and games to the store. A team or game whose ID is already stored replaces
   // the old one, except that a finished game is never replaced by an unfinished one.
@@ -44,7 +56,7 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
 
   @Override
   public synchronized Optional<Game> findGame(String gameId) {
-    return Optional.ofNullable(games.get(gameId));
+    return Optional.ofNullable(games.get(gameId)).map(this::withCurrentStatus);
   }
 
   // A season has a snapshot once at least one of its games is loaded.
@@ -75,13 +87,14 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
 
   @Override
   public synchronized List<Game> findAllGames() {
-    return new ArrayList<>(games.values());
+    return games.values().stream().map(this::withCurrentStatus).toList();
   }
 
   // Filters the games list by specific attributes.
   @Override
   public synchronized List<Game> findGames(GameFilter filter) {
     return games.values().stream()
+        .map(this::withCurrentStatus)
         .filter(
             game ->
                 filter.teamId() == null
@@ -101,6 +114,15 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
 
   @Override
   public synchronized List<Game> findGames(int season) {
-    return games.values().stream().filter(game -> game.season() == season).toList();
+    return games.values().stream()
+        .filter(game -> game.season() == season)
+        .map(this::withCurrentStatus)
+        .toList();
+  }
+
+  // The game as it stands now: a scheduled game may have started, or have been missed.
+  private Game withCurrentStatus(Game game) {
+    GameStatus status = GameStatusResolver.resolve(game, clock.instant());
+    return status == game.status() ? game : game.withStatus(status);
   }
 }

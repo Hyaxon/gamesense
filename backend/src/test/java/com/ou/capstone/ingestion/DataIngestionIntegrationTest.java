@@ -20,7 +20,10 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,7 +55,10 @@ class DataIngestionIntegrationTest {
 
   @BeforeEach
   void setUp() {
-    store = new InMemoryCanonicalDataStore();
+    // Before the 2026 games, so the unplayed ones stay scheduled whatever day the tests run.
+    store =
+        new InMemoryCanonicalDataStore(
+            Clock.fixed(Instant.parse("2026-08-01T00:00:00Z"), ZoneOffset.UTC));
     SourceFeedMapper mapper = new SourceFeedMapper();
     historical = new HistoricalIngestionService(mapper, store);
 
