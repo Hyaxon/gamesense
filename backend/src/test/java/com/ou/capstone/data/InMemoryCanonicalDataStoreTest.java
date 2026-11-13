@@ -5,15 +5,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.GameStatus;
 import com.ou.capstone.domain.Team;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 // Verifies how the store merges loaded records and scopes its lookups.
 class InMemoryCanonicalDataStoreTest {
 
-  private final InMemoryCanonicalDataStore store = new InMemoryCanonicalDataStore();
+  // Before every game below, so scheduled games stay scheduled unless a test moves the clock.
+  private final InMemoryCanonicalDataStore store =
+      new InMemoryCanonicalDataStore(Clock.fixed(Instant.EPOCH.minusSeconds(1), ZoneOffset.UTC));
 
   private static Team team(String id, String conference) {
     return new Team(id, id, id, null, conference, null);
@@ -161,5 +166,101 @@ class InMemoryCanonicalDataStoreTest {
         .containsExactly(nextDay);
     assertThat(store.findGames(new GameFilter(null, null, null, null)))
         .containsExactly(late, nextDay, undated);
+  }
+
+  // A clock the test can move forward.
+  private static class MutableClock extends Clock {
+    private Instant now;
+
+    MutableClock(Instant now) {
+      this.now = now;
+    }
+
+    void set(Instant newNow) {
+      now = newNow;
+    }
+
+    @Override
+    public ZoneId getZone() {
+      return ZoneOffset.UTC;
+    }
+
+    @Override
+    public Clock withZone(ZoneId zone) {
+      return this;
+    }
+
+    @Override
+    public Instant instant() {
+      return now;
+    }
+  }
+
+  @Test
+  void statusFollowsTheClockWithoutReloadingTheGame() {
+    Instant start = Instant.parse("2026-11-14T00:00:00Z");
+    MutableClock clock = new MutableClock(start.minusSeconds(3600));
+    InMemoryCanonicalDataStore clockedStore = new InMemoryCanonicalDataStore(clock);
+    Game scheduled =
+        new Game(
+            "g1",
+            "g1",
+            2026,
+            null,
+            "home",
+            "away",
+            null,
+            false,
+            start,
+            GameStatus.SCHEDULED,
+            null,
+            null,
+            null);
+    clockedStore.load(List.of(), List.of(scheduled));
+
+    assertThat(clockedStore.findGame("g1").orElseThrow().status()).isEqualTo(GameStatus.SCHEDULED);
+
+    clock.set(start.plusSeconds(3600));
+    assertThat(clockedStore.findGame("g1").orElseThrow().status())
+        .isEqualTo(GameStatus.IN_PROGRESS);
+    assertThat(clockedStore.findAllGames())
+        .extracting(Game::status)
+        .containsExactly(GameStatus.IN_PROGRESS);
+    assertThat(clockedStore.findGames(2026))
+        .extracting(Game::status)
+        .containsExactly(GameStatus.IN_PROGRESS);
+
+    clock.set(start.plusSeconds(86_400 * 3L));
+    assertThat(clockedStore.findGame("g1").orElseThrow().status()).isEqualTo(GameStatus.POSTPONED);
+  }
+
+  @Test
+  void statusFilterUsesTheCurrentStatusNotTheStoredOne() {
+    Instant start = Instant.parse("2026-11-14T00:00:00Z");
+    InMemoryCanonicalDataStore clockedStore =
+        new InMemoryCanonicalDataStore(
+            Clock.fixed(start.plusSeconds(3600), ZoneOffset.UTC)); // game day, no result yet
+    clockedStore.load(
+        List.of(),
+        List.of(
+            new Game(
+                "g1",
+                "g1",
+                2026,
+                null,
+                "home",
+                "away",
+                null,
+                false,
+                start,
+                GameStatus.SCHEDULED,
+                null,
+                null,
+                null)));
+
+    assertThat(clockedStore.findGames(new GameFilter(null, null, GameStatus.IN_PROGRESS, null)))
+        .hasSize(1);
+    assertThat(clockedStore.findGames(new GameFilter(null, null, GameStatus.SCHEDULED, null)))
+        .isEmpty();
   }
 }

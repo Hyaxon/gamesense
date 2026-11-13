@@ -61,6 +61,23 @@ Consumers depend on `CanonicalDataProvider`, which extends the existing `Predict
 
 The `InMemoryCanonicalDataStore` is registered as a Spring bean and is the application's `PredictionDataProvider`, so prediction orchestration and every other consumer use the same single access path.
 
+### Game status
+
+Ingestion only knows whether a result exists: a game with a score is `FINAL`, and one without is `SCHEDULED`. The store works out the rest each time games are read, using `GameStatusResolver` and the clock, so statuses stay current without reloading. In the ticket's words, Upcoming, Current, and Past are `SCHEDULED`, `IN_PROGRESS`, and `FINAL`.
+
+| Stored status | Moment | Status returned |
+| --- | --- | --- |
+| `FINAL`, `CANCELLED`, `POSTPONED`, `IN_PROGRESS` | any | unchanged |
+| `SCHEDULED` | before the scheduled time | `SCHEDULED` |
+| `SCHEDULED` | from the scheduled time until 36 hours later | `IN_PROGRESS` |
+| `SCHEDULED` | 36 hours or more after, with no result | `POSTPONED` |
+| `SCHEDULED` | no scheduled time | `SCHEDULED` |
+
+* The feed has dates but no kickoff times, so `scheduledAt` is midnight UTC of the game day. `IN_PROGRESS` therefore means "game day, no result yet", and it can show before kickoff. The 36-hour window covers US evening games, which are played well after midnight UTC.
+* `POSTPONED` here means a game that should be over has no reported result. Loading a final score later replaces it.
+* Times are compared as instants, so time zones cannot change the answer.
+* The `status` filter on `GET /games` matches the current status, not the stored one.
+
 ### Seasons and snapshots
 
 A game's season comes from its date: July to December belong to that calendar year, January to June to the previous one. The feed gives dates only, so `scheduledAt` is midnight UTC.
