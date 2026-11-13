@@ -388,23 +388,31 @@ separate execution IDs. Independent failures do not discard successes; an all-fa
 request returns its failures. Interruption aborts orchestration and preserves the
 thread interrupt flag. Requests are not automatically retried.
 
-Orchestration is disabled by default. The in-memory canonical store already implements
-`PredictionDataProvider`. To enable orchestration, configure at least one model selection
-and ensure the required data is loaded.
-For example, in a local Spring properties file:
+Orchestration is enabled by default. The in-memory canonical store implements
+`PredictionDataProvider`, and `application.properties` selects every model the Python
+service always registers:
+
+| Index | Model ID | Execution kind | Trials |
+| --- | --- | --- | --- |
+| 0 | `elo-v1` | `DETERMINISTIC` | - |
+| 1 | `glicko2` | `DETERMINISTIC` | - |
+| 2 | `bradley-terry-v1` | `DETERMINISTIC` | - |
+| 3 | `monte-carlo-v1` | `SIMULATION` | 10000 |
+| 4 | `coin-flip-v1` | `SIMULATION` | 1000 |
+
+Set `PREDICTION_ORCHESTRATION_ENABLED=false` to disable orchestration. Model IDs must
+be registered in Python; Java configuration does not install adapters or discover
+their capabilities. A Python test checks that every default selection is registered.
+
+XGBoost is not selected by default because Python registers it only when a trained
+artifact is configured (see the prediction service's
+[Registered models](../prediction/README.md#registered-models)). After configuring
+one, add it in a local Spring properties file:
 
 ```properties
-prediction.orchestration.enabled=true
-prediction.orchestration.models[0].model-id=coin-flip-v1
-prediction.orchestration.models[0].execution-kind=SIMULATION
-prediction.orchestration.models[0].trials=1000
-prediction.orchestration.models[0].seed=42
+prediction.orchestration.models[5].model-id=xgboost-v1
+prediction.orchestration.models[5].execution-kind=DETERMINISTIC
 ```
-
-The enable flag can also be set with `PREDICTION_ORCHESTRATION_ENABLED=true`.
-Add entries at indices `[1]`, `[2]`, etc. for additional executions. Model IDs must
-be registered in Python. The current Python startup registers only coin flip;
-Java configuration does not install adapters or discover their capabilities.
 
 Optional `configuration-json` supplies a JSON object of model-specific settings.
 For a model that supports such a setting, an example is

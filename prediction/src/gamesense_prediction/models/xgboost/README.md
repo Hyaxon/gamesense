@@ -29,8 +29,10 @@ the local demo, and `XGBoostModel(classifier)` still accepts an existing classif
 Training uses the supplied snapshot; the model package does not fetch sports data.
 
 Paths must come from trusted setup configuration. Callers choose the artifact
-location and provide an existing parent directory. Automatic storage management,
-artifact metadata/version selection, and FastAPI startup wiring remain future work.
+location and provide an existing parent directory. The service loads an artifact at
+startup from `PREDICTION_XGBOOST_MODEL_PATH` (see
+[Registered models](../../../../README.md#registered-models)). Automatic storage
+management and artifact metadata/version selection remain future work.
 
 ## Inputs and training
 

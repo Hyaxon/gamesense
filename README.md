@@ -115,8 +115,9 @@ ingestion failures still stop startup. Set `PREDICTION_SNAPSHOT_PUBLISH_ENABLED=
 to disable publication, or `GAMESENSE_INGESTION_ENABLED=false` to skip the entire
 startup ingestion/publication flow.
 
-Backend orchestration is disabled by default and requires model selections when
-enabled. Startup does not automatically request a prediction. For file-based use,
+Backend orchestration is enabled by default with Elo, Glicko-2, Bradley-Terry,
+Monte Carlo, and coin-flip selections; set `PREDICTION_ORCHESTRATION_ENABLED=false`
+to disable it. Startup does not automatically request a prediction. For file-based use,
 configure Java with `PREDICTION_SNAPSHOT_FALLBACK_SEASON` and
 `PREDICTION_SNAPSHOT_FALLBACK_ID`, plus canonical data matching Python's file.
 

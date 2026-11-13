@@ -1,7 +1,7 @@
 """HTTP entry point for the GameSense prediction service.
 
-Registers the coin-flip model and optionally loads a configured snapshot at
-initialization. Exposes health, snapshot publication, and execution endpoints, delegates
+Registers every ready prediction model (XGBoost only when its trained artifact is
+configured) and optionally loads a configured snapshot at initialization. Exposes health, snapshot publication, and execution endpoints, delegates
 predictions to the shared runner, and maps errors to shared JSON and HTTP statuses.
 """
 
@@ -13,11 +13,10 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from .contracts import ErrorCode, ErrorResponse, ModelExecutionError, PredictionMethod
+from .contracts import ErrorCode, ErrorResponse, ModelExecutionError
 from .execution_validation import require
-from .models.coin_flip import CoinFlipModel
-from .registry import ModelRegistration, ModelRegistry
 from .runner import PredictionRunner
+from .service_registry import XGBOOST_MODEL_PATH_ENV, build_registry
 from .snapshots import FileSnapshotProvider, InMemorySnapshotProvider
 
 ERROR_HTTP_STATUS = {
@@ -46,11 +45,8 @@ async def handle_request_validation(
     )
 
 
-# Define the available model registry upon initialization.
-registry = ModelRegistry(
-    [ModelRegistration(adapter=CoinFlipModel(), supports_seed=True)],
-    {PredictionMethod.RANDOM: "coin-flip-v1"},
-)
+# Register every ready model at startup; XGBoost joins only if its artifact loads.
+registry = build_registry(os.environ.get(XGBOOST_MODEL_PATH_ENV))
 
 # A local file is optional because Java can publish after Python starts.
 # An explicitly configured invalid file still fails startup rather than being ignored.

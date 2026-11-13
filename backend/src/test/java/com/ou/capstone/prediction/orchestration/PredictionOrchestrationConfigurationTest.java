@@ -181,6 +181,33 @@ class PredictionOrchestrationConfigurationTest {
                 assertThat(context).hasNotFailed().hasSingleBean(PredictionOrchestrator.class));
   }
 
+  @Test
+  void applicationPropertiesEnableDefaultModelSelections() throws Exception {
+    ResourcePropertySource applicationProperties =
+        new ResourcePropertySource(new ClassPathResource("application.properties"));
+    runner
+        .withInitializer(
+            context -> context.getEnvironment().getPropertySources().addLast(applicationProperties))
+        .withBean(PredictionDataProvider.class, UnusedDataProvider::new)
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed().hasSingleBean(PredictionOrchestrator.class);
+              assertThat(
+                      context
+                          .getBean(PredictionOrchestrationConfiguration.Properties.class)
+                          .toSelections())
+                  .containsExactly(
+                      new ModelSelection("elo-v1", ExecutionKind.DETERMINISTIC, null, null, null),
+                      new ModelSelection("glicko2", ExecutionKind.DETERMINISTIC, null, null, null),
+                      new ModelSelection(
+                          "bradley-terry-v1", ExecutionKind.DETERMINISTIC, null, null, null),
+                      new ModelSelection(
+                          "monte-carlo-v1", ExecutionKind.SIMULATION, null, null, 10000),
+                      new ModelSelection(
+                          "coin-flip-v1", ExecutionKind.SIMULATION, null, null, 1000));
+            });
+  }
+
   private static final class UnusedDataProvider implements PredictionDataProvider {
     @Override
     public Optional<Game> findGame(String gameId) {
