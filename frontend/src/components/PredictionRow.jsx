@@ -1,54 +1,33 @@
-/** Reusable row for individual model predictions
- * - isPresage: Flags row as the weighted summary card.
- * - cardColor: Hex color passed down and dynamically applies team color highlighting. (thought i'd add this) */
-
-export default function PredictionRow({
-  isPresage,
-  icon,
-  modelName,
-  description,
-  formattedPrediction,
-  tier,
-  cardColor,
-}) {
-  // Apply dynamic team color border so presage prediction is the color of the predicted winning team
-  const presageStyle =
-    isPresage && cardColor
-      ? {
-          borderColor: cardColor,
-          backgroundColor: `${cardColor}15`, // opacity
-        }
-      : {}
-
+/** One model's prediction in the Game Breakdown: name, description, and win chance.
+ * The accuracy column stays empty until evaluated model accuracy exists (#121). */
+export default function PredictionRow({ model }) {
   return (
-    <div
-      className={`prediction-row ${isPresage ? 'presage-card' : ''}`}
-      style={presageStyle}
-    >
-      <div className="model-info-col">
-        <span className="model-icon">{icon}</span>
-        <div className="model-text">
-          <div className="model-title-row">
-            <span className="model-name">{modelName}</span>
-            <span className="info-icon">ⓘ</span>
-          </div>
-          <span className="model-desc">{description}</span>
-        </div>
-      </div>
-
-      <div className="prediction-val-col">
-        <span
-          className={`prediction-text ${formattedPrediction?.teamClass || ''}`}
-        >
-          {formattedPrediction?.text}
+    <li className="prediction-row">
+      <span className="model-icon" aria-hidden="true">
+        {model.icon}
+      </span>
+      <span className="model-text">
+        <span className="model-title-row">
+          <span className="model-name">{model.name}</span>
+          <span
+            className="info-icon"
+            title={`${model.name}: ${model.description}`}
+            aria-hidden="true"
+          >
+            ⓘ
+          </span>
         </span>
-      </div>
-
-      <div className="accuracy-tier-col">
-        {tier && (
-          <span className={`tier-badge ${tier.className}`}>{tier.label}</span>
-        )}
-      </div>
-    </div>
+        <span className="model-desc">{model.description}</span>
+      </span>
+      <span className={`prediction-value team-${model.side}`}>
+        {model.percentage}% {model.abbreviation}
+        <span className="visually-hidden">
+          {' '}
+          win chance for {model.teamName}
+        </span>
+      </span>
+      {/* PLACEHOLDER: accuracy badge (#121) */}
+      <span className="accuracy-tier" />
+    </li>
   )
 }

@@ -36,7 +36,8 @@ All files are under [shared/schemas](../../shared/schemas/). Matching complete J
 |---|---|
 | team | Shared Team entity. |
 | game | Existing Game entity, including status and embedded optional venue. |
-| game-response | Game endpoint response: existing game fields plus optional complete homeTeam and awayTeam objects. |
+| game-response | Game endpoint response: existing game fields plus optional complete homeTeam and awayTeam objects and optional stored predictions. |
+| game-predictions | Stored predictions embedded in a game response: state, successful model results, and a reserved aggregate. |
 | game-status | Reusable lifecycle enum corresponding to GameStatus. |
 | prediction | Existing standalone PredictionResult for an identified game. |
 | common | Reusable identifier, timestamp, probability, method, strategy, and nonblank string definitions. Not an API payload. |
@@ -358,7 +359,7 @@ Example: [team.json](../../shared/examples/team.json).
 
 ### GameResponse
 
-`GET /games` returns an array of GameResponse objects; `GET /games/{gameId}` returns one.
+`GET /api/games` returns an array of GameResponse objects; `GET /api/games/{gameId}` returns one.
 The response preserves every Game field at the top level, referencing its existing field
 schemas and required fields. Optional `homeTeam` and `awayTeam` each reference the full
 Team schema, including required `id`, `name`, and `conference`. The backend resolves each
@@ -366,3 +367,20 @@ object using its corresponding game team ID. Missing teams are omitted, never nu
 the game and its team IDs remain available. Teams reflect current loaded data.
 Unknown response fields are rejected. HTTP consumers should validate against
 `game-response.schema.json`; the canonical `game.schema.json` is unchanged.
+
+Optional `predictions` follows `game-predictions.schema.json`. It is present only for
+games queued by the startup prediction job, and is omitted otherwise.
+
+| Field | Type / structure | Required | Constraints |
+|---|---|---|---|
+| `state` | `PENDING`, `AVAILABLE`, or `UNAVAILABLE` | yes | |
+| `models` | array of model predictions | yes | at least 1 when `AVAILABLE`; empty otherwise |
+| `models[].modelId` | `model-descriptor.schema.json#/properties/modelId` | yes | |
+| `models[].displayName` | `model-descriptor.schema.json#/properties/displayName` | yes | |
+| `models[].prediction` | `single-prediction-result.schema.json` | yes | |
+| `models[].simulation` | `simulation-outcome.schema.json` | no | simulation models only |
+| `aggregate` | `aggregated-prediction-outcome.schema.json` | no | `AVAILABLE` only; omitted until consensus is calculated (#137) |
+
+Only successful model results are returned; failed models are left out. See the
+[decision record](../decisions/2026-11-15-embedded-game-predictions.md) and
+[game-predictions.json](../../shared/examples/game-predictions.json).

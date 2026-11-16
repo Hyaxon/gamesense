@@ -1,6 +1,6 @@
 # GameSense Frontend
 
-The React frontend for GameSense, built with Vite. The shared application shell provides branding, responsive navigation, and a consistent content container. The Games page has a two-region layout for upcoming games and game breakdowns. Other application routes render a blank canvas; component content and backend integration will be added in later work.
+The React frontend for GameSense, built with Vite. The shared application shell provides branding, responsive navigation, and a consistent content container. The Games page lists upcoming games beside a Game Breakdown for the selected game, and Game History compares completed games with their stored predictions. Both pages render from the Java Games API, including its embedded predictions. Other application routes render a blank canvas.
 
 ## Requirements
 
@@ -47,7 +47,7 @@ The prototype prediction validator lives in `src/utils/predictionValidation.js`,
 
 ## Shared layout and routes
 
-`App.jsx` defines nested React Router routes beneath `MainLayout`. The layout renders `TopNavigation` and a main content container with an `Outlet` for the current page. The root URL redirects to `/games`, which renders `GamesPage`. All other routes currently leave the main content area blank, including unknown URLs.
+`App.jsx` defines nested React Router routes beneath `MainLayout`. The layout renders `TopNavigation` and a main content container with an `Outlet` for the current page. The root URL redirects to `/games`, which renders `GamesPage`. Game History renders current-season final results at `/game-history`. Other routes currently leave the main content area blank, including unknown URLs.
 
 | URL             | Navigation label                |
 | --------------- | ------------------------------- |
@@ -74,21 +74,148 @@ Production hosting must serve `index.html` for application routes so direct visi
 
 ## Games page layout
 
-`src/pages/GamesPage.jsx` defines two labeled sections: Upcoming Games on the left and Game Breakdown on the right. Both regions use equal-width columns, rounded white surfaces, and a responsive gap from 16px to 24px. The page inherits its outer gutters, vertical spacing, and maximum width from `MainLayout`.
+`src/pages/GamesPage.jsx` follows the Games page reference design in #68: a page header, then Upcoming games on the left and the Game Breakdown on the right. The page inherits its outer gutters, vertical spacing, and maximum width from `MainLayout`.
 
-At widths of 1024px and below, the sections stack with Upcoming Games first. The region headings and the Upcoming Games subheading are the only visible placeholder content. No game data, controls, images, or API calls are required. Future Games List and Game Breakdown components can replace the comments beneath each heading; these components should reuse or replace the region headings as appropriate to avoid duplicate titles.
+Each GameCard row shows a logo placeholder, the matchup, each team's conference and name, a consensus slot, the date, and "View game →" or "Selected". The list scrolls within its panel so the "How to read predictions" note stays visible, and the Breakdown stays in view while scrolling. The first game is selected until another is chosen.
+
+The Game Breakdown renders the selected game from the list response, without another request: matchup, date, both teams, the consensus box, and one row per model the API returned with its win chance. Model rows come from the API, so models that are not implemented or did not succeed do not appear.
+
+Placeholders follow the design's dependencies on other tickets:
+
+| Element                           | Shown now                                                        | Owned by           |
+| --------------------------------- | ---------------------------------------------------------------- | ------------------ |
+| Consensus ring and box            | "Consensus unavailable" until the API returns an `aggregate`     | #137               |
+| Model accuracy badges             | Empty column                                                     | #121               |
+| Rankings and records              | Omitted                                                          | #117               |
+| Filters, search, sort, pagination | Omitted                                                          | #23, #24, #25, #26 |
+| Team logos and stadium banner     | Text badges and a generic banner                                 | Image sources      |
+| Kickoff time, venue, week         | Shown only when the API provides them; the current feed does not | Data source        |
+
+At widths of 1024px and below, the sections stack with Upcoming games first.
 
 To validate, visit `/games` at a desktop width (for example, 1440px) and confirm the two equally sized regions appear side by side. Resize to 1024px, 768px, and 320px and confirm they stack, retain spacing, and stay within the viewport. Reload `/games` directly and verify the Games navigation item remains active.
+
+## Upcoming games API integration
+
+Start Java in a separate terminal from the repository root:
+
+```bash
+cd backend
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+./mvnw spring-boot:run
+```
+
+The Java selection command above is for macOS. On other systems, configure
+`JAVA_HOME` for JDK 17. Wait for startup ingestion to finish; the current-season
+feed requires network access. Python is not required for games. See the
+[backend instructions](../backend/README.md#running-the-backend) for details.
+Then start Vite using the local development commands above and open `/games`.
+
+Vite forwards `/api` requests unchanged to `http://localhost:8080`. The list calls
+`GET /api/games?status=SCHEDULED`; the React page itself uses `/games`. The proxy
+is development-only. Production hosting must route `/api` to Java separately
+from the frontend's SPA fallback.
+
+### Responsibilities
+
+| File                            | Responsibility                                                                                                                                     |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/services/gamesApi.js`      | Fetch scheduled games, pass cancellation through, and throw for failed HTTP responses. Return the original JSON array.                             |
+| `src/utils/mapGameToCard.js`    | Map game responses to card fields, preserve date-only UTC dates and format known kickoff times in Eastern Time, and supply missing-team fallbacks. |
+| `src/utils/predictions.js`      | Map embedded predictions to display rows and the consensus pick, score History outcomes, and decide when to poll for pending predictions.          |
+| `src/hooks/useUpcomingGames.js` | Define the query key, mapping selector, cache policy, retries, and refetch triggers.                                                               |
+| `src/main.jsx`                  | Create one QueryClient and provide it above the router.                                                                                            |
+| `src/pages/GamesPage.jsx`       | Render initial loading, connection waiting, errors with retry, cached refresh states, and selection.                                               |
+
+The mapper assumes the [GameResponse contract](../docs/architecture/api-schemas.md#gameresponse)
+and does not validate arbitrary JSON. Missing embedded teams display as Unknown
+team with a question-mark badge. The original 44 × 44 logo placeholder uses
+shortName when available, otherwise up to three initials from the full team name.
+These initials are display placeholders, not official team abbreviations, and
+also label win chances. Rankings, records, and predictions are not fabricated.
+Without a consensus, the consensus slot shows Calculating predictions while the
+backend is still predicting (`PENDING`), Predictions unavailable when no model
+succeeded or the game was never predicted, and Consensus unavailable otherwise.
+Predictions color by side (home blue, away orange) until team colors exist. An empty successful
+array displays No upcoming games found; request failures are not converted to
+empty arrays. Mock games are no longer the list's runtime data source.
+
+### Cache behavior
+
+The query key is `['games', { status: 'SCHEDULED' }]`. Original API responses stay
+in the cache; the selector supplies mapped cards to consumers. Successful data is
+fresh for five minutes. Stale data can refresh when a consumer mounts, the window
+regains focus, or the network reconnects. While any game's predictions are
+`PENDING`, the query also polls every five seconds and stops once none are. Unused
+entries are retained for thirty minutes after their last consumer unmounts.
+Failures retry once automatically, and the page provides a manual retry button.
+Cached games remain visible during a refresh and after a refresh failure.
+
+This cache lives in browser memory and resets on a full page reload. Navigating
+between React routes preserves it. See the
+[query cache decision](../docs/decisions/2026-11-04-frontend-query-cache.md) for
+alternatives and tradeoffs. Predictions are calculated by the backend at startup;
+the frontend only reads them.
+
+### Manual validation
+
+1. Visit `/api/games?status=SCHEDULED` on the Vite URL and confirm a JSON array.
+2. Visit `/games` and compare the rendered teams and dates with that response.
+3. Use browser network throttling and reload to observe initial loading.
+4. After a successful load, navigate away and back within five minutes. The list
+   should reuse fresh data without a new games request.
+5. Stop Java and reload the page to test initial failure and retry. Restart Java
+   and click Try again to recover.
+6. To test an empty store, stop Java and restart from `backend/` with
+   `GAMESENSE_INGESTION_ENABLED=false ./mvnw spring-boot:run`. Reload the frontend
+   to clear its cache and confirm the empty message. Restart Java normally afterward.
+7. For a failed background refresh, load games successfully, stop Java, wait until
+   the data is stale, then leave and refocus the browser window. Cached cards should
+   remain visible with a refresh error after the retry completes.
+
+## Game history
+
+The Game History navigation item opens `/game-history` and follows the Game
+History reference design in #68:
+
+- Summary cards: games reviewed, correct consensus picks, and consensus accuracy.
+  The consensus figures show Consensus unavailable until aggregates exist (#137).
+- Completed games table: date, matchup with its conference (or Nonconference),
+  final score in matchup order, pregame pick, outcome, and a View recap placeholder
+  (#73). Games without a stored prediction show No pregame prediction in the pick
+  and outcome columns; games with one show Consensus unavailable until an aggregate
+  exists, then the pick and a Correct or Missed badge.
+- Model performance cards: each model's correct winner picks across completed games
+  with a stored prediction from that model, or an empty state when there are none.
+
+Ties and games without a winner are not scored. Missing winners are not assumed.
+The backend stores predictions only for games that were scheduled at startup, so
+completed games show No pregame prediction until refresh (#65) or persistence (#59).
+
+`getPastGames` calls `/api/games?status=FINAL&season=2026` for season 2026.
+`getCurrentSeason` follows GameMapper's July season boundary in UTC, so January
+through June belong to the previous year's season. `usePastGames` keys its cache by
+status and season, sorts a copy newest-first, and maps through `mapPastGameToCard`.
+It uses five-minute freshness, thirty-minute unused retention, one retry, and
+stale-data refresh on mount, focus, or reconnect. The page handles loading, empty,
+error, and cached-refresh states just like Upcoming Games.
+
+To validate, open Game History and compare it with the filtered API response.
+Check newest-first ordering, zero scores, and the pick and outcome columns. Use the
+empty-store and backend-unavailable steps above to verify empty and error states.
+Automated tests cover season boundaries, service filters and failures, prediction
+mapping, consensus and model scoring, and the Games, Breakdown, and History states.
 
 ## Project structure
 
 ```text
 frontend/
 ├── src/
-│   ├── components/  # MainLayout and TopNavigation
+│   ├── components/  # Layout, navigation, game cards, and breakdown components
+│   ├── hooks/       # Cached API queries, including useUpcomingGames
 │   ├── pages/       # GamesPage and its page-level styles
-│   ├── services/    # Future API and service code
-│   ├── utils/       # Prediction validation and shared helper functions
+│   ├── services/    # HTTP requests to the Java API
+│   ├── utils/       # Game-to-card mapping and prediction validation
 │   ├── App.jsx      # Root React component
 │   ├── index.css    # Global styles
 │   ├── main.jsx     # React entry point
@@ -101,3 +228,12 @@ frontend/
 ```
 
 Empty folders contain `.gitkeep` files so Git preserves them. Remove each placeholder when adding files to that folder.
+
+### Date-only game schedules
+
+The ingestion feed supplies calendar dates without kickoff times. Java stores
+these as midnight UTC. Card mapping preserves that UTC calendar date and displays
+no time rather than shifting it to the previous local day. Non-midnight
+timestamps display in Eastern Time. This applies to both pages. The current contract cannot distinguish a genuine midnight UTC
+kickoff from a date-only value; an explicit precision field would be needed to
+remove that ambiguity when timed feeds are introduced.

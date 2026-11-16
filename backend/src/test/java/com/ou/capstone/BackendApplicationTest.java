@@ -17,6 +17,7 @@ import com.ou.capstone.ingestion.IngestionResult;
 import com.ou.capstone.ingestion.SourceFeedMapper;
 import com.ou.capstone.ingestion.currentseason.CurrentSeasonIngestionService;
 import com.ou.capstone.ingestion.historical.HistoricalIngestionService;
+import com.ou.capstone.prediction.results.StartupPredictionService;
 import com.ou.capstone.prediction.snapshot.SnapshotPublicationService;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +35,7 @@ import org.springframework.core.io.FileSystemResource;
 class BackendApplicationTest {
 
   private final SnapshotPublicationService publisher = mock(SnapshotPublicationService.class);
+  private final StartupPredictionService startup = mock(StartupPredictionService.class);
 
   private CurrentSeasonIngestionService currentService() {
     var current = mock(CurrentSeasonIngestionService.class);
@@ -65,14 +67,16 @@ class BackendApplicationTest {
             current,
             historical,
             publisher,
+            startup,
             true,
             new ClassPathResource("historical/Schedule-2025.json"))
         .run(new DefaultApplicationArguments());
 
-    InOrder order = inOrder(current, historical, publisher);
+    InOrder order = inOrder(current, historical, publisher, startup);
     order.verify(current).loadCurrentSeason();
     order.verify(historical).loadStream(any(InputStream.class));
     order.verify(publisher).publishSeason(2026);
+    order.verify(startup).start(2026);
     order.verifyNoMoreInteractions();
   }
 
@@ -81,10 +85,10 @@ class BackendApplicationTest {
     CurrentSeasonIngestionService current = currentService();
     HistoricalIngestionService historical = mock(HistoricalIngestionService.class);
     new BackendApplication(
-            current, historical, publisher, false, new ClassPathResource("missing.json"))
+            current, historical, publisher, startup, false, new ClassPathResource("missing.json"))
         .run(new DefaultApplicationArguments());
 
-    verifyNoInteractions(current, historical, publisher);
+    verifyNoInteractions(current, historical, publisher, startup);
   }
 
   @Test
@@ -95,11 +99,14 @@ class BackendApplicationTest {
             currentService(),
             historical,
             publisher,
+            startup,
             true,
             new ClassPathResource("historical/Schedule-2025.json"))
         .run(new DefaultApplicationArguments());
     verify(historical).loadStream(any(InputStream.class));
     verify(publisher).publishSeason(2026);
+    // Predictions still start so the season's games report an unavailable state.
+    verify(startup).start(2026);
   }
 
   @Test
@@ -113,11 +120,12 @@ class BackendApplicationTest {
                         current,
                         historical,
                         publisher,
+                        startup,
                         true,
                         new ClassPathResource("historical/Schedule-2025.json"))
                     .run(new DefaultApplicationArguments()))
         .isInstanceOf(IllegalStateException.class);
-    verifyNoInteractions(historical, publisher);
+    verifyNoInteractions(historical, publisher, startup);
   }
 
   @Test
@@ -129,11 +137,12 @@ class BackendApplicationTest {
                         currentService(),
                         historical,
                         publisher,
+                        startup,
                         true,
                         new ClassPathResource("missing.json"))
                     .run(new DefaultApplicationArguments()))
         .isInstanceOf(IOException.class);
-    verifyNoInteractions(publisher);
+    verifyNoInteractions(publisher, startup);
   }
 
   @Test
@@ -143,6 +152,7 @@ class BackendApplicationTest {
             currentService(),
             new HistoricalIngestionService(new SourceFeedMapper(), store),
             publisher,
+            startup,
             true,
             new ClassPathResource("historical/Schedule-2025.json"))
         .run(new DefaultApplicationArguments());
@@ -158,6 +168,7 @@ class BackendApplicationTest {
             currentService(),
             new HistoricalIngestionService(new SourceFeedMapper(), store),
             publisher,
+            startup,
             true,
             new FileSystemResource(file))
         .run(new DefaultApplicationArguments());

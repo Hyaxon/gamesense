@@ -1,0 +1,173 @@
+.games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  /* Room for the selected card's outer shadow inside the scroll area. */
+  padding: 0.25rem 0.5rem 0.25rem 2px;
+  list-style: none;
+  /* Scroll the list so the reading note stays visible; pagination is #24. */
+  max-height: min(70dvh, 52rem);
+  overflow-y: auto;
+}
+
+.games-empty {
+  margin: 1rem 0 0;
+  color: var(--color-muted);
+}
+
+.game-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 6.5rem auto;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.game-card:hover {
+  border-color: #cbd5e1;
+}
+
+.game-card.is-selected {
+  /* Thicken the border with a shadow so selection does not shift the content. */
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+/* Spans keep the button's content valid; text lines render as blocks. */
+.game-card-title,
+.game-card-team,
+.game-card-date,
+.game-card-time,
+.game-card-action,
+.consensus-placeholder,
+.gauge-percentage,
+.gauge-label {
+  display: block;
+}
+
+.game-card-title {
+  color: #1a202c;
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.game-card-team {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.game-card-consensus {
+  justify-self: center;
+}
+
+.consensus-placeholder {
+  max-width: 6.5rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.game-card-schedule {
+  text-align: right;
+}
+
+.game-card-date {
+  color: #1a202c;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.game-card-time {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.game-card-action {
+  margin-top: 0.4rem;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.game-card.is-selected .game-card-action {
+  color: var(--color-accent);
+}
+
+/* Consensus ring, colored by the favored team's side. */
+.confidence-gauge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+}
+
+.confidence-gauge svg {
+  transform: rotate(-90deg);
+}
+
+.gauge-track,
+.gauge-fill {
+  fill: transparent;
+  stroke-width: 5;
+}
+
+.gauge-track {
+  stroke: #edf2f7;
+}
+
+.gauge-fill {
+  stroke: var(--team-color);
+  stroke-linecap: round;
+}
+
+.gauge-text {
+  position: absolute;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.gauge-percentage {
+  color: #1a202c;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.gauge-label {
+  color: var(--color-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@media (max-width: 40rem) {
+  .game-card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .game-card-consensus {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .game-card-schedule {
+    grid-column: 2 / -1;
+    text-align: left;
+  }
+}

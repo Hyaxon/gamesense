@@ -2,7 +2,8 @@
 
 ## Branching Strategy
 
-- Create feature branches from `main` using a standard ticket format: `tickets/{ticket-number}-{ticket-name}` (e.g., `tickets/12-setup-docs`).
+- Create feature branches from `main` using `tickets/s{sprint-number}-{ticket-number}-{ticket-name}` (e.g., `tickets/s2-8-games-api-connection`). Sprint and ticket numbers must be numeric; names must use lowercase words separated by hyphens.
+- The previous `tickets/{ticket-number}-{ticket-name}` convention is retired. Existing PR branches must move to the sprint-based format to pass CI.
 - Always keep pull requests focused on single tasks or tickets.
 
 ## Code Standards
@@ -29,7 +30,7 @@
 
 ## CI checks
 
-GitHub Actions runs on pull requests targeting `main`, new commits to those pull requests, and pushes to `main`. PR branch names must use `tickets/<number>-<description>` with lowercase words separated by hyphens.
+GitHub Actions runs on pull requests targeting `main`, new commits to those pull requests, and pushes to `main`. PR branch names must use `tickets/s<sprint>-<number>-<description>`, with lowercase words separated by hyphens (for example, `tickets/s2-8-games-api-connection`).
 
 The workflow runs Python tests and Ruff checks, Java tests with Checkstyle and Spotless, and frontend Vitest tests, ESLint, Prettier, and production build checks. Checks do not automatically fix source files.
 

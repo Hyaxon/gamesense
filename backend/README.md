@@ -112,6 +112,8 @@ before testing loaded results. After ingestion succeeds, Java publishes live-sea
 to Python and stores the returned IDs. Start Python first; it can start without a snapshot
 file. Publication failures are logged without failing backend startup. Set
 `PREDICTION_SNAPSHOT_PUBLISH_ENABLED=false` to skip publishing while retaining ingestion.
+Java then predicts every scheduled game in each live season in the background (see
+[Startup predictions](#startup-predictions)).
 The store is rebuilt on every restart and has no scheduled refresh.
 
 To use an external dataset, set `GAMESENSE_INGESTION_HISTORICAL_LOCATION` to an absolute
@@ -132,7 +134,7 @@ To start without either data source:
 GAMESENSE_INGESTION_ENABLED=false ./mvnw spring-boot:run
 ```
 
-In that mode, `/games` returns `[]` until another caller loads data. Python is not required
+In that mode, `/api/games` returns `[]` until another caller loads data. Python is not required
 for the health or games endpoints. Stop the backend with `Ctrl+C`.
 
 ## Health Check
@@ -166,7 +168,7 @@ The backend can pull current-season college football data from the mentor-provid
 - The `Source*` records (in `ingestion/source/`) mirror the external format exactly (every value is a raw string). They are shared by the current-season and historical paths and stay separate from the domain models; the shared mapper in `ingestion/` converts them into `Team`/`Game`. See [Data Ingestion and Retrieval](#data-ingestion-and-retrieval).
 - The feed puts a small HTML stub in front of the JSON, so the client skips ahead to the first `{` before parsing.
 - Any failure (unreachable, timeout, non-2xx status, invalid JSON, or a response with no teams) is thrown as a `DataSourceException`, so callers can handle it. The startup runner lets this exception propagate, failing startup.
-- Loaded canonical games are exposed through `/games`. There is no HTTP endpoint to trigger ingestion or return the raw feed.
+- Loaded canonical games are exposed through `/api/games`. There is no HTTP endpoint to trigger ingestion or return the raw feed.
 
 ### Configuration
 
@@ -287,7 +289,7 @@ Used to verify that the backend service is available.
 
 ---
 
-### `GET /games`
+### `GET /api/games`
 
 Returns `200` with a JSON array of enriched game responses. No matches returns `[]`.
 All parameters are optional; multiple parameters combine with AND.
@@ -303,7 +305,7 @@ Malformed dates, unknown status values, and non-integer seasons return `400`.
 An unknown team ID returns an empty array. There is no pagination or explicit sorting.
 Games without a scheduled timestamp do not match a supplied date.
 
-### `GET /games/{gameId}`
+### `GET /api/games/{gameId}`
 
 Returns `200` with one game object, or `404` when the canonical ID is not stored.
 Use `id`, not `externalId`, from a listing response. Responses follow the
@@ -314,6 +316,9 @@ These include `id`, `name`, and `conference`, plus available optional fields suc
 `shortName` and `logoUrl`. If a team lookup is unavailable, that team object is omitted;
 `homeTeamId` and `awayTeamId` remain present. Embedded teams reflect the currently loaded
 team data, not historical names or conference membership at game time.
+Games queued by the [startup prediction job](#startup-predictions) also include
+`predictions`, with a `state` of `PENDING`, `AVAILABLE`, or `UNAVAILABLE` and one entry
+in `models` for each model that succeeded. Other games omit `predictions`.
 The internal Game model and its schema remain unchanged. Consumers validating HTTP
 responses must use GameResponse instead of Game. See the
 [example response](../shared/examples/game-response.json).
@@ -324,17 +329,17 @@ Run these in another terminal after starting the backend. Replace `GAME_ID` and 
 with IDs returned by the listing endpoint. Quote query URLs so the shell preserves `?` and `&`.
 
 ```bash
-curl -i 'http://localhost:8080/games'
-curl -i 'http://localhost:8080/games?date=2025-09-06&status=FINAL&season=2025'
-curl -i 'http://localhost:8080/games?teamId=TEAM_ID&season=2025'
-curl -i 'http://localhost:8080/games/GAME_ID'
-curl -i 'http://localhost:8080/games/nonexistent'
+curl -i 'http://localhost:8080/api/games'
+curl -i 'http://localhost:8080/api/games?date=2025-09-06&status=FINAL&season=2025'
+curl -i 'http://localhost:8080/api/games?teamId=TEAM_ID&season=2025'
+curl -i 'http://localhost:8080/api/games/GAME_ID'
+curl -i 'http://localhost:8080/api/games/nonexistent'
 ```
 
 For readable JSON, omit headers and pipe the body to a formatter:
 
 ```bash
-curl -s 'http://localhost:8080/games?season=2025' | python3 -m json.tool
+curl -s 'http://localhost:8080/api/games?season=2025' | python3 -m json.tool
 ```
 
 ## Architecture
@@ -353,6 +358,7 @@ data by default but does not send a prediction execution request.
 | `PREDICTION_SERVICE_CONNECT_TIMEOUT` | `2s`                    |
 | `PREDICTION_SERVICE_REQUEST_TIMEOUT` | `30s`                   |
 | `PREDICTION_SNAPSHOT_PUBLISH_ENABLED` | `true` |
+| `PREDICTION_STARTUP_ENABLED` | `true` |
 | `PREDICTION_SNAPSHOT_FALLBACK_SEASON` | `0` (disabled) |
 | `PREDICTION_SNAPSHOT_FALLBACK_ID` | Empty (disabled) |
 
@@ -377,6 +383,28 @@ and do not require Python.
 
 ---
 
+## Startup predictions
+
+After ingestion and snapshot publication, `StartupPredictionService` runs the configured
+models once for every `SCHEDULED` game in each live season. It runs on one background
+thread, so the backend starts and serves games while predictions are calculated.
+Results are stored in memory by game ID (`InMemoryPredictionResultStore`) and returned
+in the games endpoints' `predictions` field:
+
+| State | Meaning |
+| --- | --- |
+| `PENDING` | Queued; the job has not reached this game yet. |
+| `AVAILABLE` | At least one model succeeded. Failed models are left out of `models`. |
+| `UNAVAILABLE` | No model succeeded, for example because Python is down or publication failed. |
+
+Completed games, other seasons, and all games when the job is disabled have no
+`predictions` field. Set `PREDICTION_STARTUP_ENABLED=false` (or disable orchestration)
+to skip the job. Results are lost on restart and are not recalculated when game data
+changes (#65). See the
+[decision record](../docs/decisions/2026-11-15-embedded-game-predictions.md).
+
+---
+
 ## Prediction orchestration
 
 `PredictionOrchestrator` retrieves canonical inputs through `PredictionDataProvider`,
@@ -388,23 +416,31 @@ separate execution IDs. Independent failures do not discard successes; an all-fa
 request returns its failures. Interruption aborts orchestration and preserves the
 thread interrupt flag. Requests are not automatically retried.
 
-Orchestration is disabled by default. The in-memory canonical store already implements
-`PredictionDataProvider`. To enable orchestration, configure at least one model selection
-and ensure the required data is loaded.
-For example, in a local Spring properties file:
+Orchestration is enabled by default. The in-memory canonical store implements
+`PredictionDataProvider`, and `application.properties` selects every model the Python
+service always registers:
+
+| Index | Model ID | Execution kind | Trials |
+| --- | --- | --- | --- |
+| 0 | `elo-v1` | `DETERMINISTIC` | - |
+| 1 | `glicko2` | `DETERMINISTIC` | - |
+| 2 | `bradley-terry-v1` | `DETERMINISTIC` | - |
+| 3 | `monte-carlo-v1` | `SIMULATION` | 10000 |
+| 4 | `coin-flip-v1` | `SIMULATION` | 1000 |
+
+Set `PREDICTION_ORCHESTRATION_ENABLED=false` to disable orchestration. Model IDs must
+be registered in Python; Java configuration does not install adapters or discover
+their capabilities. A Python test checks that every default selection is registered.
+
+XGBoost is not selected by default because Python registers it only when a trained
+artifact is configured (see the prediction service's
+[Registered models](../prediction/README.md#registered-models)). After configuring
+one, add it in a local Spring properties file:
 
 ```properties
-prediction.orchestration.enabled=true
-prediction.orchestration.models[0].model-id=coin-flip-v1
-prediction.orchestration.models[0].execution-kind=SIMULATION
-prediction.orchestration.models[0].trials=1000
-prediction.orchestration.models[0].seed=42
+prediction.orchestration.models[5].model-id=xgboost-v1
+prediction.orchestration.models[5].execution-kind=DETERMINISTIC
 ```
-
-The enable flag can also be set with `PREDICTION_ORCHESTRATION_ENABLED=true`.
-Add entries at indices `[1]`, `[2]`, etc. for additional executions. Model IDs must
-be registered in Python. The current Python startup registers only coin flip;
-Java configuration does not install adapters or discover their capabilities.
 
 Optional `configuration-json` supplies a JSON object of model-specific settings.
 For a model that supports such a setting, an example is
