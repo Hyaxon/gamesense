@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { getPastGames } from '../services/gamesApi'
 import { mapPastGameToCard } from '../utils/mapGameToCard'
+import { pollWhilePending } from '../utils/predictions'
 
 // Sort a copy so cached API responses retain their original order.
 const selectPastGameCards = (games) =>
@@ -17,6 +18,7 @@ export function usePastGames(season) {
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     retry: 1,
+    refetchInterval: pollWhilePending,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,

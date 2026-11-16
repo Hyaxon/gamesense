@@ -7,21 +7,21 @@ export default function GamesList({
   onSelectGame,
   emptyMessage = 'No upcoming games found.',
 }) {
+  // One card per game, or a message if there are none
+  if (!games || games.length === 0) {
+    return <p className="games-empty">{emptyMessage}</p>
+  }
   return (
-    <div style={{ marginTop: '16px' }}>
-      {/* One card per game, or a message if there are none */}
-      {games && games.length > 0 ? (
-        games.map((game) => (
+    <ul className="games-list">
+      {games.map((game) => (
+        <li key={game.id}>
           <GameCard
-            key={game.id}
             game={game}
             isSelected={game.id === selectedGameId}
             onSelect={onSelectGame}
           />
-        ))
-      ) : (
-        <p>{emptyMessage}</p>
-      )}
-    </div>
+        </li>
+      ))}
+    </ul>
   )
 }

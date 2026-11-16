@@ -1,9 +1,6 @@
-// Circular gauge showing a prediction's confidence percentage and winner
-export default function ConfidenceGauge({
-  percentage,
-  logo = '',
-  color = '#3182ce',
-}) {
+// Circular gauge showing a win probability and the abbreviation of the team it
+// belongs to, colored by that team's side.
+export default function ConfidenceGauge({ percentage, label = '', side }) {
   // Ring size and how much of it to fill based on the percentage
   const r = 26
   const circ = 2 * Math.PI * r
@@ -11,68 +8,24 @@ export default function ConfidenceGauge({
 
   return (
     <span
-      style={{
-        position: 'relative',
-        width: '64px',
-        height: '64px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      className={`confidence-gauge team-${side}`}
+      role="img"
+      aria-label={`${percentage}% win probability for ${label}`}
     >
-      <svg
-        width="64"
-        height="64"
-        viewBox="0 0 64 64"
-        style={{ transform: 'rotate(-90deg)' }}
-      >
-        {/* Background ring */}
+      <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+        <circle className="gauge-track" cx="32" cy="32" r={r} />
         <circle
+          className="gauge-fill"
           cx="32"
           cy="32"
           r={r}
-          stroke="#edf2f7"
-          strokeWidth="5"
-          fill="transparent"
-        />
-        {/* Progress ring filled to the percentage */}
-        <circle
-          cx="32"
-          cy="32"
-          r={r}
-          stroke={color}
-          strokeWidth="5"
           strokeDasharray={circ}
           strokeDashoffset={offset}
-          strokeLinecap="round"
-          fill="transparent"
         />
       </svg>
-      {/* Percentage and winner label centered in the ring */}
-      <span
-        style={{ position: 'absolute', textAlign: 'center', lineHeight: '1.1' }}
-      >
-        <span
-          style={{
-            display: 'block',
-            fontWeight: '800',
-            fontSize: '0.85rem',
-            color: '#1a202c',
-          }}
-        >
-          {percentage}%
-        </span>
-        <span
-          style={{
-            display: 'block',
-            fontWeight: '700',
-            fontSize: '0.65rem',
-            color: '#718096',
-            textTransform: 'uppercase',
-          }}
-        >
-          {logo}
-        </span>
+      <span className="gauge-text" aria-hidden="true">
+        <span className="gauge-percentage">{percentage}%</span>
+        <span className="gauge-label">{label}</span>
       </span>
     </span>
   )

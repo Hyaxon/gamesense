@@ -13,6 +13,24 @@
   --page-width: 1640px;
   --page-gutter: clamp(1rem, 2vw, 2rem);
   --layout-spacing: clamp(1rem, 1.5vw, 1.5rem);
+  --color-accent: #285bb5;
+  --color-accent-soft: #eef4ff;
+  --color-positive: #1f6f43;
+  --color-negative: #b42318;
+  /* Teams have no colors in the data yet, so predictions color by side. */
+  --color-home: #285bb5;
+  --color-away: #c2410c;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 * {
