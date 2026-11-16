@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router'
 import MainLayout from './components/MainLayout.jsx'
 import GamesPage from './pages/GamesPage.jsx'
+import PredictorPage from './pages/PredictorPage.jsx'
 import { MAIN_ROUTES } from './routes.js'
 
 function App() {
@@ -12,7 +13,15 @@ function App() {
           <Route
             key={path}
             path={path}
-            element={path === '/games' ? <GamesPage /> : <></>}
+            element={
+              path === '/games' ? (
+                <GamesPage />
+              ) : path === '/predictions' ? (
+                <PredictorPage />
+              ) : (
+                <></>
+              )
+            }
           />
         ))}
         <Route path="settings" element={<></>} />
