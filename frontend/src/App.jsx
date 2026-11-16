@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router'
 import MainLayout from './components/MainLayout.jsx'
 import GamesPage from './pages/GamesPage.jsx'
 import GameHistoryPage from './pages/GameHistoryPage.jsx'
+import PredictorPage from './pages/PredictorPage.jsx'
 import { MAIN_ROUTES } from './routes.js'
 
 function App() {
@@ -18,6 +19,8 @@ function App() {
                 <GamesPage />
               ) : path === '/game-history' ? (
                 <GameHistoryPage />
+              ) : path === '/predictions' ? (
+                <PredictorPage />
               ) : (
                 <></>
               )
