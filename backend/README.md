@@ -112,6 +112,8 @@ before testing loaded results. After ingestion succeeds, Java publishes live-sea
 to Python and stores the returned IDs. Start Python first; it can start without a snapshot
 file. Publication failures are logged without failing backend startup. Set
 `PREDICTION_SNAPSHOT_PUBLISH_ENABLED=false` to skip publishing while retaining ingestion.
+Java then predicts every scheduled game in each live season in the background (see
+[Startup predictions](#startup-predictions)).
 The store is rebuilt on every restart and has no scheduled refresh.
 
 To use an external dataset, set `GAMESENSE_INGESTION_HISTORICAL_LOCATION` to an absolute
@@ -314,6 +316,9 @@ These include `id`, `name`, and `conference`, plus available optional fields suc
 `shortName` and `logoUrl`. If a team lookup is unavailable, that team object is omitted;
 `homeTeamId` and `awayTeamId` remain present. Embedded teams reflect the currently loaded
 team data, not historical names or conference membership at game time.
+Games queued by the [startup prediction job](#startup-predictions) also include
+`predictions`, with a `state` of `PENDING`, `AVAILABLE`, or `UNAVAILABLE` and one entry
+in `models` for each model that succeeded. Other games omit `predictions`.
 The internal Game model and its schema remain unchanged. Consumers validating HTTP
 responses must use GameResponse instead of Game. See the
 [example response](../shared/examples/game-response.json).
@@ -353,6 +358,7 @@ data by default but does not send a prediction execution request.
 | `PREDICTION_SERVICE_CONNECT_TIMEOUT` | `2s`                    |
 | `PREDICTION_SERVICE_REQUEST_TIMEOUT` | `30s`                   |
 | `PREDICTION_SNAPSHOT_PUBLISH_ENABLED` | `true` |
+| `PREDICTION_STARTUP_ENABLED` | `true` |
 | `PREDICTION_SNAPSHOT_FALLBACK_SEASON` | `0` (disabled) |
 | `PREDICTION_SNAPSHOT_FALLBACK_ID` | Empty (disabled) |
 
@@ -374,6 +380,28 @@ See the [connectivity guide](../docs/architecture/prediction-service-connectivit
 for constructor injection, response/error handling, automated coverage, and a
 reproducible local Java-to-Python smoke check. Client tests run a local test server
 and do not require Python.
+
+---
+
+## Startup predictions
+
+After ingestion and snapshot publication, `StartupPredictionService` runs the configured
+models once for every `SCHEDULED` game in each live season. It runs on one background
+thread, so the backend starts and serves games while predictions are calculated.
+Results are stored in memory by game ID (`InMemoryPredictionResultStore`) and returned
+in the games endpoints' `predictions` field:
+
+| State | Meaning |
+| --- | --- |
+| `PENDING` | Queued; the job has not reached this game yet. |
+| `AVAILABLE` | At least one model succeeded. Failed models are left out of `models`. |
+| `UNAVAILABLE` | No model succeeded, for example because Python is down or publication failed. |
+
+Completed games, other seasons, and all games when the job is disabled have no
+`predictions` field. Set `PREDICTION_STARTUP_ENABLED=false` (or disable orchestration)
+to skip the job. Results are lost on restart and are not recalculated when game data
+changes (#65). See the
+[decision record](../docs/decisions/2026-11-15-embedded-game-predictions.md).
 
 ---
 

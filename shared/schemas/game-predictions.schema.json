@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/game-predictions.schema.json",
+  "title": "GamePredictions",
+  "description": "Stored predictions embedded in a GameResponse. PENDING: the startup job has not reached the game yet. AVAILABLE: at least one model succeeded; failed models are left out. UNAVAILABLE: no model succeeded. Only AVAILABLE contains model results. aggregate is reserved for the consensus prediction and is omitted until it is calculated.",
+  "type": "object",
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "AVAILABLE",
+        "UNAVAILABLE"
+      ]
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/modelPrediction"
+      }
+    },
+    "aggregate": {
+      "$ref": "aggregated-prediction-outcome.schema.json"
+    }
+  },
+  "required": [
+    "state",
+    "models"
+  ],
+  "additionalProperties": false,
+  "if": {
+    "properties": {
+      "state": {
+        "const": "AVAILABLE"
+      }
+    }
+  },
+  "then": {
+    "properties": {
+      "models": {
+        "minItems": 1
+      }
+    }
+  },
+  "else": {
+    "properties": {
+      "models": {
+        "maxItems": 0
+      }
+    },
+    "not": {
+      "required": [
+        "aggregate"
+      ]
+    }
+  },
+  "$defs": {
+    "modelPrediction": {
+      "description": "One model's successful prediction. simulation is present only for simulation models.",
+      "type": "object",
+      "properties": {
+        "modelId": {
+          "$ref": "model-descriptor.schema.json#/properties/modelId"
+        },
+        "displayName": {
+          "$ref": "model-descriptor.schema.json#/properties/displayName"
+        },
+        "prediction": {
+          "$ref": "single-prediction-result.schema.json"
+        },
+        "simulation": {
+          "$ref": "simulation-outcome.schema.json"
+        }
+      },
+      "required": [
+        "modelId",
+        "displayName",
+        "prediction"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

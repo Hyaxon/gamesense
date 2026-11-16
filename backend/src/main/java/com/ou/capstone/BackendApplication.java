@@ -3,6 +3,7 @@ package com.ou.capstone;
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.ingestion.currentseason.CurrentSeasonIngestionService;
 import com.ou.capstone.ingestion.historical.HistoricalIngestionService;
+import com.ou.capstone.prediction.results.StartupPredictionService;
 import com.ou.capstone.prediction.snapshot.SnapshotPublicationService;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import org.springframework.core.io.Resource;
 public class BackendApplication implements ApplicationRunner {
   private static final Logger LOGGER = LoggerFactory.getLogger(BackendApplication.class);
   private final SnapshotPublicationService snapshotPublicationService;
+  private final StartupPredictionService startupPredictionService;
   private final CurrentSeasonIngestionService currentSeasonIngestionService;
   private final HistoricalIngestionService historicalIngestionService;
   private final boolean ingestionEnabled;
@@ -31,10 +33,12 @@ public class BackendApplication implements ApplicationRunner {
       CurrentSeasonIngestionService currentSeasonIngestionService,
       HistoricalIngestionService historicalIngestionService,
       SnapshotPublicationService snapshotPublicationService,
+      StartupPredictionService startupPredictionService,
       @Value("${gamesense.ingestion.enabled:true}") boolean ingestionEnabled,
       @Value("${gamesense.ingestion.historical-location:classpath:historical/Schedule-2025.json}")
           Resource historicalData) {
     this.snapshotPublicationService = snapshotPublicationService;
+    this.startupPredictionService = startupPredictionService;
     this.currentSeasonIngestionService = currentSeasonIngestionService;
     this.historicalIngestionService = historicalIngestionService;
     this.ingestionEnabled = ingestionEnabled;
@@ -47,7 +51,8 @@ public class BackendApplication implements ApplicationRunner {
    * historical resource defaults to the packaged dataset, independent of working directory. An
    * ingestion failure propagates and causes startup to fail; if the live load fails, the historical
    * load is not attempted. Snapshot publication follows successful ingestion but is best-effort, so
-   * prediction-service availability does not determine whether game endpoints can start.
+   * prediction-service availability does not determine whether game endpoints can start. Startup
+   * predictions then run in the background for each live season's scheduled games.
    *
    * @throws IOException if the historical file cannot be read
    */
@@ -74,6 +79,8 @@ public class BackendApplication implements ApplicationRunner {
             season,
             error);
       }
+      // Runs in the background; a failed publication leaves those games unavailable, not missing.
+      startupPredictionService.start(season);
     }
   }
 
