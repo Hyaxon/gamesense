@@ -104,16 +104,25 @@ installation and startup instructions:
 - [Frontend setup](frontend/README.md): run the standalone UI, usually on port 5173.
 - [Backend setup](backend/README.md): build and run Spring Boot, normally on port 8080.
 - [Prediction service setup](prediction/README.md): install Python dependencies and
-  run FastAPI, normally on port 8000. Startup requires `PREDICTION_SNAPSHOT_PATH`.
+  run FastAPI, normally on port 8000. `PREDICTION_SNAPSHOT_PATH` is optional;
+  without it, Python starts empty and accepts published snapshots.
 
-The backend exposes `GET /health`. Python exposes `GET /health` and
-`POST /model-executions`. Backend orchestration is disabled by default until a
-canonical data provider and model selections are supplied. Starting the services
-does not automatically ingest a schedule or request a prediction.
+The backend exposes `GET /health`. Python exposes `GET /health`, `POST /snapshots`,
+and `POST /model-executions`. Start Python before the backend: Java ingests the live
+feed and historical data at startup, then publishes live-season snapshots and stores
+Python's returned IDs. Publication failures are logged without stopping the backend;
+ingestion failures still stop startup. Set `PREDICTION_SNAPSHOT_PUBLISH_ENABLED=false`
+to disable publication, or `GAMESENSE_INGESTION_ENABLED=false` to skip the entire
+startup ingestion/publication flow.
 
-For a working schedule-to-prediction walkthrough, see [demo.md](demo.md). It uses
-opt-in backend endpoints and a separate Python entry point without requiring
-frontend integration.
+Backend orchestration is disabled by default and requires model selections when
+enabled. Startup does not automatically request a prediction. For file-based use,
+configure Java with `PREDICTION_SNAPSHOT_FALLBACK_SEASON` and
+`PREDICTION_SNAPSHOT_FALLBACK_ID`, plus canonical data matching Python's file.
+
+See the [connectivity guide](docs/architecture/prediction-service-connectivity.md)
+for configuration, restart limitations, and a Java-to-Python publish-and-execute
+smoke check using synthetic data.
 
 ## Testing and code quality
 

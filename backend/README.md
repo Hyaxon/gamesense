@@ -349,7 +349,13 @@ Starting the backend alone does not send a prediction request.
 
 Set overrides in the backend process environment. Spring binds them through
 `prediction.service.*` in `application.properties`. The URL must be an HTTP(S)
-root address; timeouts must be positive.
+root address; timeouts must be positive. Snapshot settings bind through
+`prediction.snapshot.publish.enabled`, `prediction.snapshot.fallback-season`, and
+`prediction.snapshot.fallback-id`. For file-based use, configure both fallback values
+to match Python's optional startup file and load matching canonical teams and games
+into Java. An acknowledged publication takes precedence over that season's fallback.
+Without either, snapshot lookup returns empty. See the connectivity guide below for
+single-worker and restart limitations.
 
 The existing `prediction.prototype` types `Prediction` and `PredictionValidator` are prototype
 types, not the Java/Python wire contract. Model selection, game-data retrieval,

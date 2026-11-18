@@ -5,11 +5,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.ou.capstone.domain.Game;
+import com.ou.capstone.domain.GameStatus;
+import com.ou.capstone.domain.Team;
 import com.ou.capstone.prediction.contract.ErrorCode;
 import com.ou.capstone.prediction.contract.ErrorResponse;
 import com.ou.capstone.prediction.contract.ModelExecutionError;
 import com.ou.capstone.prediction.contract.ModelExecutionRequest;
 import com.ou.capstone.prediction.contract.ModelExecutionResult;
+import com.ou.capstone.prediction.snapshot.SnapshotPublishRequest;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -17,6 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -187,11 +194,12 @@ class PythonPredictionClientTest {
         .isInstanceOf(InvalidPredictionResponseException.class);
   }
 
-  @Test
-  void reportsUnavailableService() throws Exception {
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void reportsUnavailableService(boolean isPublication) throws Exception {
     server.stop(0);
     ModelExecutionRequest request = request("deterministic");
-    assertThatThrownBy(() -> client().execute(request))
+    assertThatThrownBy(() -> send(client(), request, isPublication))
         .isInstanceOfSatisfying(
             PredictionTransportException.class,
             error ->
@@ -199,8 +207,9 @@ class PythonPredictionClientTest {
                     .isEqualTo(PredictionTransportException.Reason.CONNECTION_FAILURE));
   }
 
-  @Test
-  void reportsTimeoutWhenServerDoesNotRespond() throws Exception {
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void reportsTimeoutWhenServerDoesNotRespond(boolean isPublication) throws Exception {
     CountDownLatch received = new CountDownLatch(1);
     CountDownLatch release = new CountDownLatch(1);
     server.createContext(
@@ -217,7 +226,7 @@ class PythonPredictionClientTest {
         });
     ModelExecutionRequest request = request("deterministic");
     try {
-      assertThatThrownBy(() -> client(Duration.ofMillis(500)).execute(request))
+      assertThatThrownBy(() -> send(client(Duration.ofMillis(500)), request, isPublication))
           .isInstanceOfSatisfying(
               PredictionTransportException.class,
               error ->
@@ -229,13 +238,14 @@ class PythonPredictionClientTest {
     }
   }
 
-  @Test
-  void restoresInterruptFlag() throws Exception {
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void restoresInterruptFlag(boolean isPublication) throws Exception {
     ModelExecutionRequest request = request("deterministic");
     PythonPredictionClient client = client();
     try {
       Thread.currentThread().interrupt();
-      assertThatThrownBy(() -> client.execute(request))
+      assertThatThrownBy(() -> send(client, request, isPublication))
           .isInstanceOfSatisfying(
               PredictionTransportException.class,
               error ->
@@ -245,6 +255,131 @@ class PythonPredictionClientTest {
     } finally {
       Thread.interrupted();
     }
+  }
+
+  private void send(
+      PythonPredictionClient client, ModelExecutionRequest request, boolean isPublication)
+      throws Exception {
+    if (isPublication) {
+      client.publishSnapshot(snapshot());
+    } else {
+      client.execute(request);
+    }
+  }
+
+  private SnapshotPublishRequest snapshot() {
+    String home = "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a";
+    String away = "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d";
+    return new SnapshotPublishRequest(
+        2026,
+        Map.of("source", "test"),
+        List.of(
+            new Team(home, null, "Home", null, null, null),
+            new Team(away, null, "Away", null, null, null)),
+        List.of(
+            new Game(
+                "c3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a",
+                null,
+                2026,
+                null,
+                home,
+                away,
+                null,
+                false,
+                Instant.parse("2026-09-01T20:00:00Z"),
+                GameStatus.SCHEDULED,
+                null,
+                null,
+                null)));
+  }
+
+  @Test
+  void publishesSnapshotWithUtcTimeAndReturnsOpaqueId() throws Exception {
+    reply(200, "application/json; charset=utf-8", "{\"dataSnapshotId\":\"assigned-by-python\"}");
+    assertThat(client().publishSnapshot(snapshot())).isEqualTo("assigned-by-python");
+    CapturedRequest sent = captured.get();
+    assertThat(sent.method()).isEqualTo("POST");
+    assertThat(sent.path()).isEqualTo("/snapshots");
+    assertThat(sent.contentType()).isEqualTo("application/json");
+    assertThat(sent.accept()).isEqualTo("application/json");
+    var body = mapper.readTree(sent.body());
+    assertThat(body.has("dataSnapshotId")).isFalse();
+    assertThat(body.path("season").asInt()).isEqualTo(2026);
+    assertThat(body.path("teams").size()).isEqualTo(2);
+    assertThat(body.path("games").get(0).path("scheduledAt").asText())
+        .isEqualTo("2026-09-01T20:00:00Z");
+    // A dedicated writer must not alter the supplied application mapper.
+    assertThat(
+            mapper.isEnabled(
+                com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS))
+        .isTrue();
+  }
+
+  @Test
+  void preservesSnapshotRejection() {
+    reply(
+        400,
+        "application/json",
+        "{\"code\":\"VALIDATION_ERROR\",\"message\":\"Invalid snapshot.\"}");
+    assertThatThrownBy(() -> client().publishSnapshot(snapshot()))
+        .isInstanceOfSatisfying(
+            SnapshotPublicationRejectedException.class,
+            error -> {
+              assertThat(error.error().code()).isEqualTo(ErrorCode.VALIDATION_ERROR);
+              assertThat(error.error().message()).isEqualTo("Invalid snapshot.");
+            });
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "",
+        "{",
+        "{}",
+        "null",
+        "[]",
+        "{\"dataSnapshotId\":null}",
+        "{\"dataSnapshotId\":42}",
+        "{\"dataSnapshotId\":\" \"}",
+        "{\"dataSnapshotId\":\"id\",\"extra\":true}",
+        "{\"dataSnapshotId\":\"a\",\"dataSnapshotId\":\"b\"}",
+        "{\"dataSnapshotId\":\"id\"} {}",
+        "{\"code\":\"VALIDATION_ERROR\",\"message\":\"Invalid snapshot.\"}"
+      })
+  void rejectsInvalidSnapshotSuccess(String body) {
+    reply(200, "application/json", body);
+    assertThatThrownBy(() -> client().publishSnapshot(snapshot()))
+        .isInstanceOf(InvalidPredictionResponseException.class);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"text/html", "text/plain", ""})
+  void rejectsSnapshotContentType(String type) {
+    reply(200, type.isEmpty() ? null : type, "{\"dataSnapshotId\":\"id\"}");
+    assertThatThrownBy(() -> client().publishSnapshot(snapshot()))
+        .isInstanceOf(InvalidPredictionResponseException.class);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {201, 302, 400, 500})
+  void rejectsSnapshotSuccessWithWrongStatus(int status) {
+    reply(status, "application/json", "{\"dataSnapshotId\":\"id\"}");
+    assertThatThrownBy(() -> client().publishSnapshot(snapshot()))
+        .isInstanceOf(InvalidPredictionResponseException.class);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "{}",
+        "{\"code\":\"UNKNOWN\",\"message\":\"Failure\"}",
+        "{\"code\":\"VALIDATION_ERROR\",\"message\":42}",
+        "{\"code\":\"INTERNAL_ERROR\",\"message\":\"Failure\"}"
+      })
+  void rejectsMalformedOrInconsistentSnapshotError(String body) {
+    reply(400, "application/json", body);
+    assertThatThrownBy(() -> client().publishSnapshot(snapshot()))
+        .isInstanceOf(InvalidPredictionResponseException.class);
   }
 
   private ModelExecutionRequest request(String name) throws Exception {

@@ -3,6 +3,13 @@ package com.ou.capstone;
 import com.ou.capstone.ingestion.currentseason.CurrentSeasonIngestionService;
 import com.ou.capstone.ingestion.historical.HistoricalIngestionService;
 import java.io.IOException;
+import com.ou.capstone.domain.Game;
+import com.ou.capstone.ingestion.currentseason.CurrentSeasonIngestionService;
+import com.ou.capstone.ingestion.historical.HistoricalIngestionService;
+import com.ou.capstone.prediction.snapshot.SnapshotPublicationService;
+import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -16,6 +23,8 @@ import org.springframework.core.io.Resource;
  */
 @SpringBootApplication
 public class BackendApplication implements ApplicationRunner {
+  private static final Logger LOGGER = LoggerFactory.getLogger(BackendApplication.class);
+  private final SnapshotPublicationService snapshotPublicationService;
   private final CurrentSeasonIngestionService currentSeasonIngestionService;
   private final HistoricalIngestionService historicalIngestionService;
   private final boolean ingestionEnabled;

@@ -76,11 +76,25 @@ class InMemoryCanonicalDataStoreTest {
         List.of(team("home", "A"), team("away", "B"), team("idle", "C")),
         List.of(game("g1", 2025, GameStatus.FINAL, 1, 0)));
 
+    assertThat(store.findSnapshot(2025)).isEmpty();
+    store.recordPublishedSnapshot(2025, "python-assigned-id");
     PredictionSnapshot snapshot = store.findSnapshot(2025).orElseThrow();
+    assertThat(snapshot.dataSnapshotId()).isEqualTo("python-assigned-id");
     assertThat(store.findTeam(snapshot, "home")).isPresent();
     assertThat(store.findTeam(snapshot, "away")).isPresent();
     assertThat(store.findTeam(snapshot, "idle")).isEmpty();
     assertThat(store.findSnapshot(2024)).isEmpty();
+  }
+
+  @Test
+  void fallbackIsSeasonSpecificAndPublishedIdTakesPrecedence() {
+    var configured = new InMemoryCanonicalDataStore(2025, "development-2025");
+    assertThat(configured.findSnapshot(2025).orElseThrow().dataSnapshotId())
+        .isEqualTo("development-2025");
+    assertThat(configured.findSnapshot(2026)).isEmpty();
+    configured.recordPublishedSnapshot(2025, "published-id");
+    assertThat(configured.findSnapshot(2025).orElseThrow().dataSnapshotId())
+        .isEqualTo("published-id");
   }
 
   @Test
