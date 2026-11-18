@@ -1,8 +1,5 @@
 package com.ou.capstone;
 
-import com.ou.capstone.ingestion.currentseason.CurrentSeasonIngestionService;
-import com.ou.capstone.ingestion.historical.HistoricalIngestionService;
-import java.io.IOException;
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.ingestion.currentseason.CurrentSeasonIngestionService;
 import com.ou.capstone.ingestion.historical.HistoricalIngestionService;
@@ -33,9 +30,11 @@ public class BackendApplication implements ApplicationRunner {
   public BackendApplication(
       CurrentSeasonIngestionService currentSeasonIngestionService,
       HistoricalIngestionService historicalIngestionService,
+      SnapshotPublicationService snapshotPublicationService,
       @Value("${gamesense.ingestion.enabled:true}") boolean ingestionEnabled,
       @Value("${gamesense.ingestion.historical-location:classpath:historical/Schedule-2025.json}")
           Resource historicalData) {
+    this.snapshotPublicationService = snapshotPublicationService;
     this.currentSeasonIngestionService = currentSeasonIngestionService;
     this.historicalIngestionService = historicalIngestionService;
     this.ingestionEnabled = ingestionEnabled;
@@ -47,7 +46,8 @@ public class BackendApplication implements ApplicationRunner {
    * Reloads on every startup because the in-memory store does not survive a process restart. The
    * historical resource defaults to the packaged dataset, independent of working directory. An
    * ingestion failure propagates and causes startup to fail; if the live load fails, the historical
-   * load is not attempted.
+   * load is not attempted. Snapshot publication follows successful ingestion but is best-effort, so
+   * prediction-service availability does not determine whether game endpoints can start.
    *
    * @throws IOException if the historical file cannot be read
    */
@@ -57,9 +57,23 @@ public class BackendApplication implements ApplicationRunner {
     if (!ingestionEnabled) {
       return;
     }
-    currentSeasonIngestionService.loadCurrentSeason();
+    var currentSeason = currentSeasonIngestionService.loadCurrentSeason();
     try (var input = historicalData.getInputStream()) {
       historicalIngestionService.loadStream(input);
+    }
+    // Use the live feed's seasons rather than the calendar year (a season can cross New Year).
+    // Historical-only seasons are loaded for browsing, but are not published by this flow.
+    for (int season : currentSeason.games().stream().map(Game::season).distinct().toList()) {
+      try {
+        snapshotPublicationService.publishSeason(season);
+      } catch (Exception error) {
+        // Keep this boundary outside ingestion: malformed snapshots, rejections, and network
+        // failures should disable predictions for missing data, not stop game browsing.
+        LOGGER.warn(
+            "Snapshot publication failed for season {}; backend will continue serving games.",
+            season,
+            error);
+      }
     }
   }
 

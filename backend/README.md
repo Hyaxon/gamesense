@@ -108,7 +108,11 @@ Maven copies `data/historical/Schedule-2025.json` into the application classpath
 so historical loading does not depend on the launch directory. Network access is still required
 for the live feed. An ingestion error fails startup;
 if the live fetch fails, the historical load is not attempted. Wait for startup to complete
-before testing loaded results. The store is rebuilt on every restart and has no scheduled refresh.
+before testing loaded results. After ingestion succeeds, Java publishes live-season snapshots
+to Python and stores the returned IDs. Start Python first; it can start without a snapshot
+file. Publication failures are logged without failing backend startup. Set
+`PREDICTION_SNAPSHOT_PUBLISH_ENABLED=false` to skip publishing while retaining ingestion.
+The store is rebuilt on every restart and has no scheduled refresh.
 
 To use an external dataset, set `GAMESENSE_INGESTION_HISTORICAL_LOCATION` to an absolute
 file URI. For example, from the repository root after packaging:
@@ -339,13 +343,18 @@ Spring creates one reusable `PythonPredictionClient`. Backend services inject it
 and call `execute(ModelExecutionRequest)` to send a single execution to Python's
 `POST /model-executions` endpoint. The client returns a validated
 `PredictionServiceResponse` or throws a transport/invalid-response exception.
-Starting the backend alone does not send a prediction request.
+The startup runner also calls `publishSnapshot(SnapshotPublishRequest)` against
+`POST /snapshots` and records Python's returned ID. Starting the backend publishes
+data by default but does not send a prediction execution request.
 
 | Environment variable                 | Default                 |
 | ------------------------------------ | ----------------------- |
 | `PREDICTION_SERVICE_BASE_URL`        | `http://127.0.0.1:8000` |
 | `PREDICTION_SERVICE_CONNECT_TIMEOUT` | `2s`                    |
 | `PREDICTION_SERVICE_REQUEST_TIMEOUT` | `30s`                   |
+| `PREDICTION_SNAPSHOT_PUBLISH_ENABLED` | `true` |
+| `PREDICTION_SNAPSHOT_FALLBACK_SEASON` | `0` (disabled) |
+| `PREDICTION_SNAPSHOT_FALLBACK_ID` | Empty (disabled) |
 
 Set overrides in the backend process environment. Spring binds them through
 `prediction.service.*` in `application.properties`. The URL must be an HTTP(S)
