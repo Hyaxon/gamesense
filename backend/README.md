@@ -465,3 +465,42 @@ probability `0.7`, and away winner confidence `0.7`, plus a `MODEL_ERROR` with
 checks these outcomes and exits unsuccessfully if they do not match; a passing run
 ends with `PASS`. Python should log six execution requests: `200`, `404`, `200`
 for each matchup. Stop the Python process with Ctrl+C afterward.
+
+## Custom prediction endpoint
+
+`POST /predictions/custom` predicts a custom matchup (no game is created, no `gameId`
+returned). Request and response follow `custom-prediction-request.schema.json` and
+`prediction-response.schema.json`. Available only when
+`prediction.orchestration.enabled=true`.
+
+- **`methods` omitted:** runs every configured model that declares a `method`; enum
+  methods with no configured model are skipped.
+- **`methods` present:** runs the configured models for each method; an unconfigured
+  method returns `400 UNSUPPORTED_METHOD`.
+- **`simulations`:** runs that method's configured model as a `SIMULATION` with the
+  requested `trials` (1-100000) and optional `seed`.
+
+The API returns complete success or a single error.
+
+Each model must be registered in Python and declare its `method`:
+
+```properties
+prediction.orchestration.models[0].model-id=coin-flip-v1
+prediction.orchestration.models[0].execution-kind=SIMULATION
+prediction.orchestration.models[0].trials=1000
+prediction.orchestration.models[0].method=RANDOM
+```
+
+Errors use the shared `ErrorResponse` body:
+
+| Condition | Status | Code |
+| --- | --- | --- |
+| Malformed body, bad matchup, trials, seed, or methods | 400 | `VALIDATION_ERROR` |
+| Method not configured | 400 | `UNSUPPORTED_METHOD` |
+| Snapshot or team unavailable | 404 | `NOT_FOUND` |
+| Python rejects the execution | 404 / 422 | Python's code |
+| Python timeout | 504 | `PREDICTION_FAILED` |
+| Python unreachable, invalid response, model failure | 502 | `PREDICTION_FAILED` |
+| Interrupted or no models configured | 503 | `INTERNAL_ERROR` |
+
+Example: `curl -X POST localhost:8080/predictions/custom -H 'Content-Type: application/json' -d @shared/examples/custom-prediction-request.json`
