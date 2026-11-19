@@ -8,7 +8,9 @@ import com.ou.capstone.data.InMemoryCanonicalDataStore;
 import com.ou.capstone.domain.Game;
 import com.ou.capstone.domain.GameStatus;
 import com.ou.capstone.domain.Team;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,7 +21,10 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 class PredictionSnapshotBuilderTest {
   private static final String HOME = "b3b6c2a0-6e2a-4c1e-9d3a-1f2e3d4c5b6a";
   private static final String AWAY = "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d";
-  private final InMemoryCanonicalDataStore store = new InMemoryCanonicalDataStore();
+  // The clock is fixed before the games' date so a scheduled game stays scheduled.
+  private final InMemoryCanonicalDataStore store =
+      new InMemoryCanonicalDataStore(
+          Clock.fixed(Instant.parse("2026-08-01T00:00:00Z"), ZoneOffset.UTC));
   private final PredictionSnapshotBuilder builder = new PredictionSnapshotBuilder(store);
 
   private static Team team(String id) {

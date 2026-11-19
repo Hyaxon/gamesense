@@ -29,15 +29,6 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
   private final Map<String, Game> games = new LinkedHashMap<>();
   private final Clock clock;
 
-  public InMemoryCanonicalDataStore() {
-    this(Clock.systemUTC());
-  }
-
-  // A fixed or adjustable clock lets tests control what time the store thinks it is.
-  public InMemoryCanonicalDataStore(Clock clock) {
-    this.clock = clock;
-  }
-
   // Loaded games do not prove that Python has their data. Track acknowledged IDs separately.
   private final Map<Integer, PredictionSnapshot> snapshots = new LinkedHashMap<>();
   private final PredictionSnapshot fallback;
@@ -46,10 +37,20 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
     this(0, "");
   }
 
+  // A fixed or adjustable clock lets tests control what time the store thinks it is.
+  public InMemoryCanonicalDataStore(Clock clock) {
+    this(0, "", clock);
+  }
+
   @Autowired
   public InMemoryCanonicalDataStore(
       @Value("${prediction.snapshot.fallback-season:0}") int fallbackSeason,
       @Value("${prediction.snapshot.fallback-id:}") String fallbackId) {
+    this(fallbackSeason, fallbackId, Clock.systemUTC());
+  }
+
+  public InMemoryCanonicalDataStore(int fallbackSeason, String fallbackId, Clock clock) {
+    this.clock = clock;
     // Require the pair so a local file ID cannot accidentally be reused for another season.
     if (fallbackSeason == 0 && fallbackId.isBlank()) {
       fallback = null;
