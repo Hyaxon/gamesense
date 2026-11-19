@@ -120,13 +120,6 @@
   font-size: 0.9rem;
 }
 
-.model-options {
-  min-height: 5rem;
-  border: 1px dashed #d5dce5;
-  border-radius: 0.75rem;
-  background: #fbfcfd;
-}
-
 .prediction-empty-state {
   display: flex;
   align-items: center;

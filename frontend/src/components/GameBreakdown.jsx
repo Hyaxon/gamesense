@@ -1,4 +1,5 @@
 import PredictionRow from './PredictionRow'
+import { getModelDesc } from '../utils/predictionMethods'
 
 /** Renders the detailed game breakdown view of a selected football matchup 
 NOTES: 
@@ -133,16 +134,6 @@ export default function GameBreakdown({ game }) {
       </div>
     </div>
   )
-}
-
-const getModelDesc = (m = '') => {
-  const lower = m.toLowerCase()
-  if (lower.includes('bradley') || lower.includes('elo'))
-    return 'Ratings-based model'
-  if (lower.includes('glicko')) return 'Dynamic ratings model'
-  if (lower.includes('machine')) return 'AI prediction model'
-  if (lower.includes('monte')) return 'Random chance baseline'
-  return 'Prediction model'
 }
 
 const getTier = (score = 0) => {

@@ -1,3 +1,5 @@
+import './PredictionRow.css'
+
 /** Reusable row for individual model predictions
  * - isPresage: Flags row as the weighted summary card.
  * - cardColor: Hex color passed down and dynamically applies team color highlighting. (thought i'd add this) */
