@@ -25,7 +25,7 @@ Each item in a team's `schedule` is **one calendar day**, not one game. Most day
 **Everything is a string.** Scores (`"pointsScored": "23"`), dates (`"08/29/2025"`), all of it. Ingestion has to convert:
 
 - Scores: string to integer.
-- Dates: `MM/DD/YYYY` to an ISO 8601 timestamp (`scheduledAt`). The feed has no game time, only a date, so pick a fixed time (e.g. midnight UTC) or leave that as a known gap.
+- Dates: `MM/DD/YYYY` to an ISO 8601 timestamp (`scheduledAt`). The feed has no game time, only a date, so pick a fixed time (we use noon UTC) or leave that as a known gap.
 
 **One dead field, and why.** `index` is `"0"` on every single row we checked, for every team. Confirmed with Adam: it's a counter for sports where a team can play more than once on the same calendar date (doubleheaders, tournament days, etc.). College football never has that, so it's always `0` in this data and safe to ignore. Don't bother mapping it to anything in our model.
 

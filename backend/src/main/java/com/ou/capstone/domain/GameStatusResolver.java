@@ -13,9 +13,10 @@ import java.time.Instant;
  */
 public final class GameStatusResolver {
 
-  // The feed has dates but no kickoff times, so scheduledAt is midnight UTC of the game day. A US
-  // evening game is played several hours after that, so a game counts as in progress for 36 hours.
-  static final Duration IN_PROGRESS_WINDOW = Duration.ofHours(36);
+  // The feed has dates but no kickoff times, so scheduledAt is noon UTC of the game day (early
+  // morning in the US). A game counts as in progress for the next 24 hours, which covers the whole
+  // US game day, late Hawaii games included, without overlapping the next day's games.
+  static final Duration IN_PROGRESS_WINDOW = Duration.ofHours(24);
 
   private GameStatusResolver() {}
 

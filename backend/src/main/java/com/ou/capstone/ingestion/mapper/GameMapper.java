@@ -153,7 +153,7 @@ public class GameMapper {
         away.id(),
         null, // venue, not in the feed
         neutral,
-        date.atStartOfDay(ZoneOffset.UTC).toInstant(), // no kickoff time in the feed
+        date.atTime(12, 0).toInstant(ZoneOffset.UTC), // no kickoff time in the feed, use noon UTC
         status,
         homeScore,
         awayScore,

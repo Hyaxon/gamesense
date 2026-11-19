@@ -69,18 +69,18 @@ Ingestion only knows whether a result exists: a game with a score is `FINAL`, an
 | --- | --- | --- |
 | `FINAL`, `CANCELLED`, `POSTPONED`, `IN_PROGRESS` | any | unchanged |
 | `SCHEDULED` | before the scheduled time | `SCHEDULED` |
-| `SCHEDULED` | from the scheduled time until 36 hours later | `IN_PROGRESS` |
-| `SCHEDULED` | 36 hours or more after, with no result | `POSTPONED` |
+| `SCHEDULED` | from the scheduled time until 24 hours later | `IN_PROGRESS` |
+| `SCHEDULED` | 24 hours or more after, with no result | `POSTPONED` |
 | `SCHEDULED` | no scheduled time | `SCHEDULED` |
 
-* The feed has dates but no kickoff times, so `scheduledAt` is midnight UTC of the game day. `IN_PROGRESS` therefore means "game day, no result yet", and it can show before kickoff. The 36-hour window covers US evening games, which are played well after midnight UTC.
+* The feed has dates but no kickoff times, so `scheduledAt` is noon UTC of the game day, which is early morning in the US. `IN_PROGRESS` therefore means "game day, no result yet", and it can show before kickoff. The 24-hour window covers the whole US game day, late Hawaii games included, and never overlaps the next day.
 * `POSTPONED` here means a game that should be over has no reported result. Loading a final score later replaces it.
 * Times are compared as instants, so time zones cannot change the answer.
 * The `status` filter on `GET /games` matches the current status, not the stored one.
 
 ### Seasons and snapshots
 
-A game's season comes from its date: July to December belong to that calendar year, January to June to the previous one. The feed gives dates only, so `scheduledAt` is midnight UTC.
+A game's season comes from its date: July to December belong to that calendar year, January to June to the previous one. The feed gives dates only, so `scheduledAt` is noon UTC.
 
 A snapshot reference is `season-<year>`. It is a label for the games loaded for that season. It does not change when more data is loaded for the season, and publishing a snapshot to the Python service is a separate responsibility that is not implemented here.
 

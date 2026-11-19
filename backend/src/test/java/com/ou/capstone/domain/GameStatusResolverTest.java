@@ -11,8 +11,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 // Verifies a game's status is worked out correctly from its stored status and the clock.
 class GameStatusResolverTest {
 
-  // A game dated 14 November: the feed gives only a date, so this is midnight UTC.
-  private static final Instant START = Instant.parse("2026-11-14T00:00:00Z");
+  // A game dated Saturday 14 November: the feed gives only a date, so this is noon UTC.
+  private static final Instant START = Instant.parse("2026-11-14T12:00:00Z");
 
   private static Game game(GameStatus status, Instant scheduledAt) {
     return new Game(
@@ -52,9 +52,27 @@ class GameStatusResolverTest {
   }
 
   @Test
-  void aUsEveningGameDatedByItsUtcDayIsInProgressAtKickoff() {
-    // 10pm Eastern on 13 November is 03:00 UTC on 14 November, hours after the date-only time.
-    Instant kickoff = OffsetDateTime.parse("2026-11-13T22:00:00-05:00").toInstant();
+  void aGameIsNotInProgressTheEveningBefore() {
+    Instant fridayEvening = OffsetDateTime.parse("2026-11-13T20:00:00-06:00").toInstant();
+    Game friday = game(GameStatus.SCHEDULED, Instant.parse("2026-11-13T12:00:00Z"));
+
+    assertThat(statusAt(game(GameStatus.SCHEDULED, START), fridayEvening))
+        .isEqualTo(GameStatus.SCHEDULED);
+    assertThat(statusAt(friday, fridayEvening)).isEqualTo(GameStatus.IN_PROGRESS);
+  }
+
+  @Test
+  void aLateGameIsStillInProgressWhenItEnds() {
+    // A 10:30pm Hawaii kickoff on Saturday is 08:30 UTC on Sunday, and it ends after that.
+    Instant lateHawaii = OffsetDateTime.parse("2026-11-14T23:30:00-10:00").toInstant();
+
+    assertThat(statusAt(game(GameStatus.SCHEDULED, START), lateHawaii))
+        .isEqualTo(GameStatus.IN_PROGRESS);
+  }
+
+  @Test
+  void aUsEveningGameIsInProgressAtKickoff() {
+    Instant kickoff = OffsetDateTime.parse("2026-11-14T22:00:00-05:00").toInstant();
 
     assertThat(statusAt(game(GameStatus.SCHEDULED, START), kickoff))
         .isEqualTo(GameStatus.IN_PROGRESS);
@@ -66,15 +84,15 @@ class GameStatusResolverTest {
     // All three are the exact same instant as START, written in different time zones.
     for (String sameMoment :
         new String[] {
-          "2026-11-14T00:00:00Z", "2026-11-13T19:00:00-05:00", "2026-11-14T09:00:00+09:00"
+          "2026-11-14T12:00:00Z", "2026-11-14T07:00:00-05:00", "2026-11-14T21:00:00+09:00"
         }) {
       assertThat(statusAt(game, OffsetDateTime.parse(sameMoment).toInstant()))
           .isEqualTo(GameStatus.IN_PROGRESS);
     }
     // One second earlier is still scheduled, whichever zone it is written in.
-    assertThat(statusAt(game, OffsetDateTime.parse("2026-11-13T18:59:59-05:00").toInstant()))
+    assertThat(statusAt(game, OffsetDateTime.parse("2026-11-14T06:59:59-05:00").toInstant()))
         .isEqualTo(GameStatus.SCHEDULED);
-    assertThat(statusAt(game, OffsetDateTime.parse("2026-11-14T08:59:59+09:00").toInstant()))
+    assertThat(statusAt(game, OffsetDateTime.parse("2026-11-14T20:59:59+09:00").toInstant()))
         .isEqualTo(GameStatus.SCHEDULED);
   }
 
