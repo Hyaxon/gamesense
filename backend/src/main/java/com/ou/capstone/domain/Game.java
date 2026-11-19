@@ -23,4 +23,23 @@ public record Game(
     GameStatus status,
     Integer homeScore,
     Integer awayScore,
-    String winnerTeamId) {}
+    String winnerTeamId) {
+
+  // Returns a copy of this game with a different status.
+  public Game withStatus(GameStatus newStatus) {
+    return new Game(
+        id,
+        externalId,
+        season,
+        week,
+        homeTeamId,
+        awayTeamId,
+        venue,
+        isNeutralSite,
+        scheduledAt,
+        newStatus,
+        homeScore,
+        awayScore,
+        winnerTeamId);
+  }
+}

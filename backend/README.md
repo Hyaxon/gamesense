@@ -206,7 +206,7 @@ Optional<Team> home = canonicalDataProvider.findTeam(games.get(0).homeTeamId());
 
 - Team and game IDs are deterministic, so the same team or game keeps one identity across sources and reloads, and overlapping records collapse into one.
 - Loading adds to the store and never discards other seasons. A final result is not replaced by an unfinished game. The store is in memory only.
-- The feed provides dates without kickoff times. Mapping stores midnight UTC in `scheduledAt`; `week` is absent from the feed.
+- The feed provides dates without kickoff times. Mapping stores noon UTC in `scheduledAt`; `week` is absent from the feed.
 - `GamesController` parses HTTP parameters, `GameFilter` carries optional criteria, and the store applies them by scanning loaded games.
 - Full design, rules, and limits: [Data Ingestion and Retrieval](../docs/architecture/data-ingestion.md).
 

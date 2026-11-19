@@ -59,7 +59,7 @@ class GameMapperTest {
     assertEquals("Michigan-id", game.winnerTeamId());
     assertEquals(GameStatus.FINAL, game.status());
     assertEquals(2025, game.season());
-    assertEquals(Instant.parse("2025-10-25T00:00:00Z"), game.scheduledAt());
+    assertEquals(Instant.parse("2025-10-25T12:00:00Z"), game.scheduledAt());
     assertFalse(game.isNeutralSite());
     assertNull(game.venue());
     assertNotNull(game.id());
