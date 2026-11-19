@@ -22,6 +22,54 @@
   color: #9b2c2c;
 }
 
+/* Rows are separate cards. These rules only apply inside the methods grid. */
+.methods-grid {
+  row-gap: 0.6rem;
+}
+
+.methods-grid .prediction-row {
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+}
+
+.methods-grid .prediction-row.presage-card {
+  margin-bottom: 0;
+  padding: 0.7rem 1rem;
+  border-color: #b7dfc4;
+  background: #e8f5ec;
+}
+
+.methods-grid .model-icon,
+.methods-grid .info-icon {
+  display: none;
+}
+
+.methods-grid .model-name {
+  font-size: 1rem;
+}
+
+.methods-grid .model-desc {
+  font-size: 0.75rem;
+}
+
+.methods-grid .prediction-val-col {
+  padding-left: 0;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.methods-grid .accuracy-tier-col {
+  justify-content: center;
+}
+
+.methods-grid .tier-badge {
+  min-width: 4.5rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+}
+
 /* Column headers sit above each of the two grid columns and share the row layout. */
 .methods-header,
 .methods-grid {
@@ -44,6 +92,10 @@
   font-weight: 600;
 }
 
+.methods-header-columns span:not(:first-child) {
+  text-align: center;
+}
+
 .methods-disclaimer {
   margin: 0;
   color: var(--color-muted);
@@ -62,14 +114,27 @@
   }
 }
 
-/* On phones the columns shrink and the icon goes, so model names stay readable. */
+/* On phones the columns, text and padding shrink so model names stay readable. */
 @media (max-width: 500px) {
   .methods-header-columns,
   .methods-grid .prediction-row {
-    grid-template-columns: 1fr 96px 62px;
+    grid-template-columns: 1fr 92px 58px;
+    gap: 8px;
   }
 
-  .methods-grid .model-icon {
-    display: none;
+  .methods-grid .prediction-row,
+  .methods-grid .prediction-row.presage-card {
+    padding: 0.6rem 0.6rem;
+  }
+
+  .methods-grid .model-name,
+  .methods-grid .prediction-val-col {
+    font-size: 0.85rem;
+  }
+
+  .methods-grid .tier-badge {
+    min-width: 0;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
   }
 }

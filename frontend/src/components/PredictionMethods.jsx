@@ -107,7 +107,8 @@ export default function PredictionMethods({
     <div className="prediction-methods">
       <h2 id="methods-title">Prediction methods</h2>
       <p className="region-description">
-        Compare each model&apos;s {teamA.name} win probability.
+        Compare each model&apos;s {teamA.name} win probability. Accuracy labels
+        describe model performance, not certainty of this result.
       </p>
       {body}
     </div>
