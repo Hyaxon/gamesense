@@ -29,6 +29,14 @@ This code block specifies the interface; its Python Protocol is implemented in `
 
 An adapter must reject insufficient context with NOT_FOUND instead of inventing ratings or silently selecting another season. Snapshot contents cannot change during execution. A descriptor version identifies the algorithm and any fixed trained artifacts; change the version when either changes. Training is not part of execute.
 
+## Snapshot delivery
+
+The backend publishes season data through `POST /snapshots` before executing predictions. The request contains `season`, `provenance`, `teams`, and `games` (with optional `ratings`); it omits `dataSnapshotId`. Python validates the entire snapshot and returns HTTP 200 with a generated `dataSnapshotId` of the form `season-<year>-<uuid>`. Invalid payloads and duplicate IDs return HTTP 400 with the shared `VALIDATION_ERROR` envelope. Each successful HTTP publish creates a new immutable version, even for identical content.
+
+Alternatively, Python can load one file at startup using optional `PREDICTION_SNAPSHOT_PATH`. The file retains its own ID and uses the same validation and storage path. Without the variable, Python starts empty. File and HTTP snapshots coexist. Java may reference a file snapshot using the explicitly configured fallback season and ID; otherwise it uses the ID acknowledged by Python, or reports missing data if none is available.
+
+Snapshots are process-local and do not survive a Python restart. Use one Python worker with this in-memory implementation. Refreshing, persistence, and automatic republishing are separate work.
+
 ## Schemas and types
 
 | Type | Schema | Role |
