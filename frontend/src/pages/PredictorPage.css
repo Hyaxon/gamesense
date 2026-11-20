@@ -61,19 +61,6 @@
   font-size: 0.6875rem;
 }
 
-.section-index {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
-  color: #285bb5;
-  background: #edf3ff;
-  font-size: 0.75rem;
-  font-weight: 800;
-}
-
 .matchup-selectors {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);

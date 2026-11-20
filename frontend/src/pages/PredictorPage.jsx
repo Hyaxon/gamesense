@@ -29,7 +29,6 @@ export default function PredictorPage() {
                 Choose two teams and the conditions for your prediction.
               </p>
             </div>
-            <span className="section-index">01</span>
           </div>
 
           <div className="matchup-selectors">
@@ -65,9 +64,9 @@ export default function PredictorPage() {
         >
           <div className="predictor-section-heading">
             <div>
-              <h2 id="results-title">Your Prediction</h2>
+              <h2 id="results-title">2. Your Prediction</h2>
               <p className="region-description">
-                [A] vs [B] * [Year] season * [Venue]
+                [A] vs [B] · [Year] season · [Venue]
               </p>
             </div>
           </div>
