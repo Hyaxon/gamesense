@@ -1,0 +1,140 @@
+.prediction-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prediction-methods .region-description {
+  margin: 0;
+}
+
+.methods-message {
+  margin: 0;
+  padding: 1.5rem 1rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.methods-error {
+  border-color: #feb2b2;
+  color: #9b2c2c;
+}
+
+/* Rows are separate cards. These rules only apply inside the methods grid. */
+.methods-grid {
+  row-gap: 0.6rem;
+}
+
+.methods-grid .prediction-row {
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+}
+
+.methods-grid .prediction-row.presage-card {
+  margin-bottom: 0;
+  padding: 0.7rem 1rem;
+  border-color: #b7dfc4;
+  background: #e8f5ec;
+}
+
+.methods-grid .model-icon,
+.methods-grid .info-icon {
+  display: none;
+}
+
+.methods-grid .model-name {
+  font-size: 1rem;
+}
+
+.methods-grid .model-desc {
+  font-size: 0.75rem;
+}
+
+.methods-grid .prediction-val-col {
+  padding-left: 0;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.methods-grid .accuracy-tier-col {
+  justify-content: center;
+}
+
+.methods-grid .tier-badge {
+  min-width: 4.5rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* Column headers sit above each of the two grid columns and share the row layout. */
+.methods-header,
+.methods-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 2rem;
+}
+
+.methods-header-columns,
+.methods-grid .prediction-row {
+  grid-template-columns: 1fr 140px 100px;
+}
+
+.methods-header-columns {
+  display: grid;
+  gap: 12px;
+  padding: 0 8px;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.methods-header-columns span:not(:first-child) {
+  text-align: center;
+}
+
+.methods-disclaimer {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+/* One column on narrow screens; the second header is only needed for the second column. */
+@media (max-width: 800px) {
+  .methods-header,
+  .methods-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .methods-header-columns:nth-child(2) {
+    display: none;
+  }
+}
+
+/* On phones the columns, text and padding shrink so model names stay readable. */
+@media (max-width: 500px) {
+  .methods-header-columns,
+  .methods-grid .prediction-row {
+    grid-template-columns: 1fr 92px 58px;
+    gap: 8px;
+  }
+
+  .methods-grid .prediction-row,
+  .methods-grid .prediction-row.presage-card {
+    padding: 0.6rem 0.6rem;
+  }
+
+  .methods-grid .model-name,
+  .methods-grid .prediction-val-col {
+    font-size: 0.85rem;
+  }
+
+  .methods-grid .tier-badge {
+    min-width: 0;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+  }
+}

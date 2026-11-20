@@ -1,3 +1,10 @@
+import PredictionMethods from '../components/PredictionMethods'
+import {
+  MOCK_AGGREGATE,
+  MOCK_PREDICTIONS,
+  MOCK_TEAM_A,
+  MOCK_TIERS,
+} from '../mock/predictionMethodsMock'
 import './PredictorPage.css'
 
 export default function PredictorPage() {
@@ -22,7 +29,6 @@ export default function PredictorPage() {
                 Choose two teams and the conditions for your prediction.
               </p>
             </div>
-            <span className="section-index">01</span>
           </div>
 
           <div className="matchup-selectors">
@@ -58,9 +64,9 @@ export default function PredictorPage() {
         >
           <div className="predictor-section-heading">
             <div>
-              <h2 id="results-title">Your Prediction</h2>
+              <h2 id="results-title">2. Your Prediction</h2>
               <p className="region-description">
-                [A] vs [B] * [Year] season * [Venue]
+                [A] vs [B] · [Year] season · [Venue]
               </p>
             </div>
           </div>
@@ -76,17 +82,16 @@ export default function PredictorPage() {
 
         <section
           className="predictor-region models-region"
-          aria-labelledby="models-title"
+          aria-labelledby="methods-title"
         >
-          <div className="predictor-section-heading">
-            <div>
-              <h2 id="models-title">Prediction models</h2>
-            </div>
-          </div>
-          <p className="region-description">
-            Choose the models to include in your prediction.
-          </p>
-          <div className="model-options">{/* INSERT CODE HERE LATER */}</div>
+          {/* Mock data until the page is connected to the Predictions API (#69) */}
+          <PredictionMethods
+            teamA={MOCK_TEAM_A}
+            status="ready"
+            predictions={MOCK_PREDICTIONS}
+            aggregate={MOCK_AGGREGATE}
+            tiers={MOCK_TIERS}
+          />
         </section>
       </div>
     </div>
