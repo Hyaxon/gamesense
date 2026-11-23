@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamesense.dev/schemas/team-response.schema.json",
+  "title": "TeamResponse",
+  "description": "GET /teams items and GET /teams/{teamId}: a canonical team. Unavailable optional fields are omitted. Records and rankings will be added once they are derived.",
+  "$ref": "team.schema.json"
+}

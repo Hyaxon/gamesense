@@ -109,6 +109,26 @@ public class InMemoryCanonicalDataStore implements CanonicalDataProvider {
     return Optional.ofNullable(teams.get(teamId));
   }
 
+  // Filters the teams list by conference and by whether the team plays in a season.
+  @Override
+  public synchronized List<Team> findTeams(TeamFilter filter) {
+    return teams.values().stream()
+        .filter(
+            team ->
+                filter.conference() == null
+                    || filter.conference().equalsIgnoreCase(team.conference()))
+        .filter(team -> filter.season() == null || playsInSeason(team.id(), filter.season()))
+        .toList();
+  }
+
+  private boolean playsInSeason(String teamId, int season) {
+    return games.values().stream()
+        .anyMatch(
+            game ->
+                game.season() == season
+                    && (teamId.equals(game.homeTeamId()) || teamId.equals(game.awayTeamId())));
+  }
+
   @Override
   public synchronized List<Game> findAllGames() {
     return new ArrayList<>(games.values());
