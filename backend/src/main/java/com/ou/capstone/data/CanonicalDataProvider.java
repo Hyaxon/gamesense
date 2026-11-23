@@ -24,4 +24,7 @@ public interface CanonicalDataProvider extends PredictionDataProvider {
   // A team by canonical ID, regardless of season. Use a game's homeTeamId/awayTeamId to find the
   // teams that played it.
   Optional<Team> findTeam(String teamId);
+
+  // Every loaded team matching the optional criteria, or an empty list.
+  List<Team> findTeams(TeamFilter filter);
 }

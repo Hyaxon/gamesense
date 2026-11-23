@@ -15,9 +15,9 @@ backend/
     ├── main/
     │   ├── java/com/ou/capstone/
     │   │   ├── BackendApplication.java
-    │   │   ├── controller/        # HealthController and GamesController
+    │   │   ├── controller/        # HealthController, GamesController, and TeamController
     │   │   ├── domain/            # Canonical Team, Game, Conference, Venue, GameStatus
-    │   │   ├── data/              # Provider interfaces, GameFilter, snapshots, and in-memory storage
+    │   │   ├── data/              # Provider interfaces, GameFilter, TeamFilter, snapshots, and in-memory storage
     │   │   ├── datasource/        # HTTP client for the current-season feed
     │   │   ├── ingestion/         # Source records, shared mapping, historical and current-season loaders
     │   │   └── prediction/
@@ -166,7 +166,7 @@ The backend can pull current-season college football data from the mentor-provid
 - The `Source*` records (in `ingestion/source/`) mirror the external format exactly (every value is a raw string). They are shared by the current-season and historical paths and stay separate from the domain models; the shared mapper in `ingestion/` converts them into `Team`/`Game`. See [Data Ingestion and Retrieval](#data-ingestion-and-retrieval).
 - The feed puts a small HTML stub in front of the JSON, so the client skips ahead to the first `{` before parsing.
 - Any failure (unreachable, timeout, non-2xx status, invalid JSON, or a response with no teams) is thrown as a `DataSourceException`, so callers can handle it. The startup runner lets this exception propagate, failing startup.
-- Loaded canonical games are exposed through `/games`. There is no HTTP endpoint to trigger ingestion or return the raw feed.
+- Loaded canonical games are exposed through `/games` and teams through `/teams`. There is no HTTP endpoint to trigger ingestion or return the raw feed.
 
 ### Configuration
 
@@ -228,7 +228,7 @@ parameter binding, JSON responses, `404`, and invalid-input `400` responses.
 For the games API and store tests only:
 
 ```bash
-./mvnw -Dtest=GamesControllerTest,InMemoryCanonicalDataStoreTest test
+./mvnw -Dtest=GamesControllerTest,TeamsControllerTest,InMemoryCanonicalDataStoreTest test
 ```
 
 ## Linting / Formatting
@@ -335,6 +335,39 @@ For readable JSON, omit headers and pipe the body to a formatter:
 
 ```bash
 curl -s 'http://localhost:8080/games?season=2025' | python3 -m json.tool
+```
+
+### `GET /teams`
+
+Returns `200` with a JSON array of teams. No matches returns `[]`.
+All parameters are optional; multiple parameters combine with AND.
+
+| Parameter    | Meaning                                                                   |
+| ------------ | ------------------------------------------------------------------------- |
+| `season`     | Positive integer; matches teams that play at least one loaded game in it. |
+| `conference` | Conference name, such as `Big Ten`; matched case-insensitively.           |
+
+Non-integer seasons return `400`. An unknown conference or a season with no loaded games
+returns an empty array. There is no pagination or explicit sorting.
+
+### `GET /teams/{teamId}`
+
+Returns `200` with one team object, or `404` when the canonical ID is not stored.
+Use `id`, not `externalId`, from a listing response. Responses follow the
+[shared team response schema](../shared/schemas/team-response.schema.json); null fields are
+omitted. Records and rankings are not included yet. See the
+[example response](../shared/examples/team-response.json).
+
+### Try the teams endpoints
+
+Run these after starting the backend. Replace `TEAM_ID` with an ID from the listing endpoint.
+
+```bash
+curl -i 'http://localhost:8080/teams'
+curl -i 'http://localhost:8080/teams?season=2025'
+curl -i 'http://localhost:8080/teams?conference=Big%20Ten'
+curl -i 'http://localhost:8080/teams/TEAM_ID'
+curl -i 'http://localhost:8080/teams/nonexistent'
 ```
 
 ## Architecture

@@ -35,6 +35,7 @@ All files are under [shared/schemas](../../shared/schemas/). Matching complete J
 | Schema | Purpose and domain relationship |
 |---|---|
 | team | Shared Team entity. |
+| team-response | Teams endpoint response: the Team schema, returned as an array by the list endpoint and as one object by the lookup. |
 | game | Existing Game entity, including status and embedded optional venue. |
 | game-response | Game endpoint response: existing game fields plus optional complete homeTeam and awayTeam objects. |
 | game-status | Reusable lifecycle enum corresponding to GameStatus. |
@@ -366,3 +367,14 @@ object using its corresponding game team ID. Missing teams are omitted, never nu
 the game and its team IDs remain available. Teams reflect current loaded data.
 Unknown response fields are rejected. HTTP consumers should validate against
 `game-response.schema.json`; the canonical `game.schema.json` is unchanged.
+
+### TeamResponse
+
+`GET /teams` returns an array of TeamResponse objects; `GET /teams/{teamId}` returns one.
+Each object is the complete Team schema, including required `id`, `name`, and `conference`,
+plus available optional fields such as `shortName` and `logoUrl`. Unavailable optional
+fields are omitted, never null. Unknown response fields are rejected. Records and rankings
+are not part of the response yet and will be added once they are derived. HTTP consumers
+should validate against `team-response.schema.json`.
+
+Example: [team-response.json](../../shared/examples/team-response.json).

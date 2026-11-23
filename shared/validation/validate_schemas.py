@@ -120,6 +120,8 @@ def main():
     reject('game-response', lambda p: p.update(homeTeam=None))
     reject('game-response', lambda p: p.update(extra=True))
     reject('game-response', lambda p: p.pop('homeTeamId'))
+    reject('team-response', lambda p: p.pop('conference'))
+    reject('team-response', lambda p: p.update(extra=True))
     reject('custom-prediction-request', lambda p: p.pop('matchup'))
     reject('custom-prediction-request', lambda p: p['matchup'].update(season=None))
     reject('custom-prediction-request', lambda p: p['matchup'].update(season='2025'))
