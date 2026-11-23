@@ -52,15 +52,28 @@ public final class PredictionOrchestrator {
     validator.validateGame(gameId, game);
     Matchup matchup =
         new Matchup(game.homeTeamId(), game.awayTeamId(), game.season(), game.isNeutralSite());
-    return predict(gameId, matchup);
+    return predict(gameId, matchup, selections);
   }
 
   /** Predicts a custom matchup without looking up or creating a scheduled game. */
   public PredictionOrchestrationResult predictMatchup(Matchup matchup) {
-    return predict(null, matchup);
+    return predict(null, matchup, selections);
   }
 
-  private PredictionOrchestrationResult predict(String gameId, Matchup matchup) {
+  /** Predicts a custom matchup using request-specific selections instead of the configured ones. */
+  public PredictionOrchestrationResult predictMatchup(
+      Matchup matchup, List<ModelSelection> requestedSelections) {
+    validator.validateSelections(requestedSelections);
+    return predict(null, matchup, List.copyOf(requestedSelections));
+  }
+
+  /** Configured selections, used to resolve request methods to concrete models. */
+  public List<ModelSelection> selections() {
+    return selections;
+  }
+
+  private PredictionOrchestrationResult predict(
+      String gameId, Matchup matchup, List<ModelSelection> selections) {
     checkInterruption();
     validator.validateSelections(selections);
     validator.validateMatchup(matchup);

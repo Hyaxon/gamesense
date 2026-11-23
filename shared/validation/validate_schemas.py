@@ -109,6 +109,11 @@ def main():
     validators['game-response'].validate(examples['game'])
     checks = []
 
+    # An omitted methods list is a valid "all methods" request.
+    all_methods = copy.deepcopy(examples['custom-prediction-request'])
+    all_methods.pop('methods')
+    validators['custom-prediction-request'].validate(all_methods)
+
     def reject(name, mutate):
         payload = copy.deepcopy(examples[name])
         mutate(payload)
