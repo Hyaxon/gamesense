@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.ou.capstone.data.PredictionDataProvider;
 import com.ou.capstone.prediction.client.PythonPredictionClient;
 import com.ou.capstone.prediction.contract.ExecutionKind;
+import com.ou.capstone.prediction.contract.PredictionMethod;
 import java.util.List;
 import java.util.Map;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -43,7 +44,8 @@ public class PredictionOrchestrationConfiguration {
       ExecutionKind executionKind,
       String configurationJson,
       Integer seed,
-      Integer trials) {
+      Integer trials,
+      PredictionMethod method) {
     private ModelSelection toSelection() {
       Map<String, Object> configuration = null;
       if (configurationJson != null) {
@@ -61,7 +63,7 @@ public class PredictionOrchestrationConfiguration {
               "Model configuration-json must be a valid JSON object.");
         }
       }
-      return new ModelSelection(modelId, executionKind, configuration, seed, trials);
+      return new ModelSelection(modelId, executionKind, configuration, seed, trials, method);
     }
   }
 
